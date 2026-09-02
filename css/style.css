@@ -599,7 +599,6 @@ button {
   gap: 1rem;
 }
 
-/* SVG Utilities */
 .icon {
   display: inline-block;
   width: 1.25rem;
@@ -609,6 +608,15 @@ button {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vertical-align: middle;
+}
+
+.wa-icon, .icon-wa {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: currentColor !important;
+  stroke: none !important;
   vertical-align: middle;
 }
 

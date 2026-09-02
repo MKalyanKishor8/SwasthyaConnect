@@ -4,7 +4,7 @@
  * and Background Synchronization.
  */
 
-const CACHE_NAME = 'swasthya-connect-v1.4';
+const CACHE_NAME = 'swasthya-connect-v1.5';
 const STATIC_ASSETS = [
   './',
   './index.html',

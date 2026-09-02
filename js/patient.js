@@ -1090,15 +1090,19 @@ function renderNearbyCards(centres) {
         ` : ''}
 
         <!-- Actions -->
-        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; gap:0.5rem; flex-wrap:wrap;">
-          <button class="btn btn-sm btn-primary" style="flex:1; min-width:105px;" onclick="openFacilityDetailsModal('${c.id}')">
-            <span>View Details</span>
+        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; gap:0.4rem; flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" style="flex:1; min-width:85px;" onclick="openFacilityDetailsModal('${c.id}')">
+            <span>Details</span>
           </button>
-          <a href="${c.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-emerald" style="flex:1; text-align:center; min-width:110px;">
+          <a href="${c.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center; min-width:100px;">
             <svg class="icon" style="width:13px; height:13px;" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-            <span>Get Directions</span>
+            <span>Directions</span>
           </a>
-          <button class="btn btn-sm btn-outline" style="min-width:40px;" onclick="flyToFacility(${c.lat}, ${c.lng}, '${c.id}')" title="Locate Pin on Map">
+          <button class="btn btn-sm btn-emerald" style="background:#25d366; border-color:#25d366; color:#ffffff; font-weight:700; flex:1; min-width:110px;" onclick="window.SwasthyaWhatsAppAI.promptSendSingleFacility('${c.id}')" title="Send location on WhatsApp">
+            <svg class="wa-icon" viewBox="0 0 24 24" style="width:13px; height:13px; fill:#ffffff;"><path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.275-.1-.475-.15-.675.15-.2.3-.776.979-.951 1.18-.175.2-.35.225-.651.075-.3-.15-1.267-.467-2.414-1.489-.893-.796-1.496-1.78-1.671-2.08-.175-.3-.019-.462.131-.611.136-.134.301-.35.451-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.675-1.625-.925-2.225-.244-.585-.492-.505-.675-.514-.175-.009-.375-.009-.575-.009s-.525.075-.8.375c-.275.3-1.05 1.025-1.05 2.5s1.075 2.9 1.225 3.1c.15.2 2.115 3.23 5.124 4.53.716.31 1.275.495 1.71.634.72.229 1.375.197 1.892.12.576-.086 1.78-.727 2.03-1.429.25-.702.25-1.303.175-1.429-.075-.126-.275-.201-.576-.351zM12.004 2C6.48 2 2 6.48 2 12.004c0 1.947.558 3.766 1.523 5.309L2.1 21.9l4.747-1.397A9.954 9.954 0 0 0 12.004 22c5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2zm0 18.292c-1.644 0-3.173-.487-4.464-1.326l-.32-.208-2.82.83.844-2.738-.228-.337A8.257 8.257 0 0 1 3.712 12c0-4.572 3.72-8.292 8.292-8.292s8.292 3.72 8.292 8.292-3.72 8.292-8.292 8.292z"/></svg>
+            <span>WhatsApp</span>
+          </button>
+          <button class="btn btn-sm btn-outline" style="min-width:36px; padding:0.25rem 0.5rem;" onclick="flyToFacility(${c.lat}, ${c.lng}, '${c.id}')" title="Locate Pin on Map">
             <span>📍 Pin</span>
           </button>
         </div>
@@ -1216,9 +1220,10 @@ function updateLeafletMapWithFacilities(centres) {
         <h4 style="margin:2px 0 4px; font-size:0.95rem; color:#0b2238; font-weight:700;">🏥 ${c.name}</h4>
         <p style="margin:2px 0 4px; font-size:0.75rem; color:#64748b; line-height:1.3;">📌 ${c.location}</p>
         <p style="margin:0 0 8px; font-size:0.75rem; color:#0f172a;">☎️ <a href="tel:${c.phone.split(' ')[0]}" style="color:inherit; text-decoration:underline;"><strong>${c.phone}</strong></a></p>
-        <div style="display:flex; gap:6px;">
-          <button class="btn btn-sm btn-primary" style="font-size:0.72rem; padding:4px 8px; flex:1;" onclick="openFacilityDetailsModal('${c.id}')">View Details</button>
-          <a href="${c.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-emerald" style="font-size:0.72rem; padding:4px 8px; flex:1; text-align:center;">Get Directions</a>
+        <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:6px;">
+          <button class="btn btn-sm btn-primary" style="font-size:0.72rem; padding:4px 8px; flex:1;" onclick="openFacilityDetailsModal('${c.id}')">Details</button>
+          <a href="${c.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size:0.72rem; padding:4px 8px; flex:1; text-align:center;">Directions</a>
+          <button class="btn btn-sm btn-emerald" style="background:#25d366; border-color:#25d366; color:#ffffff; font-size:0.72rem; padding:4px 8px; flex:1; font-weight:700;" onclick="window.SwasthyaWhatsAppAI.promptSendSingleFacility('${c.id}')">📱 WhatsApp</button>
         </div>
       </div>
     `);
@@ -1323,10 +1328,16 @@ window.openFacilityDetailsModal = function(facilityId) {
 
     <!-- Footer Actions -->
     <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1px solid var(--border-light); flex-wrap:wrap; gap:0.75rem;">
-      <a href="${fac.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-emerald">
-        <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-        <span>Open Navigation Route (Google Maps)</span>
-      </a>
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <a href="${fac.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-emerald">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          <span>Open Directions (Google Maps)</span>
+        </a>
+        <button type="button" class="btn btn-emerald" style="background:#25d366; border-color:#25d366; color:#ffffff; font-weight:700;" onclick="window.SwasthyaWhatsAppAI.promptSendSingleFacility('${fac.id}')">
+          <svg class="wa-icon" viewBox="0 0 24 24" style="fill:#ffffff; width:16px; height:16px;"><path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.275-.1-.475-.15-.675.15-.2.3-.776.979-.951 1.18-.175.2-.35.225-.651.075-.3-.15-1.267-.467-2.414-1.489-.893-.796-1.496-1.78-1.671-2.08-.175-.3-.019-.462.131-.611.136-.134.301-.35.451-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.675-1.625-.925-2.225-.244-.585-.492-.505-.675-.514-.175-.009-.375-.009-.575-.009s-.525.075-.8.375c-.275.3-1.05 1.025-1.05 2.5s1.075 2.9 1.225 3.1c.15.2 2.115 3.23 5.124 4.53.716.31 1.275.495 1.71.634.72.229 1.375.197 1.892.12.576-.086 1.78-.727 2.03-1.429.25-.702.25-1.303.175-1.429-.075-.126-.275-.201-.576-.351zM12.004 2C6.48 2 2 6.48 2 12.004c0 1.947.558 3.766 1.523 5.309L2.1 21.9l4.747-1.397A9.954 9.954 0 0 0 12.004 22c5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2zm0 18.292c-1.644 0-3.173-.487-4.464-1.326l-.32-.208-2.82.83.844-2.738-.228-.337A8.257 8.257 0 0 1 3.712 12c0-4.572 3.72-8.292 8.292-8.292s8.292 3.72 8.292 8.292-3.72 8.292-8.292 8.292z"/></svg>
+          <span>Share on WhatsApp</span>
+        </button>
+      </div>
       <a href="tel:${fac.phone.split(' ')[0]}" class="btn btn-secondary">
         <svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/></svg>
         <span>Call Facility</span>
