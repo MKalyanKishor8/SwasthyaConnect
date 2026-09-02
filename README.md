@@ -2,9 +2,18 @@
 
 A modern, responsive, and feature-complete healthcare web application featuring a **Unified Authentication Gateway**, an interactive **Patient Care Portal**, and a **Doctor Clinical Dashboard**.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMKalyanKishor8%2FPulseCare-Healthcare-Portal)
 ![PulseCare OS Preview](https://img.shields.io/badge/Status-Live-emerald?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Design](https://img.shields.io/badge/Design-Glassmorphism-purple?style=for-the-badge)
+
+---
+
+## 🔗 Live Deployments
+
+- **⚡ Vercel 1-Click Deploy**: [Deploy to Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMKalyanKishor8%2FPulseCare-Healthcare-Portal)
+- **🌐 GitHub Pages**: [https://mkalyankishor8.github.io/PulseCare-Healthcare-Portal/](https://mkalyankishor8.github.io/PulseCare-Healthcare-Portal/)
+- **🐙 GitHub Repository**: [https://github.com/MKalyanKishor8/PulseCare-Healthcare-Portal](https://github.com/MKalyanKishor8/PulseCare-Healthcare-Portal)
 
 ---
 
@@ -42,6 +51,7 @@ A modern, responsive, and feature-complete healthcare web application featuring 
 ├── index.html           # 🔐 Unified Authentication Gateway
 ├── patient.html         # 🩺 Patient Care Portal
 ├── doctor.html          # 👨‍⚕️ Doctor Clinical Dashboard
+├── vercel.json          # ⚡ Vercel Deployment Configuration
 ├── README.md            # 📖 Documentation & Setup
 ├── css/
 │   ├── style.css        # 🎨 Design System, CSS Variables, Typography & Themes
@@ -70,14 +80,6 @@ python3 -m http.server 8080
 # Or open index.html directly in any modern browser
 open index.html
 ```
-
----
-
-## 🎨 Design System & Aesthetics
-- **Color Palette**: Clinical Sapphire (`#0284C7`), Emerald (`#10B981`), Cyan (`#06B6D4`), Slate Dark Mode (`#090D16`, `#0F172A`).
-- **Typography**: Google Fonts (*Plus Jakarta Sans* & *Outfit*).
-- **Aesthetic**: Glassmorphism with `backdrop-filter: blur(16px)`, animated pulse status indicators, and smooth transitions.
-- **Dark Mode**: 1-click persistent theme toggle.
 
 ---
 
