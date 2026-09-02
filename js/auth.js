@@ -1,9 +1,9 @@
 /**
- * PulseCare OS - Authentication Page Logic (js/auth.js)
+ * SwasthyaConnect - Authentication Page Logic (js/auth.js)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  let selectedRole = 'patient'; // 'patient' or 'doctor'
+  let selectedRole = 'patient';
 
   const rolePatientBtn = document.getElementById('role-patient-btn');
   const roleDoctorBtn = document.getElementById('role-doctor-btn');
@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const demoPatientBtn = document.getElementById('demo-patient-btn');
   const registerForm = document.getElementById('register-form');
 
-  // Switch Role Tabs
   function setRole(role) {
     selectedRole = role;
     if (role === 'patient') {
@@ -28,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       roleDoctorBtn?.classList.add('active');
       rolePatientBtn?.classList.remove('active');
-      emailInput.placeholder = 'e.g. sarah.lin@pulsecare.health';
+      emailInput.placeholder = 'e.g. sarah.lin@swasthyaconnect.health';
       document.getElementById('role-badge-text').textContent = 'Physician & Staff Sign In';
     }
   }
@@ -36,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (rolePatientBtn) rolePatientBtn.addEventListener('click', () => setRole('patient'));
   if (roleDoctorBtn) roleDoctorBtn.addEventListener('click', () => setRole('doctor'));
 
-  // Password Visibility Toggle
   if (passwordToggleBtn && passwordInput) {
     passwordToggleBtn.addEventListener('click', () => {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -50,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Quick Demo Logins
   if (demoPatientBtn) {
     demoPatientBtn.addEventListener('click', () => {
       setRole('patient');
@@ -64,14 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (demoDoctorBtn) {
     demoDoctorBtn.addEventListener('click', () => {
       setRole('doctor');
-      emailInput.value = 'sarah.lin@pulsecare.health';
+      emailInput.value = 'sarah.lin@swasthyaconnect.health';
       passwordInput.value = 'DoctorClinicalPass123!';
       PulseCareUI.showToast('Demo Account Selected', 'Loaded credentials for Dr. Sarah Lin, MD (Cardiologist)', 'info');
       triggerLoginProcess('doc-1', 'doctor');
     });
   }
 
-  // Biometric Login Simulation
   if (biometricBtn) {
     biometricBtn.addEventListener('click', () => {
       PulseCareUI.showToast('Biometric Verification', 'Scanning Touch ID / Face ID sensor...', 'info');
@@ -87,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Login Form Submission
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -108,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
 
-        // Lookup or create session
         if (selectedRole === 'doctor' || email.includes('doc') || email.includes('dr')) {
           const doctor = PulseCareStore.getDoctors().find(d => d.email.toLowerCase() === email) || PulseCareStore.getDoctors()[0];
           triggerLoginProcess(doctor.id, 'doctor');
@@ -159,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Registration Modal Form
   if (registerForm) {
     registerForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -173,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       PulseCareUI.closeModal('register-modal');
-      PulseCareUI.showToast('Account Created', `Welcome to PulseCare OS, ${name}! Logging you in now...`, 'success');
+      PulseCareUI.showToast('Account Created', `Welcome to SwasthyaConnect, ${name}! Logging you in now...`, 'success');
 
       if (role === 'doctor') {
         triggerLoginProcess('doc-1', 'doctor');
