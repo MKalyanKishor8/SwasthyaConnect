@@ -556,8 +556,15 @@ function renderNearbyCards(centres) {
   const countEl = document.getElementById('nearby-results-count');
   if (!container) return;
 
+  const isOffline = typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline';
+  const timestampStr = typeof SwasthyaOfflineManager !== 'undefined' ? SwasthyaOfflineManager.getFormattedTimestamp() : 'Recent';
+
   if (countEl) {
-    countEl.textContent = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} within ${nearbyDistanceFilter || 5} km`;
+    if (isOffline) {
+      countEl.innerHTML = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} <span class="badge badge-danger" style="font-size:0.75rem; margin-left:6px;">🔴 Offline data — last updated ${timestampStr}</span>`;
+    } else {
+      countEl.textContent = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} within ${nearbyDistanceFilter || 5} km`;
+    }
   }
 
   if (centres.length === 0) {
@@ -593,6 +600,12 @@ function renderNearbyCards(centres) {
       <!-- Card Body -->
       <div class="portal-card-body" style="display:flex; flex-direction:column; gap:0.75rem; flex:1;">
         
+        ${isOffline ? `
+          <div style="padding:0.35rem 0.6rem; background:rgba(225, 29, 72, 0.08); border-radius:var(--radius-xs); font-size:0.75rem; color:var(--hospital-cross-red); font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+            <span>🔴 Offline saved facility</span> &bull; <span style="font-weight:500; color:var(--text-muted);">Updated ${timestampStr}</span>
+          </div>
+        ` : ''}
+
         <p style="font-size:0.875rem; color:var(--text-secondary); margin:0;">
           📌 <strong>Address:</strong> ${c.location}
         </p>
@@ -1080,6 +1093,14 @@ function renderPrescriptions() {
 }
 
 function handleRefillRequest(rxId) {
+  if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
+    SwasthyaOfflineManager.queueOfflineAction('REFILL_REQUEST', { rxId });
+    PulseCareStore.requestRefill(rxId);
+    PulseCareUI.showToast('Refill Saved Offline', 'Refill request stored safely on device. Will automatically sync to pharmacy when reconnected.', 'info');
+    renderPrescriptions();
+    return;
+  }
+
   const res = PulseCareStore.requestRefill(rxId);
   if (res.success) {
     PulseCareUI.showToast('Refill Authorized', `Refill order for ${res.rx.medicationName} transmitted to pharmacy network!`, 'success');
@@ -1515,6 +1536,11 @@ function getEligibilityBadgeHTML(status) {
 
 // Telehealth WebRTC Simulator
 window.joinTelehealthRoom = function(aptId) {
+  if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
+    PulseCareUI.showToast('Internet Connection Required', 'Live encrypted video telehealth requires an active internet connection. Please reconnect or use the offline telephone helpline.', 'error');
+    return;
+  }
+
   const apt = PulseCareStore.getAppointments().find(a => a.id === aptId) || PulseCareStore.getAppointments()[0];
   const modalBody = document.getElementById('telehealth-modal-body');
 
@@ -1665,7 +1691,7 @@ function initBookingWizard() {
       const type = document.getElementById('book-type').value;
       const reason = document.getElementById('book-reason').value;
 
-      PulseCareStore.addAppointment({
+      const appointmentData = {
         patientId: currentPatient.id,
         patientName: currentPatient.name,
         doctorId: doc.id,
@@ -1677,7 +1703,19 @@ function initBookingWizard() {
         type,
         reason,
         status: 'confirmed'
-      });
+      };
+
+      if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
+        SwasthyaOfflineManager.queueOfflineAction('BOOK_APPOINTMENT', appointmentData);
+        PulseCareStore.addAppointment(appointmentData);
+        PulseCareUI.closeModal('book-apt-modal');
+        PulseCareUI.showToast('Appointment Saved (Offline)', `Consultation with ${doc.name} saved on device. Will auto-sync with hospital servers when online.`, 'info');
+        renderAppointments();
+        switchTab('appointments');
+        return;
+      }
+
+      PulseCareStore.addAppointment(appointmentData);
 
       PulseCareUI.closeModal('book-apt-modal');
       PulseCareUI.showToast('Consultation Booked', `Appointment confirmed with ${doc.name} for ${date} at ${time}.`, 'success');

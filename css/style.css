@@ -641,3 +641,119 @@ button {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   OFFLINE-FIRST & LOW-INTERNET / DATA SAVER DESIGN STYLES
+   ========================================================================== */
+
+/* Connection Status Banner (Top Floating / Sticky) */
+.connection-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all var(--transition-normal);
+  z-index: 999;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.connection-status-banner.status-online {
+  background: linear-gradient(90deg, #ecfdf5 0%, #f0fdfa 100%);
+  color: #065f46;
+  border-bottom-color: #a7f3d0;
+}
+
+.connection-status-banner.status-poor {
+  background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+  color: #92400e;
+  border-bottom-color: #fde68a;
+}
+
+.connection-status-banner.status-offline {
+  background: linear-gradient(90deg, #fff1f2 0%, #ffe4e6 100%);
+  color: #9f1239;
+  border-bottom-color: #fecdd3;
+  animation: pulseOffline 2s infinite ease-in-out;
+}
+
+@keyframes pulseOffline {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
+}
+
+.connection-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.status-dot-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-online .status-dot-indicator {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+}
+
+.status-poor .status-dot-indicator {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+}
+
+.status-offline .status-dot-indicator {
+  background: #e11d48;
+  box-shadow: 0 0 8px rgba(225, 29, 72, 0.8);
+}
+
+/* Offline timestamp badge */
+.offline-timestamp-label {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  display: inline-block;
+}
+
+/* Offline Notice Tag for disabled actions */
+.offline-notice-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(225, 29, 72, 0.1);
+  color: var(--hospital-cross-red);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Data Saver Mode Styles (body[data-saver="true"]) */
+body[data-saver="true"] {
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-glow: none;
+}
+
+body[data-saver="true"] * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+body[data-saver="true"] .brand-icon,
+body[data-saver="true"] .pulse-dot {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+body[data-saver="true"] .glass-panel,
+body[data-saver="true"] .portal-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+

@@ -1,0 +1,26 @@
+{
+  "name": "SwasthyaConnect - Rural & Underserved Healthcare Portal",
+  "short_name": "SwasthyaConnect",
+  "description": "Offline-First Healthcare and Medical Records Portal for Rural and Underserved Communities across India.",
+  "start_url": "./patient.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#0d9488",
+  "icons": [
+    {
+      "src": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=192&auto=format&fit=crop&q=80",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=512&auto=format&fit=crop&q=80",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["medical", "health", "government", "utilities"]
+}

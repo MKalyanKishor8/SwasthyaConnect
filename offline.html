@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline Mode - SwasthyaConnect</title>
+  <meta name="theme-color" content="#0d9488">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .offline-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+      background: var(--bg-main);
+    }
+    .offline-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+    }
+    .offline-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(225, 29, 72, 0.1);
+      color: var(--hospital-cross-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+    .emergency-dial-box {
+      background: var(--bg-input);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="offline-container">
+    <div class="offline-card">
+      <div class="offline-icon">
+        <svg class="icon" style="width:36px; height:36px;" viewBox="0 0 24 24">
+          <line x1="1" y1="1" x2="23" y2="23"/>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+          <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <line x1="12" y1="20" x2="12.01" y2="20"/>
+        </svg>
+      </div>
+
+      <span class="badge badge-danger" style="margin-bottom:0.5rem;">🔴 Offline Mode Active</span>
+      <h2 style="font-size:1.6rem; color:var(--text-primary); margin-bottom:0.5rem;">You Are Currently Offline</h2>
+      <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:1.5rem;">
+        SwasthyaConnect is operating in <strong>Offline-First Mode</strong>. You can continue accessing all your saved medical records, prescriptions, and government schemes from your local device.
+      </p>
+
+      <div class="emergency-dial-box">
+        <strong style="display:block; color:var(--hospital-cross-red); font-size:0.95rem; margin-bottom:0.5rem;">
+          🚨 Direct Emergency Helplines (No Internet Required)
+        </strong>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+          <a href="tel:108" class="btn btn-sm btn-danger" style="text-align:center;">
+            <span>🚑 Call 108 (Trauma)</span>
+          </a>
+          <a href="tel:102" class="btn btn-sm btn-secondary" style="text-align:center;">
+            <span>👶 Call 102 (Mother/Child)</span>
+          </a>
+          <a href="tel:112" class="btn btn-sm btn-outline" style="text-align:center;">
+            <span>🚨 Call 112 (National)</span>
+          </a>
+          <a href="tel:104" class="btn btn-sm btn-outline" style="text-align:center;">
+            <span>☎️ Call 104 (Health Help)</span>
+          </a>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        <a href="patient.html" class="btn btn-primary btn-lg" style="width:100%; text-align:center;">
+          <span>Open Saved Patient Portal</span>
+          <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <button class="btn btn-outline" onclick="window.location.reload()">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          <span>Check Connection & Retry</span>
+        </button>
+      </div>
+
+      <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1.5rem; margin-bottom:0;">
+        SwasthyaConnect Offline Storage &bull; Secure Local Encryption
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Auto-redirect if internet connection returns
+    window.addEventListener('online', () => {
+      window.location.href = 'patient.html';
+    });
+  </script>
+</body>
+</html>
