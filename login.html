@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseCare OS | Unified Healthcare Login Gateway</title>
+  <meta name="description" content="Select your portal to sign in: Patient Care Portal or Doctor Clinical Command Center.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <a href="index.html" class="brand-logo">
+      <div class="brand-icon">
+        <svg class="icon" style="width:22px; height:22px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <span>PulseCare <span style="color:var(--primary-500); font-weight:400;">OS</span></span>
+    </a>
+
+    <div class="nav-actions">
+      <button class="btn-icon theme-toggle-btn" aria-label="Toggle Theme" title="Toggle theme">
+        <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon icon-sun" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="auth-wrapper" style="align-items: center; justify-content: center; padding: 3rem 1.5rem;">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div style="position: relative; z-index: 1; max-width: 960px; width: 100%; margin: 0 auto; text-align: center;">
+      
+      <div class="auth-hero-badge" style="margin: 0 auto 1.25rem;">
+        <span class="pulse-dot"></span>
+        <span>SECURE MEDICAL AUTHENTICATION</span>
+      </div>
+
+      <h1 style="font-size: 2.75rem; font-weight: 800; margin-bottom: 0.75rem;">
+        Choose Your <span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Healthcare Portal</span>
+      </h1>
+      <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 580px; margin: 0 auto 2.5rem;">
+        Please select your role to access your dedicated healthcare portal and encrypted clinical tools.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; text-align: left;">
+        
+        <!-- Patient Portal Login Card -->
+        <div class="glass-panel" style="padding: 2.25rem; border-top: 4px solid var(--accent-emerald); display: flex; flex-direction: column; gap: 1.25rem; transition: transform var(--transition-fast);">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="user-avatar" style="width: 54px; height: 54px; background: var(--accent-emerald-gradient); font-size: 1.4rem;">
+              <svg class="icon" style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span class="badge badge-emerald">Patients & Families</span>
+          </div>
+
+          <div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.35rem;">Patient Portal</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+              Access your medical chart, live vitals, prescription refills, upcoming doctor visits, and telehealth chat.
+            </p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+            <a href="patient-login.html" class="btn btn-emerald btn-lg" style="width: 100%;">
+              <span>Sign In as Patient</span>
+              <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <button class="btn btn-sm btn-secondary" onclick="loginPatientQuick()">
+              <span>⚡ Instant Demo: Alex Johnson</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Doctor Portal Login Card -->
+        <div class="glass-panel" style="padding: 2.25rem; border-top: 4px solid var(--primary-600); display: flex; flex-direction: column; gap: 1.25rem; transition: transform var(--transition-fast);">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="user-avatar" style="width: 54px; height: 54px; background: var(--primary-gradient); font-size: 1.4rem;">
+              <svg class="icon" style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+            </div>
+            <span class="badge badge-primary">Physicians & Staff</span>
+          </div>
+
+          <div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.35rem;">Doctor Clinical Hub</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+              Manage daily patient intake queues, review complete electronic health records (EHR), and write SOAP e-prescriptions.
+            </p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+            <a href="doctor-login.html" class="btn btn-primary btn-lg" style="width: 100%;">
+              <span>Sign In as Doctor / MD</span>
+              <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <button class="btn btn-sm btn-secondary" onclick="loginDoctorQuick()">
+              <span>⚡ Instant Demo: Dr. Sarah Lin, MD</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/store.js"></script>
+  <script src="js/theme.js"></script>
+  <script>
+    function loginPatientQuick() {
+      const pat = PulseCareStore.getPatientById('pat-1') || PulseCareStore.getPatients()[0];
+      PulseCareStore.setSession({
+        id: pat.id,
+        name: pat.name,
+        email: pat.email,
+        role: 'patient',
+        bloodType: pat.bloodType
+      }, true);
+      PulseCareUI.showToast('Patient Authenticated', `Welcome back, ${pat.name}!`, 'success');
+      setTimeout(() => { window.location.href = 'patient.html'; }, 400);
+    }
+
+    function loginDoctorQuick() {
+      const doc = PulseCareStore.getDoctorById('doc-1') || PulseCareStore.getDoctors()[0];
+      PulseCareStore.setSession({
+        id: doc.id,
+        name: doc.name,
+        email: doc.email,
+        role: 'doctor',
+        specialty: doc.specialty,
+        department: doc.department,
+        avatar: doc.avatar
+      }, true);
+      PulseCareUI.showToast('Physician Authenticated', `Welcome back, ${doc.name}!`, 'success');
+      setTimeout(() => { window.location.href = 'doctor.html'; }, 400);
+    }
+  </script>
+</body>
+</html>
