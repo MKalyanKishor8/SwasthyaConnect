@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PulseCare OS - Portal Layout & Component Styles (css/portal.css)
+   SwasthyaConnect - Hospital Portal Layout & Component Styles (css/portal.css)
    ========================================================================== */
 
 .portal-layout {
@@ -10,10 +10,10 @@
 
 /* Sidebar Navigation */
 .portal-sidebar {
-  width: 260px;
+  width: 268px;
   background: var(--bg-surface-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-right: 1px solid var(--bg-surface-glass-border);
   display: flex;
   flex-direction: column;
@@ -26,7 +26,7 @@
 }
 
 .sidebar-header {
-  height: 70px;
+  height: 72px;
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
@@ -44,7 +44,7 @@
 
 .nav-section-title {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
@@ -66,26 +66,27 @@
 
 .nav-link:hover {
   background: var(--bg-hover);
-  color: var(--primary-600);
+  color: var(--hospital-teal-700);
 }
 
 [data-theme="dark"] .nav-link:hover {
-  color: var(--primary-300);
+  color: var(--hospital-teal-300);
 }
 
 .nav-link.active {
   background: var(--primary-gradient);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
 }
 
 .nav-link .nav-badge {
   margin-left: auto;
   font-size: 0.7rem;
+  font-weight: 700;
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-full);
-  background: rgba(2, 132, 199, 0.15);
-  color: #0284c7;
+  background: rgba(13, 148, 136, 0.15);
+  color: var(--hospital-teal-700);
 }
 .nav-link.active .nav-badge {
   background: rgba(255, 255, 255, 0.25);
@@ -115,15 +116,15 @@
 }
 
 .user-avatar {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--primary-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.9rem;
 }
 
@@ -134,7 +135,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--hospital-healing-green);
   border: 2px solid var(--bg-surface);
 }
 
@@ -166,10 +167,10 @@
 }
 
 .portal-topbar {
-  height: 70px;
+  height: 72px;
   background: var(--bg-surface-glass);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--bg-surface-glass-border);
   display: flex;
   align-items: center;
@@ -223,10 +224,10 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Welcome Banner */
+/* Hospital Welcome Banner */
 .welcome-banner {
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(13, 148, 136, 0.12) 100%);
-  border: 1px solid rgba(6, 182, 212, 0.25);
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.14) 0%, rgba(2, 132, 199, 0.12) 100%);
+  border: 1.5px solid rgba(13, 148, 136, 0.3);
   border-radius: var(--radius-lg);
   padding: 1.75rem 2rem;
   display: flex;
@@ -276,6 +277,7 @@
 .metric-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  border-color: var(--hospital-teal-400);
 }
 
 .metric-header {
@@ -286,22 +288,22 @@
 
 .metric-label {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
 .metric-icon-wrap {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.metric-icon-wrap.cyan { background: rgba(6, 182, 212, 0.12); color: #0891b2; }
-.metric-icon-wrap.emerald { background: rgba(16, 185, 129, 0.12); color: #059669; }
-.metric-icon-wrap.purple { background: rgba(99, 102, 241, 0.12); color: #6366f1; }
-.metric-icon-wrap.rose { background: rgba(244, 63, 94, 0.12); color: #e11d48; }
+.metric-icon-wrap.cyan { background: rgba(13, 148, 136, 0.14); color: var(--hospital-teal-600); }
+.metric-icon-wrap.emerald { background: rgba(5, 150, 105, 0.14); color: var(--hospital-healing-green); }
+.metric-icon-wrap.purple { background: rgba(2, 132, 199, 0.14); color: var(--hospital-blue); }
+.metric-icon-wrap.rose { background: rgba(225, 29, 72, 0.14); color: var(--hospital-cross-red); }
 
 .metric-value-wrap {
   display: flex;
@@ -310,7 +312,7 @@
 }
 
 .metric-value {
-  font-size: 1.85rem;
+  font-size: 1.95rem;
   font-weight: 800;
   font-family: var(--font-heading);
 }
@@ -318,7 +320,7 @@
 .metric-unit {
   font-size: 0.85rem;
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .metric-footer {
@@ -364,7 +366,7 @@
 }
 
 .portal-card-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -381,7 +383,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 1.15rem;
   border-radius: var(--radius-sm);
   background: var(--bg-input);
   border: 1px solid transparent;
@@ -402,8 +404,8 @@
 }
 
 .appointment-time-box {
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-sm);
   background: var(--primary-gradient);
   color: #ffffff;
@@ -411,17 +413,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.1;
   text-align: center;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
-.appointment-time-box .day { font-size: 1.1rem; }
-.appointment-time-box .month { font-size: 0.65rem; text-transform: uppercase; }
+.appointment-time-box .day { font-size: 1.15rem; }
+.appointment-time-box .month { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
 .appointment-info h4 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   margin-bottom: 0.2rem;
 }
 
@@ -451,7 +454,7 @@
 
 .rx-card:hover {
   box-shadow: var(--shadow-md);
-  border-color: var(--primary-400);
+  border-color: var(--hospital-teal-500);
 }
 
 .rx-badge-top {
@@ -461,8 +464,8 @@
 }
 
 .rx-name {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 800;
 }
 
 .rx-dosage {
@@ -498,11 +501,12 @@
 .doctor-table th {
   padding: 0.85rem 1rem;
   font-size: 0.775rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1.5px solid var(--border-light);
+  background: var(--bg-input);
 }
 
 .doctor-table td {
@@ -520,7 +524,7 @@
 .drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(6, 17, 28, 0.6);
   backdrop-filter: blur(4px);
   z-index: 1000;
   opacity: 0;
