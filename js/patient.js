@@ -1054,6 +1054,9 @@ function renderGovernmentSchemes(category = 'All', search = '') {
 }
 
 function getCategoryColor(cat) {
+  if (cat.includes('Tribal')) return '#f59e0b';
+  if (cat.includes('Infrastructure')) return 'var(--hospital-blue)';
+  if (cat.includes('Rural')) return 'var(--hospital-healing-green)';
   if (cat.includes('Insurance')) return 'var(--hospital-teal-600)';
   if (cat.includes('Telemedicine')) return 'var(--hospital-blue)';
   if (cat.includes('Vaccination')) return 'var(--hospital-healing-green)';
@@ -1063,6 +1066,9 @@ function getCategoryColor(cat) {
 }
 
 function getCategoryBadgeClass(cat) {
+  if (cat.includes('Tribal')) return 'badge-amber';
+  if (cat.includes('Infrastructure')) return 'badge-primary';
+  if (cat.includes('Rural')) return 'badge-emerald';
   if (cat.includes('Insurance')) return 'badge-primary';
   if (cat.includes('Telemedicine')) return 'badge-purple';
   if (cat.includes('Vaccination')) return 'badge-emerald';

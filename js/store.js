@@ -538,17 +538,18 @@ const initialSeedData = {
       id: 'nhm',
       name: 'National Health Mission (NHM)',
       hindiName: 'राष्ट्रीय स्वास्थ्य मिशन',
-      shortName: 'NHM',
+      shortName: 'NHM (NRHM & NUHM)',
       category: 'Rural Healthcare',
       department: 'Ministry of Health & Family Welfare (MoHFW)',
-      badge: 'Universal Public Health',
-      shortDesc: 'Comprehensive national flagship mission uniting NRHM & NUHM to deliver free essential healthcare, diagnostics, and generic medicines across urban and rural India.',
-      purpose: 'To establish a community-owned, decentralized health delivery system with universal access to equitable, affordable, and high-quality public healthcare.',
+      badge: 'Flagship Umbrella (₹39,390 Cr Outlay)',
+      shortDesc: 'India’s flagship umbrella health scheme comprising NRHM & NUHM (allocated 37% of 2026-27 Health Budget) strengthening primary, secondary, and rural healthcare delivery.',
+      purpose: 'To achieve universal, equitable, affordable, and high-quality public healthcare through decentralized infrastructure, communicable & NCD disease control, and dedicated rural outreach.',
       benefits: [
-        'Free Essential Drugs Initiative: 100% free quality generic medicines at all government PHCs, CHCs, and District Hospitals.',
-        'Free Essential Diagnostics Initiative: Over 50+ free diagnostic tests at PHCs and 100+ at District Hospitals.',
-        'Free National Ambulance Network: Emergency trauma response (108) and maternal-infant transport (102).',
-        'Network of 1,60,000+ Ayushman Arogya Mandirs providing comprehensive primary healthcare closer to homes.'
+        'Free Essential Drugs & Diagnostics: 100% free quality generic medicines and 50+ diagnostic tests at PHCs/CHCs/District Hospitals.',
+        'Mobile Medical Units (MMUs): Fleet of equipped mobile clinic vans delivering regular diagnostic and clinical care in remote rural villages.',
+        'RMNCAH+A Services: Reproductive, Maternal, Newborn, Child, and Adolescent Health integrated interventions.',
+        'NPCDCS Programme: Free screening and treatment for Cancer, Diabetes, Cardiovascular Diseases, and Stroke.',
+        '1,60,000+ Ayushman Arogya Mandirs providing comprehensive primary healthcare and teleconsultation hubs.'
       ],
       eligibility: [
         'Universal public access for all citizens visiting any government primary health center (PHC), community health center (CHC), or district hospital.',
@@ -561,13 +562,125 @@ const initialSeedData = {
       howToApply: [
         'Walk into any nearest Government Sub-Centre, PHC, CHC, or District Civil Hospital.',
         'Consult the medical officer on duty and receive prescribed generic medicines and diagnostic tests on-site free of cost.',
-        'Connect with local community ASHA or ANM workers for maternal and infant health support.'
+        'Connect with local community ASHA or ANM workers for maternal, infant, and NCD screening support.'
       ],
       faqs: [
-        { q: 'What is an Ayushman Arogya Mandir?', a: 'Ayushman Arogya Mandirs (formerly Health and Wellness Centres) are upgraded health posts providing 12 packages of comprehensive primary healthcare, free diagnostic testing, and teleconsultations.' }
+        { q: 'What is the 2026-27 budget allocation for NHM?', a: 'NHM commands 37% of the Union Health Ministry budget with an outlay of ₹39,390 Crore, an increase of 6% over revised estimates.' },
+        { q: 'What are Mobile Medical Units (MMUs)?', a: 'MMUs are mobile healthcare vehicles equipped with basic diagnostic equipment, essential drugs, and medical staff deployed to deliver doorstep care in hard-to-reach rural hamlets.' }
       ],
       officialUrl: 'https://nhm.gov.in/',
       portalUrl: 'https://nhm.gov.in/'
+    },
+    {
+      id: 'pmjanman',
+      name: 'PM-JANMAN (Pradhan Mantri Janjati Adivasi Nyaya Maha Abhiyan)',
+      hindiName: 'प्रधानमंत्री जनजाति आदिवासी न्याय महा अभियान (स्वास्थ्य घटक)',
+      shortName: 'PM-JANMAN',
+      category: 'Tribal & Underserved Health',
+      department: 'Ministry of Tribal Affairs & Ministry of Health & Family Welfare',
+      badge: 'Targeted Tribal Health (₹46.23 Cr)',
+      shortDesc: 'Dedicated national public health initiative targeting Particularly Vulnerable Tribal Groups (PVTGs) across 75 tribal communities with Mobile Health Units and Sickle Cell screening.',
+      purpose: 'To bridge chronic healthcare disparities in remote tribal habitations through doorstep mobile medical units, Ayushman Bharat saturation, and multi-purpose health centres.',
+      benefits: [
+        'Dedicated Mobile Medical Units (MMUs) operating exclusively in remote tribal settlements and forest villages.',
+        '100% saturation of Ayushman Bharat PM-JAY Golden Cards for all eligible PVTG households.',
+        'Sickle Cell Trait and Disease universal screening, genetic counseling, and free management drugs.',
+        'Establishment of Multi-Purpose Health Centres (MPCs) and emergency ambulance transit connectivity.',
+        'Free nutritional supplements and maternal-infant care kits distributed via local tribal health volunteers.'
+      ],
+      eligibility: [
+        'Members of Particularly Vulnerable Tribal Groups (PVTGs) across 18 States and Union Territory of Andaman & Nicobar Islands.',
+        'Tribal residents in notified habitations and forest villages.'
+      ],
+      documents: [
+        'Tribal / Community Certificate (or PVTG village habitation verification)',
+        'Aadhaar Card (assisted on-site enrollment available)',
+        'Ration Card / PM-JAY Beneficiary ID'
+      ],
+      howToApply: [
+        'Visit the PM-JANMAN Mobile Health Unit camp visiting your tribal habitation.',
+        'Or approach the local ASHA, Anganwadi, or Community Health Worker at the Village Multi-Purpose Centre.',
+        'Enroll for Ayushman Card and Sickle Cell screening on-the-spot without complex paperwork.'
+      ],
+      faqs: [
+        { q: 'Which groups are covered under PM-JANMAN?', a: 'The scheme covers 75 Particularly Vulnerable Tribal Groups (PVTGs) residing in over 22,000 remote villages across 18 States and UTs.' },
+        { q: 'Is Sickle Cell screening provided free?', a: 'Yes, comprehensive point-of-care Sickle Cell screening and counseling are provided 100% free under the National Sickle Cell Anaemia Elimination Mission component.' }
+      ],
+      officialUrl: 'https://tribal.nic.in/PM-JANMAN.aspx',
+      portalUrl: 'https://tribal.nic.in/PM-JANMAN.aspx'
+    },
+    {
+      id: 'pmssy',
+      name: 'PMSSY (Pradhan Mantri Swasthya Suraksha Yojana) & Medical Expansion',
+      hindiName: 'प्रधानमंत्री स्वास्थ्य सुरक्षा योजना एवं चिकित्सा शिक्षा विस्तार',
+      shortName: 'PMSSY',
+      category: 'Infrastructure & Tertiary Care',
+      department: 'Ministry of Health & Family Welfare (MoHFW)',
+      badge: 'New AIIMS & ₹1,725 Cr College Fund',
+      shortDesc: 'Flagship infrastructure expansion program establishing 22 new AIIMS apex institutions and setting up new government medical colleges attached to district hospitals (₹1,725 Cr outlay).',
+      purpose: 'To correct regional imbalances in tertiary healthcare availability and augment quality medical education and specialist physician workforce in underserved districts.',
+      benefits: [
+        'World-class, affordable tertiary and super-specialty hospital care across 22 new All India Institutes of Medical Sciences (AIIMS).',
+        'Upgradation of 75 existing Government Medical Colleges with modern super-specialty blocks, ICUs, and oncology suites.',
+        'Establishment of new medical colleges attached to existing District Civil Hospitals (₹1,725 Crore outlay in 2026-27).',
+        'Substantially increases MBBS and MD/MS specialist seats to eliminate physician shortages in rural and backward districts.',
+        'Cashless coverage for tertiary procedures through full integration with Ayushman Bharat PM-JAY.'
+      ],
+      eligibility: [
+        'Open to all citizens seeking super-specialty consultations, complex surgeries, and advanced tertiary inpatient care at any AIIMS or upgraded Medical College Hospital.'
+      ],
+      documents: [
+        'Patient ID (Aadhaar / Passport / Voter ID)',
+        'Referral slip from District Hospital / CHC (optional, for priority OPD)',
+        'Ayushman Bharat PM-JAY Card (for cashless hospitalization)'
+      ],
+      howToApply: [
+        'Register for OPD consultations directly at any new AIIMS (e.g. AIIMS Bibinagar, AIIMS Mangalagiri, AIIMS Rishikesh) or online via the ORS Portal (ors.gov.in).',
+        'Obtain digital OPD card and consult with faculty super-specialists.',
+        'Avail subsidized or free cashless surgeries and diagnostics under PM-JAY.'
+      ],
+      faqs: [
+        { q: 'What is the budget for setting up medical colleges attached to district hospitals?', a: '₹1,725 Crore has been allocated in 2026-27 to establish new medical colleges attached to district hospitals to boost specialist doctor capacity.' },
+        { q: 'Can poor patients receive free surgery at AIIMS under PMSSY?', a: 'Yes, all new AIIMS hospitals are fully empanelled under Ayushman Bharat PM-JAY, providing 100% cashless treatment up to ₹5 Lakhs.' }
+      ],
+      officialUrl: 'https://pmssy.mohfw.gov.in/',
+      portalUrl: 'https://ors.gov.in/'
+    },
+    {
+      id: 'nacp',
+      name: 'National AIDS Control Programme (NACP Phase-V) & Link Worker Scheme',
+      hindiName: 'राष्ट्रीय एड्स नियंत्रण कार्यक्रम (चरण-5) एवं लिंक वर्कर योजना',
+      shortName: 'NACP Phase-V',
+      category: 'Disease Prevention',
+      department: 'National AIDS Control Organisation (NACO), MoHFW',
+      badge: 'Free ART & Rural Link Outreach',
+      shortDesc: 'Strategic national program providing free HIV/AIDS testing (ICTC), lifelong Anti-Retroviral Therapy (ART), and specialized rural outreach via the Link Worker Scheme.',
+      purpose: 'To achieve universal access to comprehensive HIV/AIDS and STI prevention, diagnostic testing, treatment, and care with active community link workers in rural areas.',
+      benefits: [
+        '100% Free and confidential HIV/STI diagnostic testing at 5,000+ Integrated Counseling and Testing Centres (ICTCs).',
+        'Free lifelong first-line, second-line, and third-line Anti-Retroviral Therapy (ART) medicines across 600+ ART Centers.',
+        'Rural Link Worker Scheme: Dedicated village link volunteers conducting doorstep awareness, stigma reduction, and healthcare linkage in high-vulnerability rural districts.',
+        'Prevention of Parent-to-Child Transmission (PPTCT) with free medication for pregnant mothers and newborns.',
+        'Comprehensive psychosocial counseling, viral load monitoring, and nutritional linkage.'
+      ],
+      eligibility: [
+        'Open to all individuals across rural and urban India requiring confidential counseling, testing, or ongoing treatment.'
+      ],
+      documents: [
+        'No documents mandatory; anonymous and confidential counseling provided at all ICTC centers.',
+        'Aadhaar / ID optional for ART center record maintenance.'
+      ],
+      howToApply: [
+        'Walk into any Government District Hospital, CHC, or Sub-District Hospital ICTC center.',
+        'Receive free, confidential pre-test counseling and rapid diagnostic screening.',
+        'If positive, immediately receive enrollment into the nearest ART Center for free lifelong medication blister packs.'
+      ],
+      faqs: [
+        { q: 'What is the Rural Link Worker Scheme under NACP?', a: 'The Link Worker Scheme is a rural outreach intervention targeting youth and vulnerable populations in rural areas with counseling, STI treatment linkage, and condom promotion.' },
+        { q: 'Are ART medications completely free?', a: 'Yes, all Anti-Retroviral Therapy (ART) medicines and regular CD4/Viral Load laboratory tests are 100% free of cost at government ART centers.' }
+      ],
+      officialUrl: 'https://naco.gov.in/',
+      portalUrl: 'https://naco.gov.in/'
     },
     {
       id: 'indradhanush',
@@ -1268,6 +1381,20 @@ class UnifiedStore {
           status = 'Eligible';
           reason = 'Universal free diagnostic testing available for any individual with respiratory or fever symptoms.';
         }
+      } else if (scheme.id === 'pmjanman') {
+        if (location === 'rural' || incomeCategory === 'bpl' || incomeCategory === 'secc') {
+          status = 'Eligible';
+          reason = 'Eligible for Mobile Medical Unit doorstep healthcare, Sickle Cell testing, and saturation Ayushman Card coverage under PM-JANMAN.';
+        } else {
+          status = 'Verify';
+          reason = 'Targeted specifically at Particularly Vulnerable Tribal Groups (PVTGs) and remote tribal habitations.';
+        }
+      } else if (scheme.id === 'pmssy') {
+        status = 'Eligible';
+        reason = 'Universal access to tertiary consultations and surgeries across all 22 AIIMS and upgraded government medical colleges.';
+      } else if (scheme.id === 'nacp') {
+        status = 'Eligible';
+        reason = 'Universal 100% free and confidential HIV/STI counseling, diagnostic testing (ICTC), and lifelong ART therapy.';
       }
 
       results.push({
