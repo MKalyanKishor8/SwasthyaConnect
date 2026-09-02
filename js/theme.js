@@ -4,11 +4,11 @@
 
 (function () {
   // Theme Manager
-  const THEME_STORAGE_KEY = 'pulsecare_theme_mode';
+  const THEME_STORAGE_KEY = 'swasthya_theme_mode';
 
   function initTheme() {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    // Default explicitly to clean hospital Light Theme unless user previously chose dark
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
     
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcons(savedTheme);
