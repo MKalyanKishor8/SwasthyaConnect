@@ -633,13 +633,16 @@
           <!-- Location Denied / Manual Location Search Bar -->
           <div id="manual-location-box" class="glass-panel" style="display:none; padding:1.25rem; margin-bottom:1.5rem; border-left:4px solid var(--hospital-blue);">
             <div style="margin-bottom:0.75rem;">
-              <h4 style="font-size:1rem; color:var(--text-primary); margin-bottom:2px;">📍 Enter Location Manually</h4>
-              <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Enter your city, village, district, or PIN code to calculate nearby facilities:</p>
+              <h4 style="font-size:1.05rem; color:var(--text-primary); margin-bottom:2px;">📍 We couldn't access your location.</h4>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">Enter your City / District / PIN Code to search for nearby healthcare centres:</p>
             </div>
             <form id="manual-location-form" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-              <input type="text" id="manual-location-input" class="form-control" placeholder="e.g. Hyderabad, Vijayawada, Springfield, 500001..." style="flex:1; min-width:240px;" required>
-              <button type="submit" class="btn btn-primary">Set Location</button>
-              <button type="button" class="btn btn-secondary" onclick="toggleManualLocationInput()">Cancel</button>
+              <input type="text" id="manual-location-input" class="form-control" placeholder="Enter City, District, Village, or 6-digit PIN Code (e.g. Hyderabad, Vijayawada, Springfield, 500001)..." style="flex:1; min-width:260px;" required>
+              <button type="submit" class="btn btn-primary">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>Search Facilities</span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="toggleManualLocationInput(false)">Cancel</button>
             </form>
           </div>
 
@@ -668,7 +671,7 @@
 
           <!-- Interactive Map View -->
           <div class="portal-card" style="margin-bottom:2rem; overflow:hidden;">
-            <div class="portal-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="portal-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
               <h3 class="portal-card-title">
                 <svg class="icon" style="color:var(--hospital-teal-600);" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
                 <span>Interactive Healthcare Map</span>
@@ -681,7 +684,7 @@
                 <span><span style="display:inline-block; width:10px; height:10px; background:#d97706; border-radius:50%;"></span> Pharmacy</span>
               </div>
             </div>
-            <div class="portal-card-body" style="padding:0;">
+            <div class="portal-card-body" style="padding:0; position:relative;">
               <div id="healthcare-map" style="height: 380px; width:100%; z-index:10; background:#edf4f9;"></div>
             </div>
           </div>
@@ -702,7 +705,7 @@
             <div style="margin-bottom:0.75rem;">
               <strong style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.35rem;">Facility Type:</strong>
               <div class="assistant-chips" id="nearby-type-pills">
-                <button class="chip-btn active" data-type="All" onclick="setNearbyTypeFilter('All')">All Facilities (8)</button>
+                <button class="chip-btn active" data-type="All" onclick="setNearbyTypeFilter('All')">All Facilities</button>
                 <button class="chip-btn" data-type="Government Hospitals" onclick="setNearbyTypeFilter('Government Hospitals')">Govt Hospitals</button>
                 <button class="chip-btn" data-type="PHC" onclick="setNearbyTypeFilter('PHC')">PHC</button>
                 <button class="chip-btn" data-type="CHC" onclick="setNearbyTypeFilter('CHC')">CHC</button>
@@ -714,13 +717,12 @@
               </div>
             </div>
 
-            <!-- Distance Radius Filters -->
+            <!-- Distance Radius Filters (Default 5 km) -->
             <div>
               <strong style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.35rem;">Distance Radius:</strong>
               <div class="assistant-chips" id="nearby-distance-pills">
-                <button class="chip-btn active" data-dist="null" onclick="setNearbyDistanceFilter(null)">All Distances</button>
                 <button class="chip-btn" data-dist="1" onclick="setNearbyDistanceFilter(1)">Within 1 km</button>
-                <button class="chip-btn" data-dist="5" onclick="setNearbyDistanceFilter(5)">Within 5 km</button>
+                <button class="chip-btn active" data-dist="5" onclick="setNearbyDistanceFilter(5)">Within 5 km</button>
                 <button class="chip-btn" data-dist="10" onclick="setNearbyDistanceFilter(10)">Within 10 km</button>
                 <button class="chip-btn" data-dist="25" onclick="setNearbyDistanceFilter(25)">Within 25 km</button>
               </div>
