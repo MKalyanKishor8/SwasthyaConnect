@@ -1,9 +1,9 @@
-# PulseCare OS - Healthcare & Clinical Portal Suite
+# SwasthyaConnect - Healthcare & Clinical Portal Suite
 
 A modern, responsive, and feature-complete healthcare web application featuring a **Unified Authentication Gateway**, an interactive **Patient Care Portal**, and a **Doctor Clinical Dashboard**.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMKalyanKishor8%2FPulseCare-Healthcare-Portal)
-![PulseCare OS Preview](https://img.shields.io/badge/Status-Live-emerald?style=for-the-badge)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMKalyanKishor8%2FSwasthyaConnect)
+![Status](https://img.shields.io/badge/Status-Live-emerald?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Design](https://img.shields.io/badge/Design-Glassmorphism-purple?style=for-the-badge)
 
@@ -11,33 +11,31 @@ A modern, responsive, and feature-complete healthcare web application featuring 
 
 ## 🔗 Live Deployments
 
-- **⚡ Vercel 1-Click Deploy**: [Deploy to Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMKalyanKishor8%2FPulseCare-Healthcare-Portal)
-- **🌐 GitHub Pages**: [https://mkalyankishor8.github.io/PulseCare-Healthcare-Portal/](https://mkalyankishor8.github.io/PulseCare-Healthcare-Portal/)
-- **🐙 GitHub Repository**: [https://github.com/MKalyanKishor8/PulseCare-Healthcare-Portal](https://github.com/MKalyanKishor8/PulseCare-Healthcare-Portal)
+- **🌐 GitHub Pages Live App**: [https://mkalyankishor8.github.io/SwasthyaConnect/](https://mkalyankishor8.github.io/SwasthyaConnect/)
+- **🐙 GitHub Repository**: [https://github.com/MKalyanKishor8/SwasthyaConnect](https://github.com/MKalyanKishor8/SwasthyaConnect)
+- **⚡ Production Vercel**: [https://pulsecare-healthcare-portal.vercel.app](https://pulsecare-healthcare-portal.vercel.app)
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & Portals
 
-### 1. 🔐 Unified Authentication Gateway (`index.html`)
-- **Dual Role Selector**: Switch dynamically between **Patient Portal** and **Doctor / MD** sign-in modes.
-- **⚡ 1-Click Demo Quick Logins**:
-  - `Alex Johnson (Patient)` - Instant access to patient telemetry, bookings, and prescriptions.
-  - `Dr. Sarah Lin, MD (Doctor)` - Instant access to the clinical queue and EHR.
-- **Biometric Simulation**: Touch ID / Face ID mock sign-in.
-- **Security & Registration**: Encrypted session simulation, forgot password, and new account modals.
+### 1. 🔐 Authentication Gateway
+- **Dual Selector Login**: [`login.html`](login.html)
+- **Dedicated Patient Login**: [`patient-login.html`](patient-login.html) - MRN / Email sign-in, Touch/Face ID simulation, 1-click demo access for **Alex Johnson (Patient)**.
+- **Dedicated Doctor Login**: [`doctor-login.html`](doctor-login.html) - Staff ID / NPI / Email sign-in, Hospital SSO, YubiKey 2FA simulation, 1-click demo access for **Dr. Sarah Lin, MD (Cardiologist)**.
+- **Unified Portal Gateway**: [`index.html`](index.html)
 
-### 2. 🩺 Patient Care Portal (`patient.html`)
-- **Health Overview Dashboard**: Personalized greeting, blood type badge, and active conditions summary.
-- **Live Biometric Telemetry**: Real-time trackers for Heart Rate (BPM), Blood Pressure (mmHg), Blood Oxygen (SpO2), and Fasting Glucose.
+### 2. 🩺 Patient Care Portal ([`patient.html`](patient.html))
+- **Health Overview Dashboard**: Personalized greeting, blood group, and chronic conditions.
+- **Live Biometric Telemetry**: Real-time trackers for Heart Rate (72 BPM), Blood Pressure (118/78 mmHg), Blood Oxygen (99% SpO2), and Fasting Glucose (94 mg/dL).
 - **7-Day Telemetry Trend**: Interactive SVG sparkline chart tracking resting vitals over time.
-- **Appointment Booking System**: Integrated wizard with doctor selection, calendar date picker, time slot selector, and consultation type (Telehealth Video vs In-Clinic).
+- **Appointment Booking System**: Physician selection, calendar date picker, time slots, and consultation format (Telehealth Video vs In-Clinic).
 - **Medication & Prescription Hub**: Active prescriptions list with pill supply progress bars and a working **1-Click Refill Request** button.
 - **Diagnostic Lab Reports**: Official CMP, Lipid Panel, and 12-Lead ECG reports with PDF download simulation.
 - **Care Team Chat & WebRTC Room**: Direct encrypted chat with Dr. Sarah Lin with auto-replies, plus mock HD Telehealth video rooms.
 
-### 3. 👨‍⚕️ Doctor Clinical Dashboard (`doctor.html`)
-- **Clinical Command Center**: Live metrics for Total Registered Patients, Today's Scheduled Consultations, Patients in Waiting Room, and Completed Charts.
+### 3. 👨‍⚕️ Doctor Clinical Dashboard ([`doctor.html`](doctor.html))
+- **Clinical Command Center**: Live metrics for Total Registered Patients, Scheduled Encounters, Patients in Waiting Room, and Completed Charts.
 - **Interactive Daily Patient Queue**: Filterable schedule table (Waiting, In-Consult, Confirmed, Completed) with status transition controls.
 - **Slide-Over EHR Drawer**: Comprehensive Electronic Health Record viewer displaying demographics, insurance, allergies, chronic conditions, telemetry vitals, and SOAP notes history.
 - **E-Prescription & SOAP Note Writer**: Interactive authoring tool to authorize medications, specify dosage instructions, and write SOAP treatment plans that **instantly sync with the patient portal in real-time via persistent local storage**.
@@ -49,6 +47,9 @@ A modern, responsive, and feature-complete healthcare web application featuring 
 
 ```
 ├── index.html           # 🔐 Unified Authentication Gateway
+├── login.html           # 🔀 Dual Portal Selector
+├── patient-login.html   # 🩺 Dedicated Patient Login
+├── doctor-login.html    # 👨‍⚕️ Dedicated Doctor Clinical Login
 ├── patient.html         # 🩺 Patient Care Portal
 ├── doctor.html          # 👨‍⚕️ Doctor Clinical Dashboard
 ├── vercel.json          # ⚡ Vercel Deployment Configuration
@@ -67,18 +68,14 @@ A modern, responsive, and feature-complete healthcare web application featuring 
 
 ---
 
-## 🚀 Getting Started
-
-### Local Setup (No Dependencies Required)
-
-You can run this project locally using any static web server:
+## 🚀 Local Setup
 
 ```bash
-# Python 3
+# Start local development server
 python3 -m http.server 8080
 
-# Or open index.html directly in any modern browser
-open index.html
+# Open in browser
+open http://localhost:8080/index.html
 ```
 
 ---
