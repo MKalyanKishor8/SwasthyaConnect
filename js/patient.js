@@ -1,8 +1,11 @@
 /**
  * SwasthyaConnect - Comprehensive Patient Portal Controller (js/patient.js)
+ * Manages Dashboard, Profile, Appointments, Medical Records, Prescriptions, Labs,
+ * Telehealth, Indian Government Healthcare Schemes, Eligibility Checker, and Nearby Centres.
  */
 
 let currentPatient = null;
+let currentSchemeCategory = 'All';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure authenticated session
@@ -30,9 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMedicalRecords();
   renderScans();
   renderTelehealthHistory();
-  renderChat();
+  renderGovernmentSchemes();
+  renderNearbyCentres();
+  initSchemesSearchAndFilter();
+  initEligibilityChecker();
   initBookingWizard();
-  initChatForm();
 
   // Listen to cross-portal state changes
   window.addEventListener('swasthya:state_change', () => {
@@ -43,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMedicalRecords();
     renderScans();
     renderTelehealthHistory();
+    renderGovernmentSchemes(currentSchemeCategory);
+    renderNearbyCentres();
   });
 });
 
@@ -53,14 +60,15 @@ function initNavigation() {
 
   const titles = {
     overview: 'Patient Health Dashboard',
-    profile: 'Patient Demographics & Profile',
-    vitals: 'Biometric Vitals & Live Telemetry',
-    appointments: 'Consultations & Scheduling',
+    profile: 'My Patient Profile & Demographics',
+    appointments: 'Scheduled Consultations & Appointments',
     records: 'Electronic Medical Records (EHR)',
-    prescriptions: 'Active Medications & Refills',
-    telehealth: 'Encrypted Telehealth Virtual Consultations',
-    emergency: 'Emergency Information & Rapid Response',
-    messages: 'Care Team Encrypted Chat'
+    prescriptions: 'Active Medications & Pharmacy Refills',
+    labs: 'Diagnostic Lab Reports & Pathology',
+    telehealth: 'Encrypted Telemedicine Video Consultations',
+    schemes: 'Indian Government Healthcare Schemes',
+    nearby: 'Find Nearby Government Healthcare Centres',
+    emergency: 'Emergency Information & Rapid Response'
   };
 
   navLinks.forEach(link => {
@@ -84,14 +92,15 @@ function switchTab(tabId) {
 
   const titles = {
     overview: 'Patient Health Dashboard',
-    profile: 'Patient Demographics & Profile',
-    vitals: 'Biometric Vitals & Live Telemetry',
-    appointments: 'Consultations & Scheduling',
+    profile: 'My Patient Profile & Demographics',
+    appointments: 'Scheduled Consultations & Appointments',
     records: 'Electronic Medical Records (EHR)',
-    prescriptions: 'Active Medications & Refills',
-    telehealth: 'Encrypted Telehealth Virtual Consultations',
-    emergency: 'Emergency Information & Rapid Response',
-    messages: 'Care Team Encrypted Chat'
+    prescriptions: 'Active Medications & Pharmacy Refills',
+    labs: 'Diagnostic Lab Reports & Pathology',
+    telehealth: 'Encrypted Telemedicine Video Consultations',
+    schemes: 'Indian Government Healthcare Schemes',
+    nearby: 'Find Nearby Government Healthcare Centres',
+    emergency: 'Emergency Information & Rapid Response'
   };
 
   navLinks.forEach(l => {
@@ -178,75 +187,15 @@ function renderPatientData() {
   const vit = currentPatient.vitals || {};
   const hrEl = document.getElementById('ov-heart-rate');
   if (hrEl) hrEl.textContent = vit.heartRate || 72;
-  const vitHr = document.getElementById('vit-hr-val');
-  if (vitHr) vitHr.textContent = vit.heartRate || 72;
 
   const bpEl = document.getElementById('ov-bp');
   if (bpEl) bpEl.textContent = vit.bloodPressure || '118/78';
-  const vitBp = document.getElementById('vit-bp-val');
-  if (vitBp) vitBp.textContent = vit.bloodPressure || '118/78';
 
   const tempEl = document.getElementById('ov-temp');
   if (tempEl) tempEl.textContent = vit.temperature ? vit.temperature.split(' ')[0] : '98.6';
-  const vitTemp = document.getElementById('vit-temp-val');
-  if (vitTemp) vitTemp.textContent = vit.temperature || '98.6 °F';
 
   const o2El = document.getElementById('ov-spo2');
   if (o2El) o2El.textContent = vit.spO2 || 99;
-  const vitO2 = document.getElementById('vit-spo2-val');
-  if (vitO2) vitO2.textContent = vit.spO2 || 99;
-
-  const vitRr = document.getElementById('vit-rr-val');
-  if (vitRr) vitRr.textContent = vit.respiratoryRate ? vit.respiratoryRate.split(' ')[0] : '16';
-
-  const vitWeight = document.getElementById('vit-weight-val');
-  if (vitWeight) vitWeight.textContent = vit.weight ? vit.weight.split(' ')[0] : '168';
-
-  // Render SVG Sparkline
-  renderSparkline(currentPatient.vitalsHistory || []);
-}
-
-// 7-Day Vitals Sparkline
-function renderSparkline(history) {
-  const container = document.getElementById('vitals-sparkline');
-  if (!container || !history.length) return;
-
-  const width = 600;
-  const height = 150;
-  const padding = 25;
-
-  const dates = history.map(h => h.date);
-  const hrs = history.map(h => h.hr);
-  const minHr = Math.min(...hrs) - 5;
-  const maxHr = Math.max(...hrs) + 5;
-
-  const points = hrs.map((hr, idx) => {
-    const x = padding + (idx / (hrs.length - 1)) * (width - 2 * padding);
-    const y = height - padding - ((hr - minHr) / (maxHr - minHr)) * (height - 2 * padding);
-    return { x, y, hr, date: dates[idx] };
-  });
-
-  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-
-  const dotsSvg = points.map(p => `
-    <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#0d9488" stroke="#ffffff" stroke-width="2" />
-    <text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-primary)">${p.hr} bpm</text>
-    <text x="${p.x}" y="${height - 5}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${p.date}</text>
-  `).join('');
-
-  container.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:auto; overflow:visible;">
-      <defs>
-        <linearGradient id="sparkline-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#0d9488" stop-opacity="0.25"/>
-          <stop offset="100%" stop-color="#0d9488" stop-opacity="0.0"/>
-        </linearGradient>
-      </defs>
-      <path d="${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#sparkline-grad)"/>
-      <path d="${pathD}" fill="none" stroke="#0d9488" stroke-width="3" stroke-linecap="round"/>
-      ${dotsSvg}
-    </svg>
-  `;
 }
 
 // Render Appointments (Upcoming vs Past)
@@ -578,6 +527,415 @@ function renderTelehealthHistory() {
   }
 }
 
+// ==========================================================================
+// GOVERNMENT HEALTHCARE SCHEMES CONTROLLER
+// ==========================================================================
+
+function renderGovernmentSchemes(category = 'All', search = '') {
+  const container = document.getElementById('schemes-grid-container');
+  if (!container) return;
+
+  const schemes = PulseCareStore.getGovernmentSchemes(category, search);
+
+  if (schemes.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align:center; padding:3rem 1rem; background:var(--bg-surface); border-radius:var(--radius-md); border:1px solid var(--border-light);">
+        <p style="font-size:1.1rem; color:var(--text-muted); margin-bottom:1rem;">No government schemes found matching your search or category filter.</p>
+        <button class="btn btn-sm btn-primary" onclick="document.getElementById('scheme-search-input').value=''; filterSchemes('All');">View All Schemes</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = schemes.map(s => `
+    <div class="portal-card" style="border-top:4px solid ${getCategoryColor(s.category)}; display:flex; flex-direction:column; height:100%;">
+      
+      <!-- Card Header -->
+      <div class="portal-card-header" style="background:var(--bg-surface-elevated); align-items:flex-start; gap:0.5rem;">
+        <div style="flex:1;">
+          <span class="badge ${getCategoryBadgeClass(s.category)}" style="margin-bottom:0.35rem;">${s.category}</span>
+          <h3 style="font-size:1.15rem; font-weight:700; line-height:1.3; color:var(--text-primary);">${s.name}</h3>
+          ${s.hindiName ? `<p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${s.hindiName}</p>` : ''}
+        </div>
+        <span class="badge badge-emerald" style="white-space:nowrap;">${s.badge}</span>
+      </div>
+
+      <!-- Card Body -->
+      <div class="portal-card-body" style="display:flex; flex-direction:column; gap:1rem; flex:1;">
+        
+        <!-- Short Desc -->
+        <p style="font-size:0.875rem; line-height:1.5; color:var(--text-secondary);">
+          ${s.shortDesc}
+        </p>
+
+        <!-- Department Tag -->
+        <div style="font-size:0.775rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
+          <svg class="icon" style="width:14px; height:14px; flex-shrink:0; color:var(--hospital-teal-600);" viewBox="0 0 24 24"><path d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7M4 4h16a1 1 0 0 1 1 1v2H3V5a1 1 0 0 1 1-1z"/></svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.department}</span>
+        </div>
+
+        <!-- Key Benefits List -->
+        <div style="background:var(--bg-input); padding:0.85rem; border-radius:var(--radius-sm); font-size:0.825rem;">
+          <strong style="color:var(--text-primary); display:block; margin-bottom:0.35rem;">Key Benefits & Highlights:</strong>
+          <ul style="padding-left:1.15rem; margin:0; color:var(--text-secondary); line-height:1.45;">
+            ${s.benefits.slice(0, 2).map(b => `<li style="margin-bottom:3px;">${b}</li>`).join('')}
+          </ul>
+        </div>
+
+        <!-- Eligibility Snapshot -->
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+          <strong>Eligibility:</strong> ${s.eligibility[0]}
+        </div>
+
+        <!-- Actions -->
+        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; flex-direction:column; gap:0.5rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-sm btn-primary" style="flex:1;" onclick="openSchemeDetailsModal('${s.id}')">
+              <span>View Full Details</span>
+              <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <button class="btn btn-sm btn-secondary" style="flex:1;" onclick="openSchemeEligibilityFor('${s.id}')">
+              <span>Check Eligibility</span>
+            </button>
+          </div>
+
+          <a href="${s.officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="text-align:center;">
+            <span>Official Government Portal</span>
+            <svg class="icon" style="width:12px; height:12px;" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  `).join('');
+}
+
+function getCategoryColor(cat) {
+  if (cat.includes('Insurance')) return 'var(--hospital-teal-600)';
+  if (cat.includes('Telemedicine')) return 'var(--hospital-blue)';
+  if (cat.includes('Vaccination')) return 'var(--hospital-healing-green)';
+  if (cat.includes('Maternal')) return '#d946ef';
+  if (cat.includes('Disease')) return 'var(--hospital-cross-red)';
+  return 'var(--hospital-teal-700)';
+}
+
+function getCategoryBadgeClass(cat) {
+  if (cat.includes('Insurance')) return 'badge-primary';
+  if (cat.includes('Telemedicine')) return 'badge-purple';
+  if (cat.includes('Vaccination')) return 'badge-emerald';
+  if (cat.includes('Maternal')) return 'badge-purple';
+  if (cat.includes('Disease')) return 'badge-danger';
+  return 'badge-primary';
+}
+
+function initSchemesSearchAndFilter() {
+  const searchInput = document.getElementById('scheme-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value;
+      renderGovernmentSchemes(currentSchemeCategory, q);
+    });
+  }
+}
+
+window.filterSchemes = function(category) {
+  currentSchemeCategory = category;
+  const pills = document.querySelectorAll('#scheme-category-pills .chip-btn');
+  pills.forEach(p => {
+    if (p.getAttribute('data-cat') === category) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
+  });
+  const searchInput = document.getElementById('scheme-search-input');
+  const q = searchInput ? searchInput.value : '';
+  renderGovernmentSchemes(category, q);
+};
+
+// Open Scheme Full Details Modal
+window.openSchemeDetailsModal = function(schemeId) {
+  const scheme = PulseCareStore.getSchemeById(schemeId);
+  if (!scheme) return;
+
+  const modalDept = document.getElementById('modal-scheme-dept');
+  const modalTitle = document.getElementById('modal-scheme-title');
+  const modalBody = document.getElementById('scheme-modal-body');
+
+  if (modalDept) modalDept.textContent = scheme.department;
+  if (modalTitle) modalTitle.textContent = scheme.name;
+
+  modalBody.innerHTML = `
+    <!-- Top Highlights Banner -->
+    <div class="welcome-banner" style="padding:1.25rem; margin-bottom:1.5rem; background:linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(2, 132, 199, 0.12) 100%);">
+      <div class="welcome-text">
+        <span class="badge badge-emerald" style="margin-bottom:0.25rem;">${scheme.badge}</span>
+        <h4 style="font-size:1.15rem; margin-bottom:0.2rem;">${scheme.shortName} Strategic Purpose</h4>
+        <p style="font-size:0.875rem; color:var(--text-secondary);">${scheme.purpose}</p>
+      </div>
+    </div>
+
+    <!-- Status Guidance Disclaimer -->
+    <div style="background:rgba(2, 132, 199, 0.08); border-left:4px solid var(--hospital-blue); padding:0.85rem 1rem; border-radius:var(--radius-xs); margin-bottom:1.5rem; font-size:0.85rem;">
+      <strong style="color:var(--hospital-blue);">📌 Beneficiary Status:</strong>
+      <span>You are <strong>Potentially Eligible</strong> for this scheme based on general public healthcare entitlements. Final determination is conducted at the respective government portal / hospital desk.</span>
+    </div>
+
+    <!-- Key Benefits -->
+    <div style="margin-bottom:1.5rem;">
+      <h4 style="font-size:1.05rem; margin-bottom:0.6rem; color:var(--hospital-teal-700);">Key Benefits & Coverage Entitlements</h4>
+      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+        ${scheme.benefits.map(b => `
+          <div style="display:flex; align-items:flex-start; gap:0.5rem; font-size:0.875rem; background:var(--bg-input); padding:0.65rem 0.85rem; border-radius:var(--radius-xs);">
+            <svg class="icon" style="color:var(--hospital-healing-green); width:16px; height:16px; margin-top:2px; flex-shrink:0;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>${b}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Eligibility & Required Documents -->
+    <div class="dashboard-grid-2" style="margin-bottom:1.5rem;">
+      
+      <div class="glass-panel" style="padding:1.15rem;">
+        <h4 style="font-size:0.95rem; margin-bottom:0.5rem; color:var(--text-primary);">Eligibility Criteria</h4>
+        <ul style="padding-left:1.15rem; font-size:0.825rem; color:var(--text-secondary); line-height:1.5;">
+          ${scheme.eligibility.map(e => `<li style="margin-bottom:4px;">${e}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="glass-panel" style="padding:1.15rem;">
+        <h4 style="font-size:0.95rem; margin-bottom:0.5rem; color:var(--text-primary);">Required Documents</h4>
+        <ul style="padding-left:1.15rem; font-size:0.825rem; color:var(--text-secondary); line-height:1.5;">
+          ${scheme.documents.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('')}
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- How to Apply Step-by-Step -->
+    <div style="margin-bottom:1.5rem;">
+      <h4 style="font-size:1.05rem; margin-bottom:0.6rem; color:var(--hospital-teal-700);">How to Apply / How to Avail</h4>
+      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+        ${scheme.howToApply.map((step, idx) => `
+          <div style="display:flex; align-items:flex-start; gap:0.75rem; font-size:0.875rem;">
+            <span style="width:24px; height:24px; border-radius:50%; background:var(--primary-gradient); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0;">${idx + 1}</span>
+            <p style="margin:0; font-size:0.85rem; color:var(--text-secondary);">${step}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- FAQs -->
+    ${scheme.faqs && scheme.faqs.length ? `
+      <div style="margin-bottom:1.5rem;">
+        <h4 style="font-size:1.05rem; margin-bottom:0.6rem; color:var(--hospital-teal-700);">Frequently Asked Questions (FAQs)</h4>
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          ${scheme.faqs.map(f => `
+            <div style="background:var(--bg-input); padding:0.75rem 1rem; border-radius:var(--radius-xs);">
+              <strong style="font-size:0.85rem; color:var(--text-primary); display:block; margin-bottom:2px;">Q: ${f.q}</strong>
+              <p style="font-size:0.825rem; color:var(--text-secondary); margin:0;">${f.a}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    <!-- Official Actions -->
+    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1px solid var(--border-light); flex-wrap:wrap; gap:0.75rem;">
+      <a href="${scheme.portalUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-emerald">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <span>Open Official Portal / Apply Online</span>
+      </a>
+      <button class="btn btn-primary" data-close-modal="scheme-details-modal">Close</button>
+    </div>
+  `;
+
+  PulseCareUI.openModal('scheme-details-modal');
+};
+
+// Open Eligibility Modal Pre-Selected for a scheme
+window.openSchemeEligibilityFor = function(schemeId) {
+  PulseCareUI.openModal('eligibility-modal');
+};
+
+// ==========================================================================
+// INTERACTIVE SCHEME ELIGIBILITY CHECKER ENGINE
+// ==========================================================================
+
+function initEligibilityChecker() {
+  const form = document.getElementById('eligibility-form');
+  const resultsContainer = document.getElementById('eligibility-results-container');
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const ageGroup = document.getElementById('elig-age').value;
+      const state = document.getElementById('elig-state').value;
+      const location = document.getElementById('elig-location').value;
+      const incomeCategory = document.getElementById('elig-income').value;
+      const specialStatus = document.getElementById('elig-status').value;
+
+      const results = PulseCareStore.evaluateSchemeEligibility({
+        ageGroup,
+        state,
+        location,
+        incomeCategory,
+        specialStatus
+      });
+
+      if (resultsContainer) {
+        resultsContainer.style.display = 'block';
+        resultsContainer.innerHTML = `
+          <div style="border-top:2px solid var(--hospital-teal-600); padding-top:1.25rem;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h4 style="font-size:1.15rem; color:var(--text-primary);">🎯 Personalized Scheme Eligibility Evaluation</h4>
+              <span class="badge badge-emerald">Evaluated</span>
+            </div>
+
+            <!-- Disclaimer Notice -->
+            <div style="background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.4); border-radius:var(--radius-xs); padding:0.85rem 1rem; margin-bottom:1.25rem; font-size:0.825rem; color:var(--text-primary);">
+              <strong>⚠️ Guidance Disclaimer:</strong> Eligibility information shown here is for guidance only. SwasthyaConnect does not make final legal determinations. Please verify eligibility through the respective official government portal.
+            </div>
+
+            <!-- Results List -->
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+              ${results.map(r => `
+                <div class="glass-panel" style="padding:1rem; border-left:4px solid ${getEligibilityStatusColor(r.status)};">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.25rem; flex-wrap:wrap; gap:0.4rem;">
+                    <div>
+                      <strong style="font-size:0.95rem; color:var(--text-primary);">${r.schemeName}</strong>
+                      <span class="badge ${getCategoryBadgeClass(r.category)}" style="margin-left:6px; font-size:0.65rem;">${r.category}</span>
+                    </div>
+                    ${getEligibilityBadgeHTML(r.status)}
+                  </div>
+                  <p style="font-size:0.825rem; color:var(--text-secondary); margin:0.35rem 0 0.5rem;">
+                    ${r.reason}
+                  </p>
+                  <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                    <a href="${r.portalUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size:0.75rem; padding:0.25rem 0.6rem;">
+                      <span>Verify on Official Portal</span>
+                      <svg class="icon" style="width:10px; height:10px;" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+          </div>
+        `;
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        PulseCareUI.showToast('Evaluation Complete', 'Your scheme eligibility report has been generated.', 'success');
+      }
+    });
+  }
+}
+
+function getEligibilityStatusColor(status) {
+  if (status === 'Eligible') return 'var(--hospital-healing-green)';
+  if (status === 'Verify') return 'var(--hospital-blue)';
+  return 'var(--text-muted)';
+}
+
+function getEligibilityBadgeHTML(status) {
+  if (status === 'Eligible') {
+    return `<span class="badge badge-emerald">🟢 Potentially Eligible</span>`;
+  } else if (status === 'Verify') {
+    return `<span class="badge badge-purple">🟡 Please Verify Officially</span>`;
+  } else {
+    return `<span class="badge" style="background:rgba(100, 116, 139, 0.2); color:#64748b;">⚪ May Not Be Eligible</span>`;
+  }
+}
+
+// ==========================================================================
+// NEARBY HEALTHCARE CENTRES CONTROLLER
+// ==========================================================================
+
+let currentNearbyFilter = 'all';
+
+function renderNearbyCentres(filterType = 'all') {
+  const container = document.getElementById('nearby-centres-grid');
+  if (!container) return;
+
+  const centres = PulseCareStore.getNearbyCentres(filterType);
+
+  if (centres.length === 0) {
+    container.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No healthcare centres found matching criteria.</p>`;
+    return;
+  }
+
+  container.innerHTML = centres.map(c => `
+    <div class="portal-card" style="border-top:4px solid var(--hospital-teal-600); display:flex; flex-direction:column;">
+      <div class="portal-card-header" style="background:var(--bg-surface-elevated);">
+        <div>
+          <span class="badge badge-primary">${c.type}</span>
+          <h4 style="font-size:1.1rem; margin-top:4px; font-weight:700;">${c.name}</h4>
+        </div>
+        <span class="badge badge-emerald">${c.distance} away</span>
+      </div>
+
+      <div class="portal-card-body" style="display:flex; flex-direction:column; gap:0.85rem; flex:1;">
+        
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+          📍 <strong>Location:</strong> ${c.location}
+        </p>
+
+        <p style="font-size:0.825rem; color:var(--text-muted); margin:0;">
+          🕒 <strong>Timings:</strong> ${c.timing}
+        </p>
+
+        <p style="font-size:0.85rem; color:var(--hospital-teal-700); font-weight:700; margin:0;">
+          📞 <strong>Emergency Helpline:</strong> ${c.phone}
+        </p>
+
+        <!-- Available Services -->
+        <div style="margin-top:0.25rem;">
+          <strong style="font-size:0.8rem; color:var(--text-primary); display:block; margin-bottom:0.35rem;">Available Public Health Services:</strong>
+          <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+            ${c.services.map(s => `
+              <span class="badge" style="background:var(--bg-input); color:var(--text-primary); font-size:0.7rem; font-weight:600; text-transform:none;">${s}</span>
+            `).join('')}
+          </div>
+        </div>
+
+        ${c.pmjayEmpanelled ? `
+          <div style="margin-top:auto; padding:0.5rem 0.75rem; background:rgba(13, 148, 136, 0.1); border-radius:var(--radius-xs); font-size:0.775rem; color:var(--hospital-teal-800); font-weight:700;">
+            ✓ PM-JAY Empanelled &bull; Free Golden Card Hospitalization Desk Available
+          </div>
+        ` : ''}
+
+        <!-- Actions -->
+        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; gap:0.5rem;">
+          <a href="${c.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="flex:1; text-align:center;">
+            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            <span>Get Directions</span>
+          </a>
+          <a href="tel:${c.phone.split(' ')[0]}" class="btn btn-sm btn-secondary" style="flex:1; text-align:center;">
+            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/></svg>
+            <span>Call Centre</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  `).join('');
+}
+
+window.filterNearbyCentres = function(type) {
+  currentNearbyFilter = type;
+  const btns = document.querySelectorAll('[data-nearby-filter]');
+  btns.forEach(b => {
+    if (b.getAttribute('data-nearby-filter') === type) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+  renderNearbyCentres(type);
+};
+
 // Interactive Telehealth WebRTC Room Simulator
 window.joinTelehealthRoom = function(aptId) {
   const apt = PulseCareStore.getAppointments().find(a => a.id === aptId) || PulseCareStore.getAppointments()[0];
@@ -776,46 +1134,6 @@ function initBookingWizard() {
       PulseCareUI.showToast('Consultation Booked', `Appointment confirmed with ${doc.name} for ${date} at ${time}.`, 'success');
       renderAppointments();
       switchTab('appointments');
-    });
-  }
-}
-
-// Chat Functionality
-function renderChat() {
-  const container = document.getElementById('chat-messages-container');
-  if (!container) return;
-
-  const msgs = PulseCareStore.getMessages(currentPatient.id, 'doc-1');
-  container.innerHTML = msgs.map(m => `
-    <div class="chat-bubble ${m.senderId === currentPatient.id ? 'outgoing' : 'incoming'}">
-      <div style="font-size:0.75rem; font-weight:700; margin-bottom:2px; opacity:0.85;">${m.senderName}</div>
-      <div>${m.text}</div>
-      <div style="font-size:0.65rem; margin-top:4px; text-align:right; opacity:0.75;">${m.timestamp}</div>
-    </div>
-  `).join('');
-
-  container.scrollTop = container.scrollHeight;
-}
-
-function initChatForm() {
-  const form = document.getElementById('chat-form');
-  const input = document.getElementById('chat-input-msg');
-
-  if (form && input) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
-
-      PulseCareStore.sendMessage(currentPatient.id, currentPatient.name, 'doc-1', text);
-      input.value = '';
-      renderChat();
-
-      // Simulated auto-reply from cardiologist
-      setTimeout(() => {
-        PulseCareStore.sendMessage('doc-1', 'Dr. Sarah Lin, MD', currentPatient.id, 'Thank you Alex! Your note is logged in your medical record. I will review this during our encounter.');
-        renderChat();
-      }, 1200);
     });
   }
 }

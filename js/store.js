@@ -452,6 +452,281 @@ const initialSeedData = {
       status: 'Optimal'
     }
   ],
+  governmentSchemes: [
+    {
+      id: 'pmjay',
+      name: 'Ayushman Bharat – PM-JAY (Pradhan Mantri Jan Arogya Yojana)',
+      hindiName: 'आयुष्मान भारत - प्रधानमंत्री जन आरोग्य योजना',
+      shortName: 'PM-JAY',
+      category: 'Insurance/Financial Assistance',
+      department: 'National Health Authority (NHA), Ministry of Health & Family Welfare',
+      badge: '₹5 Lakhs Annual Cover',
+      shortDesc: 'World’s largest government-funded health assurance scheme providing ₹5,00,000 cashless hospitalization cover per eligible family per year across 28,000+ empanelled hospitals.',
+      purpose: 'To provide financial protection against catastrophic health expenditures and ensure universal access to secondary and tertiary medical care across India.',
+      benefits: [
+        '₹5,00,000 annual health cover per family on a floater basis with no restrictions on family size, age, or gender.',
+        'Cashless and paperless treatment at all empanelled public hospitals and private healthcare facilities nationwide.',
+        'Comprehensive coverage of 1,949+ medical procedures including oncology, cardiology, neurosurgery, and intensive care.',
+        'Pre-hospitalization expenses (up to 3 days) and post-hospitalization care (up to 15 days) including diagnostics and medicines.',
+        'All pre-existing diseases are covered from the very first day of scheme enrollment.'
+      ],
+      eligibility: [
+        'Households identified under Socio-Economic Caste Census (SECC 2011) rural deprivation criteria (D1 to D7) or 11 urban occupational worker categories.',
+        'Active beneficiaries of National Food Security Act (NFSA) / Ration Card programs in participating States.',
+        'All Senior Citizens aged 70 years and above (under PM-JAY Vistrit Coverage) irrespective of socio-economic status.'
+      ],
+      documents: [
+        'Aadhaar Card of all family members',
+        'Ration Card / NFSA Family ID / State Beneficiary Card',
+        'Active Mobile Number linked with Aadhaar (for OTP e-KYC)',
+        'PMJAY Beneficiary Letter / Family ID (if received)'
+      ],
+      howToApply: [
+        'Visit the official NHA portal (beneficiary.nha.gov.in) or download the Ayushman App.',
+        'Login using your active mobile number and enter the received OTP.',
+        'Search beneficiary list using State, Scheme (PMJAY), Ration Card Number, or Aadhaar Number.',
+        'Complete online e-KYC via Aadhaar OTP or Face Authentication and download your Ayushman Card instantly.',
+        'Alternatively, visit any nearby Empanelled Hospital (Ayushman Mitra Helpdesk) or Common Service Centre (CSC) with your documents.'
+      ],
+      faqs: [
+        { q: 'Is there any registration fee for PM-JAY?', a: 'No, PM-JAY registration and the Ayushman Card generation are 100% free of cost at all government hospitals and online portals.' },
+        { q: 'Can I use the Ayushman Card in another state?', a: 'Yes, PM-JAY offers nationwide portability. An Ayushman card issued in one state is fully valid at any empanelled hospital across India.' },
+        { q: 'Are OPD consultations covered?', a: 'PM-JAY primarily covers in-patient secondary and tertiary hospitalizations (IPD). Free OPD consultations and primary medicines are provided under Ayushman Arogya Mandirs.' }
+      ],
+      officialUrl: 'https://pmjay.gov.in/',
+      portalUrl: 'https://beneficiary.nha.gov.in/'
+    },
+    {
+      id: 'esanjeevani',
+      name: 'eSanjeevani (National Teleconsultation Service)',
+      hindiName: 'ई-संजीवनी राष्ट्रीय टेली-परामर्श सेवा',
+      shortName: 'eSanjeevani',
+      category: 'Telemedicine',
+      department: 'Ministry of Health & Family Welfare (MoHFW) & C-DAC Mohali',
+      badge: 'Free Specialist Video Consult',
+      shortDesc: 'Official national doctor-to-patient (eSanjeevaniOPD) and doctor-to-doctor (eSanjeevani HWC) telemedicine platform providing free medical consultations from home.',
+      purpose: 'To democratize access to specialist doctors, eliminate geographical barriers, and offer free digital clinical consultations across all States and UTs.',
+      benefits: [
+        '100% Free video and audio consultations with verified government medical officers, MD specialists, and AIIMS faculty.',
+        'Legally recognized, digitally signed e-Prescriptions generated instantly after the consultation.',
+        'Dedicated specialty OPDs: Cardiology, Endocrinology, Pediatrics, Gynecology, Dermatology, and Psychiatry.',
+        'Completely contact-free with zero travel time and zero hospital queue waiting.'
+      ],
+      eligibility: [
+        'Open to all Indian citizens and residents across all States and Union Territories.',
+        'No income ceiling, age limitation, or geographic restrictions.'
+      ],
+      documents: [
+        'Valid Indian Mobile Number for SMS OTP authentication',
+        'Previous medical records / lab reports / prescriptions (optional, to upload during consult)'
+      ],
+      howToApply: [
+        'Visit esanjeevani.mohfw.gov.in or download the official eSanjeevani Android/iOS app.',
+        'Register or login with your mobile number using SMS OTP.',
+        'Select your State, choose the required OPD Clinic, and fill in patient demographics.',
+        'Join the digital virtual queue. When the doctor is ready, accept the encrypted video call.',
+        'Consult with the doctor and download your signed prescription immediately to your device.'
+      ],
+      faqs: [
+        { q: 'What are the operating hours for eSanjeevani?', a: 'General OPDs are active Monday through Saturday (09:00 AM to 05:00 PM), while specialized super-specialty clinics operate according to state-wise timetables.' },
+        { q: 'Is the eSanjeevani prescription accepted at local pharmacies?', a: 'Yes, eSanjeevani digital prescriptions are signed by registered medical practitioners and are legally valid under the Telemedicine Practice Guidelines issued by the National Medical Commission (NMC).' }
+      ],
+      officialUrl: 'https://esanjeevani.mohfw.gov.in/',
+      portalUrl: 'https://esanjeevani.mohfw.gov.in/#/patient/signin'
+    },
+    {
+      id: 'nhm',
+      name: 'National Health Mission (NHM)',
+      hindiName: 'राष्ट्रीय स्वास्थ्य मिशन',
+      shortName: 'NHM',
+      category: 'Rural Healthcare',
+      department: 'Ministry of Health & Family Welfare (MoHFW)',
+      badge: 'Universal Public Health',
+      shortDesc: 'Comprehensive national flagship mission uniting NRHM & NUHM to deliver free essential healthcare, diagnostics, and generic medicines across urban and rural India.',
+      purpose: 'To establish a community-owned, decentralized health delivery system with universal access to equitable, affordable, and high-quality public healthcare.',
+      benefits: [
+        'Free Essential Drugs Initiative: 100% free quality generic medicines at all government PHCs, CHCs, and District Hospitals.',
+        'Free Essential Diagnostics Initiative: Over 50+ free diagnostic tests at PHCs and 100+ at District Hospitals.',
+        'Free National Ambulance Network: Emergency trauma response (108) and maternal-infant transport (102).',
+        'Network of 1,60,000+ Ayushman Arogya Mandirs providing comprehensive primary healthcare closer to homes.'
+      ],
+      eligibility: [
+        'Universal public access for all citizens visiting any government primary health center (PHC), community health center (CHC), or district hospital.',
+        'Special focus on rural villages, tribal communities, urban slums, and economically vulnerable households.'
+      ],
+      documents: [
+        'No mandatory documents required for basic OPD consultation and free medicines.',
+        'Aadhaar / Government ID beneficial for Ayushman Bharat Health Account (ABHA) digital record creation.'
+      ],
+      howToApply: [
+        'Walk into any nearest Government Sub-Centre, PHC, CHC, or District Civil Hospital.',
+        'Consult the medical officer on duty and receive prescribed generic medicines and diagnostic tests on-site free of cost.',
+        'Connect with local community ASHA or ANM workers for maternal and infant health support.'
+      ],
+      faqs: [
+        { q: 'What is an Ayushman Arogya Mandir?', a: 'Ayushman Arogya Mandirs (formerly Health and Wellness Centres) are upgraded health posts providing 12 packages of comprehensive primary healthcare, free diagnostic testing, and teleconsultations.' }
+      ],
+      officialUrl: 'https://nhm.gov.in/',
+      portalUrl: 'https://nhm.gov.in/'
+    },
+    {
+      id: 'indradhanush',
+      name: 'Mission Indradhanush (Universal Immunization Programme - UIP)',
+      hindiName: 'मिशन इन्द्रधनुष - सार्वभौमिक टीकाकरण कार्यक्रम',
+      shortName: 'Mission Indradhanush',
+      category: 'Vaccination',
+      department: 'Ministry of Health & Family Welfare (MoHFW)',
+      badge: '100% Free Vaccination',
+      shortDesc: 'Intensive national immunization campaign providing free vaccines against 12 life-threatening diseases to all infants, children under 5 years, and pregnant mothers.',
+      purpose: 'To achieve over 90% full immunization coverage across all districts and eliminate vaccine-preventable childhood and maternal mortality.',
+      benefits: [
+        '100% Free immunization against 12 diseases: Tuberculosis, Diphtheria, Pertussis, Tetanus, Polio, Measles, Rubella, Hepatitis B, Rotavirus, Hib Meningitis, Pneumococcal Pneumonia (PCV), and Japanese Encephalitis.',
+        'Digital vaccine tracking and verifiable digital immunization certificates powered by the national U-WIN platform.',
+        'Doorstep community vaccination camps organized at Anganwadi centers, primary schools, and urban slums.'
+      ],
+      eligibility: [
+        'All children from birth up to 5 years of age who have missed routine vaccine doses.',
+        'All pregnant women requiring Tetanus and adult Diphtheria (Td) immunization.'
+      ],
+      documents: [
+        'Mother & Child Protection (MCP) Card / RCH Booklet',
+        'Aadhaar Card / Birth Certificate (optional, no child is denied vaccination for lack of documents)'
+      ],
+      howToApply: [
+        'Visit the nearest Anganwadi Center, Government PHC, or Urban Health Post on Village Health and Nutrition Days (VHND).',
+        'Or register online on the U-WIN Portal (uwin.mohfw.gov.in) to view vaccination slots and schedules.',
+        'Administer vaccines according to the National Immunization Schedule and receive digital confirmation.'
+      ],
+      faqs: [
+        { q: 'Are vaccines provided under Mission Indradhanush free?', a: 'Yes, all vaccines under Mission Indradhanush and the Universal Immunization Programme are 100% free of charge at all public facilities.' }
+      ],
+      officialUrl: 'https://www.mohfw.gov.in/',
+      portalUrl: 'https://uwin.mohfw.gov.in/'
+    },
+    {
+      id: 'jsy',
+      name: 'Janani Suraksha Yojana (JSY)',
+      hindiName: 'जननी सुरक्षा योजना',
+      shortName: 'JSY',
+      category: 'Maternal & Child Health',
+      department: 'National Health Mission, Ministry of Health & Family Welfare',
+      badge: 'Direct Cash Assistance',
+      shortDesc: 'Safe motherhood intervention under NHM promoting institutional delivery among pregnant women through direct benefit transfer (DBT) cash assistance and free delivery care.',
+      purpose: 'To reduce maternal and neonatal mortality by encouraging institutional deliveries in accredited government and private health facilities.',
+      benefits: [
+        'Cash Assistance (Low Performing States): ₹1,400 for rural mothers and ₹1,000 for urban mothers delivering in institutional healthcare centers.',
+        'Cash Assistance (High Performing States): ₹700 for rural BPL/SC/ST mothers and ₹600 for urban BPL mothers.',
+        'Combined with JSSK (Janani Shishu Suraksha Karyakram): 100% free normal delivery & C-section, free diagnostics, free hospital diet, and free ambulance transport.',
+        'Incentives for ASHA health workers who motivate and accompany pregnant women to health facilities.'
+      ],
+      eligibility: [
+        'All pregnant women delivering in government health centers in Low Performing States (UP, Bihar, MP, Rajasthan, Odisha, Jharkhand, Chhattisgarh, Uttarakhand, Assam, J&K).',
+        'BPL / SC / ST pregnant women aged 19 years and above in High Performing States.'
+      ],
+      documents: [
+        'Mother & Child Protection (MCP) Card with recorded Antenatal Checkups (ANCs)',
+        'Aadhaar-linked active Bank Account details / Passbook copy for DBT transfer',
+        'BPL Card / SC / ST Caste Certificate (where applicable in HPS states)'
+      ],
+      howToApply: [
+        'Register the pregnancy with the local ASHA or ANM worker at the nearest Sub-Centre / PHC during the first trimester.',
+        'Obtain an MCP Card and complete all mandatory Antenatal Checkups (ANCs).',
+        'Deliver in a Government Health Facility (PHC/CHC/District Hospital).',
+        'The JSY financial assistance is directly credited to the mother’s bank account via DBT.'
+      ],
+      faqs: [
+        { q: 'Are Cesarean deliveries covered?', a: 'Yes, both normal deliveries and Cesarean sections (C-sections) are completely free of charge, including anesthesia, blood transfusion, and hospital stay.' }
+      ],
+      officialUrl: 'https://nhm.gov.in/',
+      portalUrl: 'https://nhm.gov.in/index1.php?lang=1&level=3&sublinkid=841&lid=309'
+    },
+    {
+      id: 'ntep',
+      name: 'National TB Elimination Programme (NTEP) & Ni-kshay',
+      hindiName: 'राष्ट्रीय क्षय रोग उन्मूलन कार्यक्रम एवं निक्षయ్',
+      shortName: 'NTEP / Ni-kshay',
+      category: 'Disease Prevention',
+      department: 'Central TB Division, Ministry of Health & Family Welfare',
+      badge: 'Free Treatment + ₹500/mo DBT',
+      shortDesc: 'National public health initiative to eliminate Tuberculosis with free high-precision diagnostics (CB-NAAT/TrueNat), free daily anti-TB drug regimens, and ₹500/month nutritional financial grant.',
+      purpose: 'To eliminate Tuberculosis in India through universal access to rapid diagnostics, free quality treatment, and community nutritional support.',
+      benefits: [
+        '100% Free rapid molecular testing (CB-NAAT / GeneXpert / TrueNat) and digital chest radiography.',
+        'Free, quality-assured Fixed-Dose Combination (FDC) anti-TB medicine courses for 6+ months under daily DOTS protocol.',
+        'Ni-kshay Poshan Yojana: ₹500 per month direct benefit transfer (DBT) directly into the patient’s bank account throughout the treatment period.',
+        'Ni-kshay Mitra community nutritional support (food baskets, diagnostic assistance, and vocational training).'
+      ],
+      eligibility: [
+        'All individuals diagnosed with Drug-Sensitive (DS-TB) or Drug-Resistant (DR-TB) Tuberculosis across public and private healthcare sectors.'
+      ],
+      documents: [
+        'Ni-kshay ID (generated by NTEP staff upon diagnostic confirmation)',
+        'Aadhaar Card copy',
+        'Bank Account Passbook copy for DBT nutritional grant transfer'
+      ],
+      howToApply: [
+        'Visit any Government Hospital, Designated Microscopy Centre (DMC), or PHC with symptoms (cough > 2 weeks, evening fever, weight loss).',
+        'Undergo free sputum molecular test (CB-NAAT).',
+        'Upon positive confirmation, the patient is enrolled in the Ni-kshay portal and assigned a treatment supporter.',
+        'Receive free medicine blister packs and register bank details for the monthly ₹500 nutritional support.'
+      ],
+      faqs: [
+        { q: 'What is Ni-kshay Poshan Yojana?', a: 'It is a Centrally Sponsored Scheme providing financial incentive of ₹500/month to each notified TB patient for the entire duration of their anti-TB treatment.' }
+      ],
+      officialUrl: 'https://tbcindia.gov.in/',
+      portalUrl: 'https://nikshay.in/'
+    }
+  ],
+  nearbyCentres: [
+    {
+      id: 'centre-1',
+      name: 'Metro Health District Civil Hospital & Trauma Centre',
+      type: 'District Hospital (DH)',
+      distance: '1.2 km',
+      location: 'Civil Lines, Ring Road, Springfield (Pincode: 500001)',
+      services: ['24x7 Emergency Trauma Care', 'PM-JAY Golden Card Desk', 'Free Essential Diagnostics & Pathology', 'Blood Bank (24x7)', 'Dialysis Unit', 'Maternal & Neonatal ICU (NICU)', 'Jan Aushadhi Generic Pharmacy'],
+      phone: '+91 800-792-7841 / Ext. 108',
+      timing: '24 Hours Open (Emergency & In-Patient) | OPD: 08:30 AM - 01:30 PM',
+      pmjayEmpanelled: true,
+      directionsUrl: 'https://maps.google.com/?q=District+Civil+Hospital'
+    },
+    {
+      id: 'centre-2',
+      name: 'Community Health Centre (CHC) - Sector 12',
+      type: 'Community Health Centre (CHC)',
+      distance: '2.8 km',
+      location: 'Plot 45, Near Main Market, Sector 12, Springfield',
+      services: ['General OPD (Medicine, Gynecology, Pediatrics)', 'Free Routine Diagnostics & X-Ray', 'Mission Indradhanush Immunization (Wed/Sat)', 'Janani Suraksha Yojana Deliveries', 'DOTS TB Diagnostic Centre (NTEP)', 'eSanjeevani Teleconsultation Hub'],
+      phone: '+91 800-792-3320',
+      timing: 'OPD: 08:30 AM - 02:00 PM | Emergency: 24x7',
+      pmjayEmpanelled: true,
+      directionsUrl: 'https://maps.google.com/?q=Community+Health+Centre'
+    },
+    {
+      id: 'centre-3',
+      name: 'Ayushman Arogya Mandir - Primary Health Centre (PHC)',
+      type: 'Primary Health Centre (PHC)',
+      distance: '3.5 km',
+      location: 'Village Health Post, North Springfield Road',
+      services: ['Comprehensive Primary Healthcare (CPHC)', 'Free Essential Drugs (EDL)', 'NCD Screening (Hypertension, Diabetes, Oral Cancer)', 'Antenatal Care (ANC) & Mother Health', 'eSanjeevani Tele-OPD with Specialists'],
+      phone: '+91 800-792-5501',
+      timing: '09:00 AM - 04:00 PM (Monday - Saturday)',
+      pmjayEmpanelled: false,
+      directionsUrl: 'https://maps.google.com/?q=Primary+Health+Centre'
+    },
+    {
+      id: 'centre-4',
+      name: 'Government Maternity & Child Health Sub-District Hospital',
+      type: 'Sub-District Hospital (SDH)',
+      distance: '4.2 km',
+      location: 'Hospital Enclave, Gandhi Nagar, Springfield',
+      services: ['24x7 Institutional Deliveries (JSY/JSSK)', 'Special Newborn Care Unit (SNCU)', 'Mission Indradhanush Immunization Hub', 'Free Nutritional Supplements (IFA/Calcium)', 'PM-JAY Maternal Packages'],
+      phone: '+91 800-792-8812',
+      timing: '24 Hours Emergency & Labor Ward | OPD: 08:30 AM - 01:30 PM',
+      pmjayEmpanelled: true,
+      directionsUrl: 'https://maps.google.com/?q=Government+Maternity+Hospital'
+    }
+  ],
   notifications: [
     {
       id: 'notif-1',
@@ -734,27 +1009,111 @@ class UnifiedStore {
     }
   }
 
-  // Messages
-  getMessages(patientId, doctorId) {
-    return (this.data.messages || []).filter(
-      m => (m.senderId === patientId && m.receiverId === doctorId) ||
-           (m.senderId === doctorId && m.receiverId === patientId)
-    );
+  // Government Healthcare Schemes
+  getGovernmentSchemes(category = null, search = '') {
+    let list = this.data.governmentSchemes || [];
+    if (category && category !== 'All') {
+      list = list.filter(s => s.category.toLowerCase() === category.toLowerCase() || (category === 'Maternal & Child Health' && (s.category.includes('Maternal') || s.category.includes('Vaccination'))));
+    }
+    if (search && search.trim() !== '') {
+      const q = search.toLowerCase().trim();
+      list = list.filter(s => 
+        s.name.toLowerCase().includes(q) || 
+        (s.hindiName && s.hindiName.toLowerCase().includes(q)) || 
+        s.shortName.toLowerCase().includes(q) || 
+        s.shortDesc.toLowerCase().includes(q) || 
+        s.category.toLowerCase().includes(q)
+      );
+    }
+    return list;
   }
 
-  sendMessage(senderId, senderName, receiverId, text) {
-    const newMsg = {
-      id: 'msg-' + Date.now(),
-      senderId,
-      senderName,
-      receiverId,
-      text,
-      timestamp: 'Just now',
-      read: false
-    };
-    this.data.messages.push(newMsg);
-    this.saveData();
-    return newMsg;
+  getSchemeById(id) {
+    return (this.data.governmentSchemes || []).find(s => s.id === id);
+  }
+
+  // Nearby Healthcare Centres
+  getNearbyCentres(filterType = 'all') {
+    let list = this.data.nearbyCentres || [];
+    if (filterType && filterType !== 'all') {
+      list = list.filter(c => c.type.toLowerCase().includes(filterType.toLowerCase()));
+    }
+    return list;
+  }
+
+  // Interactive Scheme Eligibility Evaluator
+  evaluateSchemeEligibility({ ageGroup, state, location, incomeCategory, specialStatus }) {
+    const results = [];
+    const schemes = this.getGovernmentSchemes();
+
+    schemes.forEach(scheme => {
+      let status = 'Verify'; // 'Eligible', 'Verify', 'Ineligible'
+      let reason = '';
+
+      if (scheme.id === 'pmjay') {
+        if (ageGroup === 'senior') {
+          status = 'Eligible';
+          reason = 'Eligible under PM-JAY Vistrit Senior Citizen (70+) universal coverage.';
+        } else if (incomeCategory === 'bpl' || incomeCategory === 'secc') {
+          status = 'Eligible';
+          reason = 'Meets PM-JAY socio-economic deprivation and NFSA/Ration Card criteria.';
+        } else if (incomeCategory === 'low') {
+          status = 'Verify';
+          reason = 'May qualify subject to State-specific expanded ration card rosters.';
+        } else {
+          status = 'Ineligible';
+          reason = 'General income category is typically not covered unless holding valid SECC/NFSA ration card.';
+        }
+      } else if (scheme.id === 'esanjeevani') {
+        status = 'Eligible';
+        reason = 'Universal access for all Indian citizens across all States & UTs.';
+      } else if (scheme.id === 'nhm') {
+        status = 'Eligible';
+        reason = 'Free public healthcare, diagnostics, and generic medicines available at all government health centers.';
+      } else if (scheme.id === 'indradhanush') {
+        if (ageGroup === 'infant' || specialStatus === 'child' || specialStatus === 'pregnant') {
+          status = 'Eligible';
+          reason = 'Target beneficiary group for universal vaccination (children 0-5 yrs and pregnant mothers).';
+        } else {
+          status = 'Verify';
+          reason = 'Routine vaccination primarily focuses on infants, children, and pregnant women.';
+        }
+      } else if (scheme.id === 'jsy') {
+        if (specialStatus === 'pregnant') {
+          if (incomeCategory === 'bpl' || location === 'rural') {
+            status = 'Eligible';
+            reason = 'Meets institutional delivery cash assistance and JSSK free transport criteria.';
+          } else {
+            status = 'Verify';
+            reason = 'Eligible for JSSK free hospital care; verify direct cash DBT rules for state.';
+          }
+        } else {
+          status = 'Ineligible';
+          reason = 'Scheme specifically covers pregnant women for institutional child deliveries.';
+        }
+      } else if (scheme.id === 'ntep') {
+        if (specialStatus === 'tb') {
+          status = 'Eligible';
+          reason = 'Full entitlement to 100% free molecular diagnostics, DOTS medicines, and ₹500/month Ni-kshay nutritional grant.';
+        } else {
+          status = 'Eligible';
+          reason = 'Universal free diagnostic testing available for any individual with respiratory or fever symptoms.';
+        }
+      }
+
+      results.push({
+        schemeId: scheme.id,
+        schemeName: scheme.name,
+        category: scheme.category,
+        badge: scheme.badge,
+        status, // 'Eligible', 'Verify', 'Ineligible'
+        reason,
+        officialUrl: scheme.officialUrl,
+        portalUrl: scheme.portalUrl
+      });
+    });
+
+    return results;
   }
 }
 

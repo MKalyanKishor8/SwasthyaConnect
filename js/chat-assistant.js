@@ -663,7 +663,46 @@
       }
     }
 
-    // 5. Fallback Response
+    // 5. Government Healthcare Schemes (PM-JAY, eSanjeevani, NHM, Indradhanush, JSY, NTEP)
+    if (
+      text.includes('scheme') || text.includes('ayushman') || text.includes('pmjay') || text.includes('pm-jay') || text.includes('esanjeevani') || text.includes('telemedicine') || text.includes('vaccin') || text.includes('indradhanush') || text.includes('jsy') || text.includes('matern') || text.includes('tb') || text.includes('nikshay') || text.includes('government') ||
+      text.includes('योजना') || text.includes('आयुष्मान') || text.includes('संजीवनी') || text.includes('टीका') || text.includes('सरकारी') ||
+      text.includes('పథక') || text.includes('ఆయుష్మాన్') || text.includes('సంజీవని') || text.includes('టీకా') || text.includes('ప్రభుత్వ')
+    ) {
+      if (currentLang === 'hi') {
+        return `
+          🇮🇳 <strong>सरकारी स्वास्थ्य योजनाएं (Government Healthcare Schemes):</strong><br>
+          • <strong>आयुष्मान भारत (PM-JAY):</strong> पात्र परिवारों के लिए प्रति वर्ष ₹5 लाख का कैशलेस अस्पताल बीमा।<br>
+          • <strong>ई-संजीवनी (eSanjeevani):</strong> सरकारी डॉक्टरों और विशेषज्ञों से 100% मुफ्त वीडियो टेली-परामर्श।<br>
+          • <strong>मिशन इन्द्रधनुष:</strong> 12 जानलेवा बीमारियों से मुफ्त टीकाकरण।<br>
+          • <strong>जननी सुरक्षा योजना (JSY):</strong> संस्थागत प्रसव के लिए वित्तीय सहायता।<br>
+          • <strong>निक्षय पोषण योजना (NTEP):</strong> टीबी के मरीजों के लिए मुफ्त जांच, दवाएं और ₹500/माह पोषण राशि।<br><br>
+          <button class="btn btn-primary btn-sm" onclick="if(window.switchTab) window.switchTab('schemes');">🏛️ सभी योजनाएं और पात्रता देखें</button>
+        `;
+      } else if (currentLang === 'te') {
+        return `
+          🇮🇳 <strong>ప్రభుత్వ ఆరోగ్య పథకాలు (Government Healthcare Schemes):</strong><br>
+          • <strong>ఆయుష్మాన్ భారత్ (PM-JAY):</strong> కుటుంబానికి సంవత్సరానికి ₹5 లక్షల ఉచిత హాస్పిటల్ కవరేజ్.<br>
+          • <strong>ఈ-సంజీవని (eSanjeevani):</strong> నిపుణులైన డాక్టర్లతో 100% ఉచిత ఆన్‌లైన్ వీడియో కన్సల్టేషన్.<br>
+          • <strong>మిషన్ ఇంద్రధనుష్:</strong> పిల్లలు మరియు గర్భిణులకు ఉచిత ప్రాణరక్షక టీకాలు.<br>
+          • <strong>జననీ సురక్ష యోజన (JSY):</strong> సురక్షిత కాన్పుల కోసం ప్రభుత్వ ఆర్థిక సహాయం.<br>
+          • <strong>నక్షయ్ పోషణ్ యోజన (NTEP):</strong> టీబీ ఉచిత నిర్ధారణ, మందులు & నెలకు ₹500 పోషకాహార గ్రాంట్.<br><br>
+          <button class="btn btn-primary btn-sm" onclick="if(window.switchTab) window.switchTab('schemes');">🏛️ ప్రభుత్వ పథకాల వివరాలు చూడండి</button>
+        `;
+      } else {
+        return `
+          🇮🇳 <strong>Indian Government Healthcare Schemes Available:</strong><br>
+          • <strong>Ayushman Bharat (PM-JAY):</strong> ₹5,00,000 annual cashless hospital coverage per family across 28,000+ empanelled hospitals.<br>
+          • <strong>eSanjeevani Teleconsultation:</strong> 100% free video consultations with government specialist doctors from home.<br>
+          • <strong>Mission Indradhanush:</strong> Free immunization against 12 vaccine-preventable diseases.<br>
+          • <strong>Janani Suraksha Yojana (JSY):</strong> Institutional delivery care and direct cash transfer support.<br>
+          • <strong>NTEP & Ni-kshay:</strong> Free TB molecular diagnostics, DOTS treatment, and ₹500/month nutritional DBT grant.<br><br>
+          <button class="btn btn-primary btn-sm" onclick="if(window.switchTab) window.switchTab('schemes');">🏛️ Explore Government Schemes & Check Eligibility</button>
+        `;
+      }
+    }
+
+    // 6. Fallback Response
     return t.fallback;
   }
 })();

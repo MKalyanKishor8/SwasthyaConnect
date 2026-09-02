@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Portal | SwasthyaConnect</title>
-  <meta name="description" content="Personal Health Dashboard: track vital telemetry, schedule doctor appointments, manage e-prescriptions, access medical records, and join telehealth consultations.">
+  <meta name="description" content="SwasthyaConnect Patient Care Dashboard: health vitals, appointments, medical records, e-prescriptions, lab reports, telehealth video, and Indian Government Healthcare Schemes.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/portal.css">
 </head>
@@ -39,16 +39,11 @@
         <div class="nav-section-title">Patient Portal Menu</div>
         <a href="#overview" class="nav-link active" data-tab="overview">
           <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          <span>Health Dashboard</span>
+          <span>Dashboard</span>
         </a>
         <a href="#profile" class="nav-link" data-tab="profile">
           <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span>Patient Profile</span>
-        </a>
-        <a href="#vitals" class="nav-link" data-tab="vitals">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>Vitals & Telemetry</span>
-          <span class="nav-badge">Live</span>
+          <span>My Profile</span>
         </a>
         <a href="#appointments" class="nav-link" data-tab="appointments">
           <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -62,19 +57,27 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
           <span>Prescriptions</span>
         </a>
+        <a href="#labs" class="nav-link" data-tab="labs">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>Lab Reports</span>
+        </a>
         <a href="#telehealth" class="nav-link" data-tab="telehealth">
           <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-          <span>Telehealth Video</span>
-          <span class="nav-badge" style="background:rgba(5, 150, 105, 0.2); color:#059669;">Ready</span>
+          <span>Telemedicine</span>
+          <span class="nav-badge" style="background:rgba(5, 150, 105, 0.2); color:#059669;">Live</span>
+        </a>
+        <a href="#schemes" class="nav-link" data-tab="schemes" style="color:var(--hospital-teal-800); font-weight:700;">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span>Government Schemes</span>
+          <span class="nav-badge" style="background:rgba(2, 132, 199, 0.2); color:#0284c7;">India</span>
+        </a>
+        <a href="#nearby" class="nav-link" data-tab="nearby">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Nearby Healthcare Centres</span>
         </a>
         <a href="#emergency" class="nav-link" data-tab="emergency" style="color:var(--hospital-cross-red);">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span>Emergency Assistance</span>
-        </a>
-        <a href="#messages" class="nav-link" data-tab="messages">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Care Team Chat</span>
-          <span class="nav-badge" style="background:rgba(13, 148, 136, 0.2); color:#0d9488;">1 New</span>
+          <span>Emergency Support</span>
         </a>
 
         <div class="nav-section-title" style="margin-top: 1rem;">System Switch</div>
@@ -151,7 +154,7 @@
           <!-- Theme Toggle -->
           <button class="btn-icon theme-toggle-btn" aria-label="Toggle Theme" title="Toggle theme">
             <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            <svg class="icon icon-sun" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="12" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon icon-sun" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           </button>
         </div>
       </header>
@@ -159,7 +162,7 @@
       <!-- Main Body Container -->
       <div class="portal-body">
 
-        <!-- ================= TAB: OVERVIEW (Health Dashboard) ================= -->
+        <!-- ================= TAB: OVERVIEW (Dashboard) ================= -->
         <section class="tab-panel active" id="tab-overview">
           
           <!-- Welcome Hero Banner -->
@@ -174,10 +177,14 @@
                 <span class="badge badge-amber">Attending: Dr. Sarah Lin, MD</span>
               </div>
             </div>
-            <div class="welcome-actions">
+            <div class="welcome-actions" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
               <button class="btn btn-emerald btn-sm" onclick="joinTelehealthRoom('apt-101')">
                 <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
                 <span>Join Telehealth Visit</span>
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="switchTab('schemes')">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <span>Govt Schemes</span>
               </button>
             </div>
           </div>
@@ -297,13 +304,13 @@
 
         </section>
 
-        <!-- ================= TAB: PATIENT PROFILE ================= -->
+        <!-- ================= TAB: MY PROFILE ================= -->
         <section class="tab-panel" id="tab-profile">
           <div class="portal-card" style="margin-bottom: 2rem;">
             <div class="portal-card-header">
               <h3 class="portal-card-title">
                 <svg class="icon" style="color:var(--hospital-teal-600);" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span>Official Patient Demographics & Health Profile</span>
+                <span>Patient Demographics & Official Medical Profile</span>
               </h3>
               <span class="badge badge-emerald">Verified Medical Chart</span>
             </div>
@@ -348,97 +355,6 @@
 
               </div>
 
-            </div>
-          </div>
-        </section>
-
-        <!-- ================= TAB: VITALS & TELEMETRY ================= -->
-        <section class="tab-panel" id="tab-vitals">
-          <div class="portal-card" style="margin-bottom: 2rem;">
-            <div class="portal-card-header">
-              <h3 class="portal-card-title">
-                <svg class="icon" style="color:var(--hospital-teal-600);" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                <span>7-Day Heart Rate & Telemetry Trend</span>
-              </h3>
-              <span class="badge badge-emerald"><span class="pulse-dot"></span> Live Bluetooth Sync</span>
-            </div>
-            <div class="portal-card-body">
-              <div id="vitals-sparkline" style="margin: 1rem 0;"></div>
-            </div>
-          </div>
-
-          <!-- Extended Vitals Grid -->
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-label">Heart Rate (Pulse)</span>
-                <span class="badge badge-emerald">Optimal</span>
-              </div>
-              <div class="metric-value-wrap">
-                <span class="metric-value" id="vit-hr-val">72</span>
-                <span class="metric-unit">BPM</span>
-              </div>
-              <p style="font-size:0.75rem; color:var(--text-muted);">Reference: 60 - 100 bpm</p>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-label">Blood Pressure</span>
-                <span class="badge badge-emerald">Normal</span>
-              </div>
-              <div class="metric-value-wrap">
-                <span class="metric-value" id="vit-bp-val">118/78</span>
-                <span class="metric-unit">mmHg</span>
-              </div>
-              <p style="font-size:0.75rem; color:var(--text-muted);">Target: &lt; 120/80 mmHg</p>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-label">Body Temperature</span>
-                <span class="badge badge-emerald">Afebrile</span>
-              </div>
-              <div class="metric-value-wrap">
-                <span class="metric-value" id="vit-temp-val">98.6</span>
-                <span class="metric-unit">°F</span>
-              </div>
-              <p style="font-size:0.75rem; color:var(--text-muted);">Reference: 97.8 - 99.1 °F</p>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-label">Blood Oxygen (SpO2)</span>
-                <span class="badge badge-emerald">99%</span>
-              </div>
-              <div class="metric-value-wrap">
-                <span class="metric-value" id="vit-spo2-val">99</span>
-                <span class="metric-unit">%</span>
-              </div>
-              <p style="font-size:0.75rem; color:var(--text-muted);">Reference: 95% - 100%</p>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-label">Respiratory Rate</span>
-                <span class="badge badge-emerald">Eupneic</span>
-              </div>
-              <div class="metric-value-wrap">
-                <span class="metric-value" id="vit-rr-val">16</span>
-                <span class="metric-unit">breaths/min</span>
-              </div>
-              <p style="font-size:0.75rem; color:var(--text-muted);">Normal: 12 - 20 bpm</p>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-label">Weight & BMI</span>
-                <span class="badge badge-primary">Healthy</span>
-              </div>
-              <div class="metric-value-wrap">
-                <span class="metric-value" id="vit-weight-val">168</span>
-                <span class="metric-unit">lbs (BMI 23.4)</span>
-              </div>
-              <p style="font-size:0.75rem; color:var(--text-muted);">Normal BMI: 18.5 - 24.9</p>
             </div>
           </div>
         </section>
@@ -518,20 +434,6 @@
 
           </div>
 
-          <!-- Diagnostic Lab & Scan Records -->
-          <div class="portal-card" style="margin-bottom: 2rem;">
-            <div class="portal-card-header">
-              <h3 class="portal-card-title">
-                <svg class="icon" style="color:var(--hospital-teal-600);" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                <span>Diagnostic Lab Reports (CMP, Lipid, ECG)</span>
-              </h3>
-              <span class="badge badge-emerald">Pathology Verified</span>
-            </div>
-            <div class="portal-card-body" id="lab-reports-list">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
-
           <!-- Scans & Imaging Records -->
           <div class="portal-card">
             <div class="portal-card-header">
@@ -565,7 +467,27 @@
           </div>
         </section>
 
-        <!-- ================= TAB: TELEHEALTH ================= -->
+        <!-- ================= TAB: LAB REPORTS ================= -->
+        <section class="tab-panel" id="tab-labs">
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.4rem;">Diagnostic Lab Reports & Clinical Pathology</h3>
+            <p>Official diagnostic results authenticated by Quest Diagnostics & Metro Health Laboratories.</p>
+          </div>
+          <div class="portal-card" style="margin-bottom: 2rem;">
+            <div class="portal-card-header">
+              <h3 class="portal-card-title">
+                <svg class="icon" style="color:var(--hospital-teal-600);" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Authenticated Diagnostic Lab Reports (CMP, Lipid, ECG)</span>
+              </h3>
+              <span class="badge badge-emerald">Pathology Verified</span>
+            </div>
+            <div class="portal-card-body" id="lab-reports-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: TELEMEDICINE ================= -->
         <section class="tab-panel" id="tab-telehealth">
           <div class="portal-card" style="margin-bottom: 2rem; border-top: 4px solid var(--hospital-healing-green);">
             <div class="portal-card-header">
@@ -599,6 +521,101 @@
             <div class="portal-card-body" id="telehealth-history-container">
               <!-- Rendered via JS -->
             </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: GOVERNMENT HEALTHCARE SCHEMES (NEW) ================= -->
+        <section class="tab-panel" id="tab-schemes">
+          
+          <!-- Government Header Banner -->
+          <div class="welcome-banner" style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(13, 148, 136, 0.12) 100%); border-color: rgba(2, 132, 199, 0.3);">
+            <div class="welcome-text">
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                <span style="font-size:1.4rem;">🇮🇳</span>
+                <span class="badge badge-primary">National Health Portal of India</span>
+                <span class="badge badge-emerald">MoHFW Verified Programs</span>
+              </div>
+              <h1 style="font-size:1.85rem;">Government Healthcare Schemes & Citizen Benefits</h1>
+              <p style="max-width:720px;">
+                Explore official Indian public health missions, free hospitalization covers, universal immunization, telemedicine access, and financial subsidies designed to protect every citizen.
+              </p>
+            </div>
+            <div class="welcome-actions">
+              <button class="btn btn-primary btn-sm" onclick="PulseCareUI.openModal('eligibility-modal')">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Check My Scheme Eligibility</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="glass-panel" style="padding:1.25rem; margin-bottom:2rem;">
+            <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem;">
+              <div style="flex:1; min-width:260px; position:relative;">
+                <input type="text" id="scheme-search-input" class="form-control" placeholder="Search schemes by name, benefits, keywords (e.g. Ayushman, TB, Delivery, Vaccination)..." style="padding-left:2.5rem;">
+                <svg class="icon" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="document.getElementById('scheme-search-input').value=''; filterSchemes('All');">
+                Reset Filters
+              </button>
+            </div>
+
+            <!-- Category Filter Pills -->
+            <div class="assistant-chips" id="scheme-category-pills">
+              <button class="chip-btn active" data-cat="All" onclick="filterSchemes('All')">All Schemes (6)</button>
+              <button class="chip-btn" data-cat="Insurance/Financial Assistance" onclick="filterSchemes('Insurance/Financial Assistance')">Insurance / Financial Assistance</button>
+              <button class="chip-btn" data-cat="Telemedicine" onclick="filterSchemes('Telemedicine')">Telemedicine</button>
+              <button class="chip-btn" data-cat="Rural Healthcare" onclick="filterSchemes('Rural Healthcare')">Rural Healthcare</button>
+              <button class="chip-btn" data-cat="Vaccination" onclick="filterSchemes('Vaccination')">Vaccination</button>
+              <button class="chip-btn" data-cat="Maternal & Child Health" onclick="filterSchemes('Maternal & Child Health')">Maternal & Child Health</button>
+              <button class="chip-btn" data-cat="Disease Prevention" onclick="filterSchemes('Disease Prevention')">Disease Prevention</button>
+            </div>
+          </div>
+
+          <!-- Schemes Grid Container -->
+          <div id="schemes-grid-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(350px, 1fr)); gap:1.5rem; margin-bottom:2.5rem;">
+            <!-- Dynamically populated by JS -->
+          </div>
+
+          <!-- Eligibility Checker Inline Promo Card -->
+          <div class="portal-card" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%); border: 1.5px dashed var(--hospital-teal-500); padding: 1.75rem; text-align: center;">
+            <div class="brand-icon" style="width:48px; height:48px; margin:0 auto 0.75rem; background:var(--primary-gradient);">
+              <svg class="icon" style="width:24px; height:24px;" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h3 style="font-size:1.3rem; margin-bottom:0.35rem;">Wondering Which Government Schemes You Qualify For?</h3>
+            <p style="max-width:600px; margin:0 auto 1.25rem; font-size:0.9rem; color:var(--text-secondary);">
+              Answer a few quick questions (State, age bracket, rural/urban setting) to receive instant personalized eligibility guidance across all 6 national healthcare programs.
+            </p>
+            <button class="btn btn-emerald btn-lg" onclick="PulseCareUI.openModal('eligibility-modal')">
+              <span>Launch Interactive Scheme Eligibility Checker</span>
+              <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
+              * Note: Eligibility calculations are for informational guidance only. Official determinations are made on the respective government portals.
+            </p>
+          </div>
+
+        </section>
+
+        <!-- ================= TAB: NEARBY HEALTHCARE CENTRES (NEW) ================= -->
+        <section class="tab-panel" id="tab-nearby">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <h3 style="font-size:1.4rem;">Find Nearby Government Healthcare Centres & Hospitals</h3>
+              <p>Locate verified public hospitals, Community Health Centres (CHCs), and Ayushman Arogya Mandirs with 24x7 emergency and PM-JAY empanelled desks.</p>
+            </div>
+            
+            <!-- Type Filters -->
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-secondary active" data-nearby-filter="all" onclick="filterNearbyCentres('all')">All Centres (4)</button>
+              <button class="btn btn-sm btn-secondary" data-nearby-filter="District Hospital" onclick="filterNearbyCentres('District Hospital')">District Civil Hospitals</button>
+              <button class="btn btn-sm btn-secondary" data-nearby-filter="Community Health" onclick="filterNearbyCentres('Community Health')">CHCs</button>
+              <button class="btn btn-sm btn-secondary" data-nearby-filter="Primary Health" onclick="filterNearbyCentres('Primary Health')">PHCs / Arogya Mandirs</button>
+            </div>
+          </div>
+
+          <div id="nearby-centres-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+            <!-- Rendered by JS -->
           </div>
         </section>
 
@@ -660,40 +677,126 @@
           </div>
         </section>
 
-        <!-- ================= TAB: CARE TEAM CHAT ================= -->
-        <section class="tab-panel" id="tab-messages">
-          <div class="chat-container">
-            <div class="portal-card-header" style="background: var(--bg-surface-elevated);">
-              <div style="display:flex; align-items:center; gap: 0.75rem;">
-                <div class="user-avatar" style="width:36px; height:36px; font-size:0.85rem; background:var(--primary-gradient);">SL</div>
-                <div>
-                  <h4 style="font-size: 0.95rem;">Dr. Sarah Lin, MD</h4>
-                  <p style="font-size: 0.75rem; color: var(--hospital-healing-green);">● Online • Cardiology Care Team</p>
-                </div>
-              </div>
-              <button class="btn btn-sm btn-emerald" onclick="joinTelehealthRoom('apt-101')">
-                <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                <span>Start Video Call</span>
-              </button>
-            </div>
-
-            <div class="chat-messages" id="chat-messages-container">
-              <!-- Rendered via JS -->
-            </div>
-
-            <form class="chat-input-bar" id="chat-form">
-              <input type="text" id="chat-input-msg" class="form-control" placeholder="Ask Dr. Lin a clinical question or report symptoms..." required autocomplete="off">
-              <button type="submit" class="btn btn-primary">
-                <span>Send</span>
-                <svg class="icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              </button>
-            </form>
-          </div>
-        </section>
-
       </div>
     </main>
 
+  </div>
+
+  <!-- Scheme Details Modal -->
+  <div class="modal-overlay" id="scheme-details-modal">
+    <div class="modal-content" style="max-width:760px;">
+      <div class="modal-header">
+        <div>
+          <span class="badge badge-primary" id="modal-scheme-dept">Ministry of Health & Family Welfare</span>
+          <h3 class="modal-title" id="modal-scheme-title" style="margin-top:4px;">Scheme Details</h3>
+        </div>
+        <button class="btn-icon" data-close-modal="scheme-details-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="scheme-modal-body">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Eligibility Checker Modal -->
+  <div class="modal-overlay" id="eligibility-modal">
+    <div class="modal-content" style="max-width:720px;">
+      <div class="modal-header" style="background:linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(2, 132, 199, 0.1) 100%);">
+        <div>
+          <span class="badge badge-emerald">Interactive Questionnaire</span>
+          <h3 class="modal-title" style="margin-top:4px;">Check Government Healthcare Scheme Eligibility</h3>
+        </div>
+        <button class="btn-icon" data-close-modal="eligibility-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      
+      <!-- Eligibility Form -->
+      <form id="eligibility-form">
+        <div class="modal-body">
+          <p style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:1.25rem;">
+            Please provide non-sensitive demographic details to evaluate your potential entitlement under PM-JAY, eSanjeevani, Mission Indradhanush, JSY, NTEP, and NHM programs.
+          </p>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            
+            <div class="form-group">
+              <label class="form-label" for="elig-age">Age Bracket</label>
+              <select id="elig-age" class="form-control" required>
+                <option value="adult" selected>18 - 59 years (Adult)</option>
+                <option value="senior">60+ years (Senior Citizen / 70+ PM-JAY Vistrit)</option>
+                <option value="infant">0 - 5 years (Infant / Young Child)</option>
+                <option value="youth">6 - 17 years (Adolescent / Student)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="elig-state">State / Union Territory</label>
+              <select id="elig-state" class="form-control" required>
+                <option value="Telangana" selected>Telangana</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Bihar">Bihar</option>
+                <option value="Delhi">Delhi (NCT)</option>
+                <option value="Other">Other States / UTs</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            
+            <div class="form-group">
+              <label class="form-label" for="elig-location">Residential Area</label>
+              <select id="elig-location" class="form-control" required>
+                <option value="urban" selected>Urban / Semi-Urban</option>
+                <option value="rural">Rural (Gram Panchayat / Village)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="elig-income">Household / Ration Card Category</label>
+              <select id="elig-income" class="form-control" required>
+                <option value="bpl">BPL / Antyodaya Anna Yojana (AAY) Ration Card</option>
+                <option value="secc">SECC Deprivation / Low Income Occupational</option>
+                <option value="low">Annual Income &lt; ₹2.5 Lakhs</option>
+                <option value="general" selected>General / Middle Income Category</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="elig-status">Special Beneficiary Condition</label>
+            <select id="elig-status" class="form-control">
+              <option value="none" selected>General Healthcare / Routine Consultation</option>
+              <option value="pregnant">Pregnant Mother or Lactating Woman</option>
+              <option value="child">Infant / Child Needing Routine Immunization</option>
+              <option value="tb">Suspected or Diagnosed Tuberculosis Patient</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Result Display Container (Hidden Initially) -->
+          <div id="eligibility-results-container" style="display:none; margin-top:1.5rem;">
+            <!-- Populated via JS -->
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="eligibility-modal">Close</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-eligibility">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Evaluate Scheme Eligibility</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Booking Modal -->
@@ -799,7 +902,7 @@
         </p>
         <div class="glass-panel" style="padding:1rem; text-align:left; margin-bottom:1.5rem; font-size:0.85rem;">
           <p><strong>Patient:</strong> Alex Johnson (MRN-2026-9082)</p>
-          <p><strong>Location:</strong> 742 Evergreen Terrace, Springfield, IL (GPS: 39.7817° N, 89.6501° W)</p>
+          <p><strong>Location:</strong> 742 Evergreen Terrace, Springfield (GPS: 39.7817° N, 89.6501° W)</p>
           <p><strong>Emergency Contact Notified:</strong> Emma Johnson (+1 555-987-6543)</p>
           <p><strong>Medical Alert:</strong> Penicillin Allergy Noted on Paramedic Chart</p>
         </div>
