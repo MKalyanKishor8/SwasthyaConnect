@@ -757,3 +757,61 @@ body[data-saver="true"] .portal-card {
   -webkit-backdrop-filter: none !important;
 }
 
+/* ==========================================================================
+   Leaflet Custom Markers & Interactive Pins
+   ========================================================================== */
+
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-user-marker,
+.custom-fac-marker {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.custom-fac-pin {
+  width: 28px;
+  height: 28px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-fac-pin:hover {
+  transform: rotate(-45deg) scale(1.25);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.custom-fac-pin-inner {
+  width: 9px;
+  height: 9px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px;
+  line-height: 1.4;
+}
+
+

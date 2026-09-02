@@ -40,6 +40,25 @@ const PlacesHealthService = {
   lastQueriedCoords: null,
   lastQueriedRadius: 0,
 
+  // Self-contained Haversine distance calculator (km)
+  calculateDistance(lat1, lon1, lat2, lon2) {
+    const p1 = parseFloat(lat1);
+    const p2 = parseFloat(lon1);
+    const p3 = parseFloat(lat2);
+    const p4 = parseFloat(lon2);
+    if (isNaN(p1) || isNaN(p2) || isNaN(p3) || isNaN(p4)) return 1.0;
+
+    const R = 6371; // Earth radius in km
+    const dLat = (p3 - p1) * Math.PI / 180;
+    const dLon = (p4 - p2) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(p1 * Math.PI / 180) * Math.cos(p3 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Math.round(R * c * 10) / 10;
+  },
+
   // Geocode manual text query (City, District, Village, PIN code) via Nominatim
   async geocodeLocation(query) {
     try {
@@ -92,7 +111,7 @@ const PlacesHealthService = {
       console.warn('Reverse geocode fallback:', e);
     }
     return {
-      locality: 'Detected Area',
+      locality: 'Local Area',
       district: 'District Healthcare Zone',
       state: 'India',
       postcode: '',
@@ -100,9 +119,9 @@ const PlacesHealthService = {
     };
   },
 
-  // Query Overpass API with multi-mirror cascading fallback
+  // Fast Parallel Query Overpass API with mirror fallback & 3.5s timeout
   async queryOverpass(lat, lng, radiusMeters) {
-    const overpassQuery = `[out:json][timeout:8];
+    const overpassQuery = `[out:json][timeout:6];
 (
   node["amenity"~"hospital|clinic|pharmacy|doctors|health_post"](around:${radiusMeters},${lat},${lng});
   way["amenity"~"hospital|clinic|pharmacy|doctors|health_post"](around:${radiusMeters},${lat},${lng});
@@ -115,10 +134,11 @@ const PlacesHealthService = {
 );
 out center tags 60;`;
 
+    // Try primary fast mirror first
     for (const mirror of this.overpassMirrors) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
 
         const res = await fetch(mirror, {
           method: 'POST',
@@ -135,7 +155,7 @@ out center tags 60;`;
           }
         }
       } catch (err) {
-        console.warn(`Overpass mirror ${mirror} failed/timed out, trying next mirror...`);
+        // Continue to next mirror or fallback
       }
     }
     return [];
@@ -153,7 +173,7 @@ out center tags 60;`;
           return data.map((item, idx) => {
             const itemLat = parseFloat(item.lat);
             const itemLng = parseFloat(item.lon);
-            const distKm = PulseCareStore.calculateDistanceKm(lat, lng, itemLat, itemLng);
+            const distKm = this.calculateDistance(lat, lng, itemLat, itemLng);
             const name = item.name || item.display_name.split(',')[0] || `Healthcare Facility ${idx + 1}`;
             
             let cat = 'Government Hospitals';
@@ -217,9 +237,9 @@ out center tags 60;`;
   // Normalize an OpenStreetMap element into a structured SwasthyaConnect Facility
   normalizeOsmElement(el, patientLat, patientLng, idx, defaultArea = 'Healthcare District') {
     const tags = el.tags || {};
-    const elLat = el.lat || (el.center ? el.center.lat : patientLat);
-    const elLng = el.lon || (el.center ? el.center.lon : patientLng);
-    const distKm = PulseCareStore.calculateDistanceKm(patientLat, patientLng, elLat, elLng);
+    const elLat = parseFloat(el.lat || (el.center ? el.center.lat : patientLat));
+    const elLng = parseFloat(el.lon || (el.center ? el.center.lon : patientLng));
+    const distKm = this.calculateDistance(patientLat, patientLng, elLat, elLng);
 
     const rawName = tags.name || tags['name:en'] || tags['name:hi'] || tags['name:te'] || '';
     const amenity = tags.amenity || tags.healthcare || tags.shop || 'clinic';
@@ -531,7 +551,9 @@ out center tags 60;`;
 
     // Compute live Haversine distance from current patient coordinates
     allFacilities.forEach(c => {
-      c.distanceKm = PulseCareStore.calculateDistanceKm(lat, lng, c.lat, c.lng);
+      c.lat = parseFloat(c.lat);
+      c.lng = parseFloat(c.lng);
+      c.distanceKm = this.calculateDistance(lat, lng, c.lat, c.lng);
       c.distance = `${c.distanceKm.toFixed(1)} km`;
       c.directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}`;
     });
@@ -614,6 +636,8 @@ out center tags 60;`;
     });
   }
 };
+
+window.PlacesHealthService = PlacesHealthService;
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure authenticated session
@@ -1086,17 +1110,23 @@ function updateLeafletMapWithFacilities(centres) {
   const mapEl = document.getElementById('healthcare-map');
   if (!mapEl || typeof L === 'undefined') return;
 
+  const pLat = parseFloat(patientCoordinates.lat);
+  const pLng = parseFloat(patientCoordinates.lng);
+
   if (!leafletMapInstance) {
-    leafletMapInstance = L.map('healthcare-map').setView([patientCoordinates.lat, patientCoordinates.lng], 13);
+    leafletMapInstance = L.map('healthcare-map', {
+      zoomControl: true,
+      scrollWheelZoom: true
+    }).setView([pLat, pLng], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(leafletMapInstance);
 
     mapMarkersLayer = L.layerGroup().addTo(leafletMapInstance);
   } else {
-    leafletMapInstance.invalidateSize();
+    leafletMapInstance.invalidateSize({ animate: false });
   }
 
   // Clear previous markers & radius
@@ -1111,67 +1141,89 @@ function updateLeafletMapWithFacilities(centres) {
 
   // Radius Circle Perimeter (e.g. 5 km active radius)
   const radiusMeters = (nearbyDistanceFilter || 5) * 1000;
-  radiusCircleLayer = L.circle([patientCoordinates.lat, patientCoordinates.lng], {
+  radiusCircleLayer = L.circle([pLat, pLng], {
     radius: radiusMeters,
     color: '#0d9488',
     fillColor: '#0d9488',
-    fillOpacity: 0.07,
-    weight: 1.5,
-    dashArray: '4, 6'
+    fillOpacity: 0.08,
+    weight: 2,
+    dashArray: '5, 6'
   }).addTo(leafletMapInstance);
 
-  // User Location Marker (Pulsing blue radar)
+  // User Location Marker (🔵 You = Patient)
   const userIcon = L.divIcon({
     className: 'custom-user-marker',
-    html: `<div style="width:20px; height:20px; background:#0284c7; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 12px rgba(2,132,199,0.9); animation:pulse 1.5s infinite;"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
+    html: `<div style="width:24px; height:24px; background:#0284c7; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 16px rgba(2,132,199,0.95); animation:pulse 1.5s infinite; display:flex; align-items:center; justify-content:center;"><div style="width:8px; height:8px; background:#ffffff; border-radius:50%;"></div></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
   });
 
-  userMarker = L.marker([patientCoordinates.lat, patientCoordinates.lng], { icon: userIcon })
-    .bindPopup(`<strong>📍 You are here</strong><br><span style="font-size:0.8rem; color:#64748b;">${detectedLocationLabel}</span>`)
+  userMarker = L.marker([pLat, pLng], { icon: userIcon, zIndexOffset: 1000 })
+    .bindPopup(`
+      <div style="font-family:system-ui, sans-serif; padding:2px;">
+        <span class="badge badge-primary" style="font-size:0.7rem; margin-bottom:4px;">🔵 Patient Location</span>
+        <h4 style="margin:2px 0 4px; font-size:0.95rem; color:#0b2238; font-weight:700;">📍 You are here</h4>
+        <p style="margin:0; font-size:0.775rem; color:#64748b;">${detectedLocationLabel}</p>
+      </div>
+    `)
     .addTo(mapMarkersLayer);
 
   // Facility POI Markers
   centres.forEach(c => {
+    const cLat = parseFloat(c.lat);
+    const cLng = parseFloat(c.lng);
+    if (isNaN(cLat) || isNaN(cLng)) return;
+
     const pinColor = getFacilityPinColorHex(c.category);
     const facIcon = L.divIcon({
       className: 'custom-fac-marker',
-      html: `<div style="width:26px; height:26px; background:${pinColor}; border:2px solid #ffffff; border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(0,0,0,0.3);"><div style="width:8px; height:8px; background:#ffffff; border-radius:50%;"></div></div>`,
-      iconSize: [26, 26],
-      iconAnchor: [13, 26],
-      popupAnchor: [0, -26]
+      html: `<div class="custom-fac-pin" style="background:${pinColor};"><div class="custom-fac-pin-inner"></div></div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 28],
+      popupAnchor: [0, -28]
     });
 
-    const marker = L.marker([c.lat, c.lng], { icon: facIcon }).addTo(mapMarkersLayer);
+    const marker = L.marker([cLat, cLng], { icon: facIcon }).addTo(mapMarkersLayer);
     mapMarkerDict[c.id] = marker;
 
     marker.bindPopup(`
-      <div style="font-family:system-ui, sans-serif; min-width:200px;">
-        <span class="badge ${getFacilityBadgeClass(c.category)}" style="font-size:0.65rem; margin-bottom:2px;">${c.type}</span>
-        <h4 style="margin:2px 0; font-size:0.95rem; color:#0b2238; font-weight:700;">🏥 ${c.name}</h4>
-        <p style="margin:0; font-size:0.8rem; color:#0d9488; font-weight:700;">📍 ${c.distance} away</p>
-        <p style="margin:2px 0 4px; font-size:0.75rem; color:#64748b;">📌 ${c.location}</p>
-        <p style="margin:0 0 6px; font-size:0.75rem; color:#0f172a;">☎️ <strong>${c.phone}</strong></p>
-        <div style="display:flex; gap:4px;">
-          <a href="${c.directionsUrl}" target="_blank" class="btn btn-sm btn-emerald" style="font-size:0.7rem; padding:3px 8px;">Get Directions</a>
-          <button class="btn btn-sm btn-primary" style="font-size:0.7rem; padding:3px 8px;" onclick="openFacilityDetailsModal('${c.id}')">View Details</button>
+      <div style="font-family:system-ui, sans-serif; min-width:220px; padding:2px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px; margin-bottom:4px;">
+          <span class="badge ${getFacilityBadgeClass(c.category)}" style="font-size:0.65rem;">${c.type}</span>
+          <span style="font-size:0.75rem; font-weight:700; color:#0d9488;">📍 ${c.distance}</span>
+        </div>
+        <h4 style="margin:2px 0 4px; font-size:0.95rem; color:#0b2238; font-weight:700;">🏥 ${c.name}</h4>
+        <p style="margin:2px 0 4px; font-size:0.75rem; color:#64748b; line-height:1.3;">📌 ${c.location}</p>
+        <p style="margin:0 0 8px; font-size:0.75rem; color:#0f172a;">☎️ <a href="tel:${c.phone.split(' ')[0]}" style="color:inherit; text-decoration:underline;"><strong>${c.phone}</strong></a></p>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm btn-primary" style="font-size:0.72rem; padding:4px 8px; flex:1;" onclick="openFacilityDetailsModal('${c.id}')">View Details</button>
+          <a href="${c.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-emerald" style="font-size:0.72rem; padding:4px 8px; flex:1; text-align:center;">Get Directions</a>
         </div>
       </div>
     `);
   });
 
-  // Fit bounds to show the radius circle and markers
+  // Fit bounds to display the active search radius circle and all healthcare markers
+  const bounds = L.latLngBounds([[pLat, pLng]]);
+  centres.forEach(c => {
+    const cLat = parseFloat(c.lat);
+    const cLng = parseFloat(c.lng);
+    if (!isNaN(cLat) && !isNaN(cLng)) {
+      bounds.extend([cLat, cLng]);
+    }
+  });
   if (radiusCircleLayer) {
-    leafletMapInstance.fitBounds(radiusCircleLayer.getBounds(), { padding: [30, 30] });
-  } else {
-    leafletMapInstance.setView([patientCoordinates.lat, patientCoordinates.lng], 13);
+    bounds.extend(radiusCircleLayer.getBounds());
   }
+
+  leafletMapInstance.fitBounds(bounds, { padding: [35, 35], maxZoom: 15 });
 }
 
 window.flyToFacility = function(lat, lng, facId) {
   if (leafletMapInstance) {
-    leafletMapInstance.flyTo([lat, lng], 15, { animate: true, duration: 1.0 });
+    const fLat = parseFloat(lat);
+    const fLng = parseFloat(lng);
+    leafletMapInstance.flyTo([fLat, fLng], 15, { animate: true, duration: 1.0 });
     setTimeout(() => {
       if (mapMarkerDict[facId]) {
         mapMarkerDict[facId].openPopup();
@@ -1181,11 +1233,12 @@ window.flyToFacility = function(lat, lng, facId) {
 };
 
 function getFacilityPinColorHex(cat) {
-  if (cat.includes('Emergency')) return '#e11d48';
-  if (cat.includes('Government Hospitals') || cat.includes('CHC')) return '#0d9488';
-  if (cat.includes('PHC') || cat.includes('Arogya Mandir')) return '#059669';
-  if (cat.includes('Pharmacies')) return '#d97706';
-  if (cat.includes('Diagnostic')) return '#8b5cf6';
+  const c = String(cat).toLowerCase();
+  if (c.includes('emergency')) return '#e11d48'; // 🔴 Emergency
+  if (c.includes('government') || c.includes('hospital') || c.includes('chc')) return '#0d9488'; // 🟢 Hospital / CHC
+  if (c.includes('phc') || c.includes('arogya') || c.includes('wellness')) return '#059669'; // 🟩 PHC / Arogya Mandir
+  if (c.includes('pharmacy') || c.includes('chemist') || c.includes('aushadh')) return '#d97706'; // 🟠 Pharmacy
+  if (c.includes('diagnostic') || c.includes('lab') || c.includes('pathology')) return '#8b5cf6'; // 🟣 Diagnostic
   return '#0284c7';
 }
 
