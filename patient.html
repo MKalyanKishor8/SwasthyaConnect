@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Portal | PulseCare OS</title>
+  <meta name="description" content="Personal Health Dashboard: track vital telemetry, schedule doctor appointments, manage e-prescriptions, and access lab reports.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+
+  <div class="portal-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="portal-sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">
+            <svg class="icon" style="width:20px; height:20px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <span>PulseCare</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Patient Care Menu</div>
+        <a href="#overview" class="nav-link active" data-tab="overview">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Health Overview</span>
+        </a>
+        <a href="#vitals" class="nav-link" data-tab="vitals">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>Vitals & Telemetry</span>
+          <span class="nav-badge">Live</span>
+        </a>
+        <a href="#appointments" class="nav-link" data-tab="appointments">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Appointments</span>
+        </a>
+        <a href="#prescriptions" class="nav-link" data-tab="prescriptions">
+          <svg class="icon" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+          <span>Prescriptions</span>
+        </a>
+        <a href="#labs" class="nav-link" data-tab="labs">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Lab & Diagnostics</span>
+        </a>
+        <a href="#messages" class="nav-link" data-tab="messages">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Care Team Chat</span>
+          <span class="nav-badge" style="background:rgba(16, 185, 129, 0.2); color:#10b981;">1 New</span>
+        </a>
+
+        <div class="nav-section-title" style="margin-top: 1rem;">System Switch</div>
+        <a href="doctor.html" class="nav-link" style="color: var(--primary-600);">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/></svg>
+          <span>Switch to Doctor View</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-compact-card">
+          <div class="user-avatar-wrap">
+            <div class="user-avatar patient-avatar-initials">AJ</div>
+            <div class="status-indicator"></div>
+          </div>
+          <div class="user-info">
+            <div class="user-info-name patient-name">Alex Johnson</div>
+            <div class="user-info-role">Patient ID: #PAT-1092</div>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-secondary btn-logout" style="width: 100%;">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Log Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="portal-main">
+      
+      <!-- Topbar Header -->
+      <header class="portal-topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="page-title-wrap">
+            <h2 id="current-page-title">Patient Health Overview</h2>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-primary btn-sm" onclick="PulseCareUI.openModal('book-apt-modal')">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Book Consultation</span>
+          </button>
+
+          <button class="btn-icon theme-toggle-btn" aria-label="Toggle Theme" title="Toggle theme">
+            <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="icon icon-sun" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <div class="portal-body">
+
+        <!-- ================= TAB: OVERVIEW ================= -->
+        <section class="tab-panel active" id="tab-overview">
+          
+          <!-- Welcome Hero Banner -->
+          <div class="welcome-banner">
+            <div class="welcome-text">
+              <h1>Hello, <span class="patient-name">Alex Johnson</span> 👋</h1>
+              <p>Your biometric cardiovascular metrics are stable and well within the target range today.</p>
+              <div style="display:flex; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.825rem; flex-wrap: wrap;">
+                <span class="badge badge-emerald"><span class="pulse-dot"></span> Blood Group: <span id="pat-blood-type">O+</span></span>
+                <span class="badge badge-primary" id="pat-age">34 yrs (Male)</span>
+                <span class="badge badge-purple" id="pat-conditions">Stage 1 Hypertension (Controlled)</span>
+              </div>
+            </div>
+            <div class="welcome-actions">
+              <button class="btn btn-emerald btn-sm" onclick="PulseCareUI.openModal('book-apt-modal')">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Schedule Visit</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Core Vitals Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Heart Rate (Pulse)</span>
+                <div class="metric-icon-wrap cyan">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="ov-heart-rate">72</span>
+                <span class="metric-unit">BPM</span>
+              </div>
+              <div class="metric-footer">
+                <span class="badge badge-emerald">Optimal Rhythm</span>
+                <span>Resting Avg</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Blood Pressure</span>
+                <div class="metric-icon-wrap emerald">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4"/></svg>
+                </div>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="ov-bp">118/78</span>
+                <span class="metric-unit">mmHg</span>
+              </div>
+              <div class="metric-footer">
+                <span class="badge badge-emerald">Normal Range</span>
+                <span>Arm Cuff Sync</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Blood Oxygen (SpO2)</span>
+                <div class="metric-icon-wrap purple">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                </div>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="ov-spo2">99</span>
+                <span class="metric-unit">%</span>
+              </div>
+              <div class="metric-footer">
+                <span class="badge badge-emerald">Optimal Oxygenation</span>
+                <span>Pulse Oximeter</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Fasting Glucose</span>
+                <div class="metric-icon-wrap rose">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                </div>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="ov-glucose">94</span>
+                <span class="metric-unit">mg/dL</span>
+              </div>
+              <div class="metric-footer">
+                <span class="badge badge-emerald">Euglycemic</span>
+                <span>Fasting Morning</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2-Column Section: Upcoming Consultations & Care Team -->
+          <div class="dashboard-grid-2">
+            
+            <!-- Left: Upcoming Appointments -->
+            <div class="portal-card">
+              <div class="portal-card-header">
+                <h3 class="portal-card-title">
+                  <svg class="icon" style="color:var(--primary-600);" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span>Upcoming Medical Appointments</span>
+                </h3>
+                <button class="btn btn-sm btn-outline" onclick="PulseCareUI.openModal('book-apt-modal')">+ Book New</button>
+              </div>
+              <div class="portal-card-body" id="ov-appointments-list">
+                <!-- Dynamically populated by JS -->
+              </div>
+            </div>
+
+            <!-- Right: Primary Care Physician Profile -->
+            <div class="portal-card">
+              <div class="portal-card-header">
+                <h3 class="portal-card-title">
+                  <svg class="icon" style="color:var(--accent-emerald);" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span>Primary Cardiologist</span>
+                </h3>
+                <span class="badge badge-emerald">Assigned MD</span>
+              </div>
+              <div class="portal-card-body">
+                <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 1rem;">
+                  <div class="user-avatar" style="width:52px; height:52px; font-size:1.2rem; background: var(--primary-gradient);">SL</div>
+                  <div>
+                    <h4 style="font-size: 1.15rem; margin-bottom: 2px;">Dr. Sarah Lin, MD</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Cardiology & Internal Medicine</p>
+                    <p style="font-size: 0.775rem; color: var(--primary-600); font-weight: 600;">Metro Health Academic Medical Center</p>
+                  </div>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                  Specializing in preventive cardiology, ambulatory blood pressure management, and non-invasive cardiovascular diagnostics.
+                </p>
+                <div style="display:flex; gap: 0.5rem;">
+                  <button class="btn btn-sm btn-primary" style="flex:1;" onclick="switchTab('messages')">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Message Dr. Lin</span>
+                  </button>
+                  <button class="btn btn-sm btn-secondary" style="flex:1;" onclick="PulseCareUI.openModal('book-apt-modal')">
+                    <span>Book Visit</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================= TAB: VITALS & TELEMETRY ================= -->
+        <section class="tab-panel" id="tab-vitals">
+          <div class="portal-card" style="margin-bottom: 2rem;">
+            <div class="portal-card-header">
+              <h3 class="portal-card-title">
+                <svg class="icon" style="color:var(--primary-600);" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                <span>7-Day Heart Rate & Telemetry Trend</span>
+              </h3>
+              <span class="badge badge-emerald"><span class="pulse-dot"></span> Live Bluetooth Sync</span>
+            </div>
+            <div class="portal-card-body">
+              <div id="vitals-sparkline" style="margin: 1rem 0;"></div>
+            </div>
+          </div>
+
+          <!-- Extended Vitals Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Heart Rate (Pulse)</span>
+                <span class="badge badge-emerald">Optimal</span>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="vit-hr-val">72</span>
+                <span class="metric-unit">BPM</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted);">Normal: 60 - 100 bpm</p>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Blood Pressure</span>
+                <span class="badge badge-emerald">Normal</span>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="vit-bp-val">118/78</span>
+                <span class="metric-unit">mmHg</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted);">Target: &lt; 120/80 mmHg</p>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Blood Oxygen (SpO2)</span>
+                <span class="badge badge-emerald">99%</span>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="vit-spo2-val">99</span>
+                <span class="metric-unit">%</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted);">Optimal: 95% - 100%</p>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Blood Glucose</span>
+                <span class="badge badge-emerald">Normal</span>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="vit-glu-val">94</span>
+                <span class="metric-unit">mg/dL</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted);">Normal Fasting: 70 - 99 mg/dL</p>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Body Temperature</span>
+                <span class="badge badge-emerald">Afebrile</span>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="vit-temp-val">98.6</span>
+                <span class="metric-unit">°F</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted);">Normal: 97.8 - 99.1 °F</p>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Weight & BMI</span>
+                <span class="badge badge-primary">Healthy</span>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="vit-weight-val">168</span>
+                <span class="metric-unit">lbs (BMI <span id="vit-bmi-val">23.4</span>)</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted);">Normal BMI: 18.5 - 24.9</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: APPOINTMENTS ================= -->
+        <section class="tab-panel" id="tab-appointments">
+          <div class="portal-card">
+            <div class="portal-card-header">
+              <h3 class="portal-card-title">
+                <svg class="icon" style="color:var(--primary-600);" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>My Consultation Schedule</span>
+              </h3>
+              <button class="btn btn-primary btn-sm" onclick="PulseCareUI.openModal('book-apt-modal')">
+                <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Book New Appointment</span>
+              </button>
+            </div>
+            <div class="portal-card-body" id="appointments-full-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: PRESCRIPTIONS ================= -->
+        <section class="tab-panel" id="tab-prescriptions">
+          <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h3 style="font-size: 1.4rem;">Active Medications & Refills</h3>
+              <p>Direct electronic dispatch synced with CVS Pharmacy #4192, Springfield</p>
+            </div>
+            <button class="btn btn-sm btn-outline" onclick="PulseCareUI.showToast('Pharmacy Sync', 'Prescriptions verified with Pharmacy Benefit Manager.', 'info')">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>Sync Pharmacy</span>
+            </button>
+          </div>
+          <div class="prescriptions-grid" id="prescriptions-list">
+            <!-- Rendered via JS -->
+          </div>
+        </section>
+
+        <!-- ================= TAB: LABS & DIAGNOSTICS ================= -->
+        <section class="tab-panel" id="tab-labs">
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.4rem;">Diagnostic Records & Lab Reports</h3>
+            <p>Official diagnostic results authenticated by Quest Diagnostics & Metro Health Laboratories.</p>
+          </div>
+          <div id="lab-reports-list">
+            <!-- Rendered via JS -->
+          </div>
+        </section>
+
+        <!-- ================= TAB: MESSAGES / CARE CHAT ================= -->
+        <section class="tab-panel" id="tab-messages">
+          <div class="chat-container">
+            <div class="portal-card-header" style="background: var(--bg-surface-elevated);">
+              <div style="display:flex; align-items:center; gap: 0.75rem;">
+                <div class="user-avatar" style="width:36px; height:36px; font-size:0.85rem; background:var(--primary-gradient);">SL</div>
+                <div>
+                  <h4 style="font-size: 0.95rem;">Dr. Sarah Lin, MD</h4>
+                  <p style="font-size: 0.75rem; color: var(--accent-emerald);">● Online • Cardiology Care Team</p>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="joinTelehealthRoom('apt-101')">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                <span>Start Video Call</span>
+              </button>
+            </div>
+
+            <div class="chat-messages" id="chat-messages-container">
+              <!-- Rendered via JS -->
+            </div>
+
+            <form class="chat-input-bar" id="chat-form">
+              <input type="text" id="chat-input-msg" class="form-control" placeholder="Ask Dr. Lin a clinical question or report symptoms..." required autocomplete="off">
+              <button type="submit" class="btn btn-primary">
+                <span>Send</span>
+                <svg class="icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </form>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="book-apt-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Schedule Doctor Consultation</h3>
+        <button class="btn-icon" data-close-modal="book-apt-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="book-appointment-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="book-doctor-select">Select Attending Physician</label>
+            <select id="book-doctor-select" class="form-control" required></select>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="book-date">Consultation Date</label>
+              <input type="date" id="book-date" class="form-control" required value="2026-09-08">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="book-time">Preferred Time Slot</label>
+              <select id="book-time" class="form-control">
+                <option value="09:00 AM">09:00 AM</option>
+                <option value="10:30 AM" selected>10:30 AM</option>
+                <option value="01:15 PM">01:15 PM</option>
+                <option value="03:00 PM">03:00 PM</option>
+                <option value="04:30 PM">04:30 PM</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="book-type">Consultation Format</label>
+            <select id="book-type" class="form-control">
+              <option value="Telehealth Video">Encrypted Telehealth Video (WebRTC)</option>
+              <option value="In-Clinic Consultation">In-Person Clinic Visit</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="book-reason">Reason for Visit / Clinical Symptoms</label>
+            <textarea id="book-reason" class="form-control" rows="3" placeholder="Describe symptoms, questions, or medication refill evaluation..." required>Routine 3-month blood pressure review and medication check.</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="book-apt-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Telehealth WebRTC Modal -->
+  <div class="modal-overlay" id="telehealth-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Telehealth Video Encounter</h3>
+        <button class="btn-icon" data-close-modal="telehealth-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="telehealth-modal-body">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Lab Report Detail Modal -->
+  <div class="modal-overlay" id="lab-report-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Official Diagnostic Report</h3>
+        <button class="btn-icon" data-close-modal="lab-report-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="lab-modal-body">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/store.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/patient.js"></script>
+</body>
+</html>

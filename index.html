@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseCare OS | Modern Healthcare & Clinical Portal</title>
+  <meta name="description" content="Unified next-generation healthcare platform for patients and physicians. Manage vitals, telehealth consultations, e-prescriptions, and medical records in real-time.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <a href="index.html" class="brand-logo">
+      <div class="brand-icon">
+        <svg class="icon" style="width:22px; height:22px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <span>PulseCare <span style="color:var(--primary-500); font-weight:400;">OS</span></span>
+    </a>
+
+    <div class="nav-actions">
+      <a href="patient.html" class="btn btn-sm btn-secondary" title="Go directly to Patient Portal">Patient Portal</a>
+      <a href="doctor.html" class="btn btn-sm btn-secondary" title="Go directly to Doctor Dashboard">Doctor Portal</a>
+      <button class="btn-icon theme-toggle-btn" aria-label="Toggle Dark Mode" title="Toggle theme">
+        <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon icon-sun" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Auth Wrapper -->
+  <div class="auth-wrapper">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <main class="auth-container">
+      
+      <!-- Left Hero Showcase -->
+      <section class="auth-hero">
+        <div class="auth-hero-badge">
+          <span class="pulse-dot"></span>
+          <span>HIPAA COMPLIANT &bull; 256-BIT ENCRYPTION</span>
+        </div>
+
+        <h1 class="auth-hero-title">
+          Intelligent Healthcare for <span class="gradient-text">Patients & Clinicians</span>
+        </h1>
+
+        <p class="auth-hero-desc">
+          Experience frictionless care coordination with real-time biometric vitals monitoring, 1-click e-prescriptions, encrypted telehealth rooms, and integrated health records.
+        </p>
+
+        <div class="auth-feature-list">
+          <div class="auth-feature-item">
+            <div class="auth-feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="auth-feature-text">
+              <h4>Live Telemetry</h4>
+              <p>Continuous vitals & blood pressure sync</p>
+            </div>
+          </div>
+
+          <div class="auth-feature-item">
+            <div class="auth-feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            </div>
+            <div class="auth-feature-text">
+              <h4>HD Telehealth</h4>
+              <p>Encrypted WebRTC virtual consultations</p>
+            </div>
+          </div>
+
+          <div class="auth-feature-item">
+            <div class="auth-feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+            </div>
+            <div class="auth-feature-text">
+              <h4>E-Prescriptions</h4>
+              <p>Direct pharmacy dispatch & refill tracking</p>
+            </div>
+          </div>
+
+          <div class="auth-feature-item">
+            <div class="auth-feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="auth-feature-text">
+              <h4>Unified EHR</h4>
+              <p>Complete medical history & diagnostic labs</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Auth Card -->
+      <section class="auth-card-container">
+        <div class="glass-panel auth-card">
+          
+          <div class="auth-card-header">
+            <h2 class="auth-card-title">Welcome to PulseCare</h2>
+            <p class="auth-card-subtitle" id="role-badge-text">Patient Portal Sign In</p>
+          </div>
+
+          <!-- Role Switcher -->
+          <div class="role-tabs" role="tablist">
+            <button type="button" class="role-tab-btn active" id="role-patient-btn" role="tab" aria-selected="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Patient Portal</span>
+            </button>
+            <button type="button" class="role-tab-btn" id="role-doctor-btn" role="tab" aria-selected="false">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+              <span>Doctor / MD</span>
+            </button>
+          </div>
+
+          <!-- Demo Quick Sign-in banner -->
+          <div class="demo-quick-access">
+            <div class="demo-quick-title">
+              <span>⚡ One-Click Demo Access</span>
+              <span style="font-size:0.7rem; font-weight:normal; opacity:0.8;">Instant Fill</span>
+            </div>
+            <div class="demo-buttons-grid">
+              <button type="button" class="btn-demo-pill" id="demo-patient-btn">
+                <span class="demo-avatar-dot dot-patient">AJ</span>
+                <span>Alex (Patient)</span>
+              </button>
+              <button type="button" class="btn-demo-pill" id="demo-doctor-btn">
+                <span class="demo-avatar-dot dot-doctor">SL</span>
+                <span>Dr. Sarah (MD)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Login Form -->
+          <form id="login-form" autocomplete="on">
+            <div class="form-group">
+              <label class="form-label" for="auth-email">Email or Medical Record Number</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+                <input type="email" id="auth-email" class="form-control" placeholder="e.g. alex.johnson@example.com" required value="alex.johnson@example.com">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">
+                <label for="auth-password">Password</label>
+                <a href="#" style="font-size:0.8rem;" onclick="event.preventDefault(); PulseCareUI.openModal('forgot-modal');">Forgot password?</a>
+              </div>
+              <div class="input-with-icon">
+                <span class="input-icon-left">
+                  <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input type="password" id="auth-password" class="form-control" placeholder="Enter your password" required value="PatientSecurePass123!">
+                <button type="button" class="password-toggle-btn" id="toggle-password-btn" aria-label="Toggle password visibility">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 1.5rem; font-size: 0.875rem;">
+              <label style="display:flex; align-items:center; gap: 0.5rem; cursor:pointer;">
+                <input type="checkbox" id="remember-me" checked>
+                <span>Remember this workstation</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+              <span>Sign In to Healthcare OS</span>
+              <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </form>
+
+          <div class="auth-divider">or sign in with</div>
+
+          <div class="social-auth-grid">
+            <button type="button" class="btn-social" id="biometric-login-btn">
+              <svg class="icon" style="color:var(--primary-600);" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-10 10c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+              <span>Touch / Face ID</span>
+            </button>
+            <button type="button" class="btn-social" onclick="PulseCareUI.showToast('SSO Redirect', 'Redirecting to Hospital Active Directory SSO...', 'info')">
+              <svg class="icon" style="color:var(--accent-emerald);" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>Hospital SSO</span>
+            </button>
+          </div>
+
+          <div class="auth-footer-text">
+            Don't have an account? 
+            <a href="#" style="font-weight:700;" onclick="event.preventDefault(); PulseCareUI.openModal('register-modal');">Register here</a>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Register Modal -->
+  <div class="modal-overlay" id="register-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Create PulseCare Account</h3>
+        <button class="btn-icon" data-close-modal="register-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="register-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Full Legal Name</label>
+            <input type="text" id="reg-name" class="form-control" placeholder="e.g. Alex Johnson" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" class="form-control" placeholder="name@domain.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-role">Account Type</label>
+            <select id="reg-role" class="form-control">
+              <option value="patient">Patient Care Portal</option>
+              <option value="doctor">Doctor / Clinician Portal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Create Secure Password</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="Minimum 8 characters with numbers & symbols" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="register-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Complete Registration</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" id="forgot-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Reset Security Credentials</h3>
+        <button class="btn-icon" data-close-modal="forgot-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1.25rem;">Enter the verified email address associated with your medical chart or staff ID. We will send you an encrypted verification code.</p>
+        <div class="form-group">
+          <label class="form-label">Registered Email</label>
+          <input type="email" class="form-control" placeholder="e.g. alex.johnson@example.com" value="alex.johnson@example.com">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="forgot-modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="PulseCareUI.closeModal('forgot-modal'); PulseCareUI.showToast('Reset Link Dispatched', 'Password reset instructions sent to your email inbox.', 'info');">Send Reset Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/store.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
