@@ -681,50 +681,154 @@ const initialSeedData = {
     {
       id: 'centre-1',
       name: 'Metro Health District Civil Hospital & Trauma Centre',
-      type: 'District Hospital (DH)',
+      type: 'Government Hospital',
+      category: 'Government Hospitals',
+      latOffset: 0.008,
+      lngOffset: 0.006,
+      distanceKm: 1.2,
       distance: '1.2 km',
       location: 'Civil Lines, Ring Road, Springfield (Pincode: 500001)',
       services: ['24x7 Emergency Trauma Care', 'PM-JAY Golden Card Desk', 'Free Essential Diagnostics & Pathology', 'Blood Bank (24x7)', 'Dialysis Unit', 'Maternal & Neonatal ICU (NICU)', 'Jan Aushadhi Generic Pharmacy'],
       phone: '+91 800-792-7841 / Ext. 108',
-      timing: '24 Hours Open (Emergency & In-Patient) | OPD: 08:30 AM - 01:30 PM',
+      timing: '24x7 Emergency & IPD | OPD: 08:30 AM - 01:30 PM',
+      emergencyReady: true,
       pmjayEmpanelled: true,
+      beds: '500 Beds',
+      doctorsCount: 45,
       directionsUrl: 'https://maps.google.com/?q=District+Civil+Hospital'
     },
     {
       id: 'centre-2',
-      name: 'Community Health Centre (CHC) - Sector 12',
-      type: 'Community Health Centre (CHC)',
+      name: 'Sector 12 Community Health Centre (CHC)',
+      type: 'CHC',
+      category: 'CHC',
+      latOffset: -0.015,
+      lngOffset: 0.012,
+      distanceKm: 2.8,
       distance: '2.8 km',
       location: 'Plot 45, Near Main Market, Sector 12, Springfield',
       services: ['General OPD (Medicine, Gynecology, Pediatrics)', 'Free Routine Diagnostics & X-Ray', 'Mission Indradhanush Immunization (Wed/Sat)', 'Janani Suraksha Yojana Deliveries', 'DOTS TB Diagnostic Centre (NTEP)', 'eSanjeevani Teleconsultation Hub'],
       phone: '+91 800-792-3320',
       timing: 'OPD: 08:30 AM - 02:00 PM | Emergency: 24x7',
+      emergencyReady: true,
       pmjayEmpanelled: true,
+      beds: '30 Beds',
+      doctorsCount: 12,
       directionsUrl: 'https://maps.google.com/?q=Community+Health+Centre'
     },
     {
       id: 'centre-3',
-      name: 'Ayushman Arogya Mandir - Primary Health Centre (PHC)',
-      type: 'Primary Health Centre (PHC)',
+      name: 'Central Urban Primary Health Centre (PHC) - Ward 4',
+      type: 'PHC',
+      category: 'PHC',
+      latOffset: 0.012,
+      lngOffset: -0.018,
+      distanceKm: 3.5,
       distance: '3.5 km',
-      location: 'Village Health Post, North Springfield Road',
-      services: ['Comprehensive Primary Healthcare (CPHC)', 'Free Essential Drugs (EDL)', 'NCD Screening (Hypertension, Diabetes, Oral Cancer)', 'Antenatal Care (ANC) & Mother Health', 'eSanjeevani Tele-OPD with Specialists'],
+      location: 'Ward 4 Health Complex, North Springfield Road',
+      services: ['Comprehensive Primary Healthcare (CPHC)', 'Free Essential Drugs (EDL)', 'NCD Screening (Hypertension, Diabetes)', 'Antenatal Care (ANC) & Mother Health', 'eSanjeevani Tele-OPD with Specialists'],
       phone: '+91 800-792-5501',
       timing: '09:00 AM - 04:00 PM (Monday - Saturday)',
+      emergencyReady: false,
       pmjayEmpanelled: false,
+      beds: '6 Beds (Day Care)',
+      doctorsCount: 4,
       directionsUrl: 'https://maps.google.com/?q=Primary+Health+Centre'
     },
     {
       id: 'centre-4',
-      name: 'Government Maternity & Child Health Sub-District Hospital',
-      type: 'Sub-District Hospital (SDH)',
-      distance: '4.2 km',
-      location: 'Hospital Enclave, Gandhi Nagar, Springfield',
-      services: ['24x7 Institutional Deliveries (JSY/JSSK)', 'Special Newborn Care Unit (SNCU)', 'Mission Indradhanush Immunization Hub', 'Free Nutritional Supplements (IFA/Calcium)', 'PM-JAY Maternal Packages'],
-      phone: '+91 800-792-8812',
-      timing: '24 Hours Emergency & Labor Ward | OPD: 08:30 AM - 01:30 PM',
+      name: 'Ayushman Arogya Mandir - Sub-Centre West',
+      type: 'Ayushman Arogya Mandir',
+      category: 'Ayushman Arogya Mandir',
+      latOffset: -0.006,
+      lngOffset: -0.009,
+      distanceKm: 0.9,
+      distance: '0.9 km',
+      location: 'Panchayat Bhavan Road, West Enclave, Springfield',
+      services: ['12 Packages Comprehensive Primary Healthcare', 'Free Point-of-Care Diagnostics (Sugar, HB, BP)', 'Yoga & Wellness Sessions', 'ASHA & ANM Mother-Child Care', 'Tele-consultation to District Specialists'],
+      phone: '+91 800-792-4419',
+      timing: '08:30 AM - 04:30 PM (Daily)',
+      emergencyReady: false,
       pmjayEmpanelled: true,
-      directionsUrl: 'https://maps.google.com/?q=Government+Maternity+Hospital'
+      beds: 'Day Care Observation',
+      doctorsCount: 2,
+      directionsUrl: 'https://maps.google.com/?q=Ayushman+Arogya+Mandir'
+    },
+    {
+      id: 'centre-5',
+      name: 'Apollo Life Care Specialist Poly-Clinic',
+      type: 'Clinic',
+      category: 'Clinics',
+      latOffset: 0.004,
+      lngOffset: 0.003,
+      distanceKm: 0.6,
+      distance: '0.6 km',
+      location: 'Suite 201, Green Glen Commercial Towers, Springfield',
+      services: ['Cardiology & Internal Medicine Consultations', 'Pediatrics & Child Wellness', 'Minor Procedures & Wound Dressing', 'ECG & Digital Vitals Telemetry Sync', 'Digital Health Record Integration'],
+      phone: '+91 800-792-9900',
+      timing: '08:00 AM - 08:00 PM (Monday - Saturday)',
+      emergencyReady: false,
+      pmjayEmpanelled: false,
+      beds: 'Outpatient Clinic',
+      doctorsCount: 8,
+      directionsUrl: 'https://maps.google.com/?q=Apollo+Clinic'
+    },
+    {
+      id: 'centre-6',
+      name: 'Quest Central Diagnostics & Pathology Laboratory',
+      type: 'Diagnostic Centre',
+      category: 'Diagnostic Centres',
+      latOffset: -0.009,
+      lngOffset: 0.008,
+      distanceKm: 1.4,
+      distance: '1.4 km',
+      location: 'Diagnostic Plaza, 2nd Avenue, Springfield',
+      services: ['Automated Blood Chemistry (CMP, Lipid, CBC)', 'Digital X-Ray & 2D Echo', 'Molecular PCR / TrueNat TB Testing', 'Home Sample Collection Available', 'Real-time Digital Lab Report Sync to App'],
+      phone: '+91 800-792-1144',
+      timing: '06:30 AM - 09:00 PM (Open 7 Days)',
+      emergencyReady: false,
+      pmjayEmpanelled: true,
+      beds: 'Diagnostic Testing Centre',
+      doctorsCount: 6,
+      directionsUrl: 'https://maps.google.com/?q=Quest+Diagnostics'
+    },
+    {
+      id: 'centre-7',
+      name: 'PMBJP Pradhan Mantri Jan Aushadhi Kendra #108',
+      type: 'Pharmacy',
+      category: 'Pharmacies',
+      latOffset: 0.002,
+      lngOffset: -0.004,
+      distanceKm: 0.4,
+      distance: '0.4 km',
+      location: 'Shop 12, Civil Hospital Gate 2, Ring Road, Springfield',
+      services: ['100% Quality Generic Medicines (50-90% Discount)', 'Chronic Care Meds (Lisinopril, Atorvastatin, Metformin)', 'Surgical Consumables & Blood Glucose Strips', '1-Click Refill Pickup Desk', 'Digital Prescription Dispensing'],
+      phone: '+91 800-792-6622',
+      timing: '08:00 AM - 10:00 PM (Daily)',
+      emergencyReady: false,
+      pmjayEmpanelled: true,
+      beds: 'Pharmacy Store',
+      doctorsCount: 2,
+      directionsUrl: 'https://maps.google.com/?q=Jan+Aushadhi+Kendra'
+    },
+    {
+      id: 'centre-8',
+      name: 'Metro 24x7 Acute Trauma & Resuscitation Center',
+      type: 'Emergency Services',
+      category: 'Emergency Services',
+      latOffset: 0.010,
+      lngOffset: 0.007,
+      distanceKm: 1.3,
+      distance: '1.3 km',
+      location: 'Emergency Red Gate, Metro Health Campus, Springfield',
+      services: ['Level-1 Emergency Trauma & Cardiac Arrest Resuscitation', '24x7 Advanced Life Support (ALS) Ambulance Dispatch (108)', 'Emergency Catheterization Lab (Cath Lab)', 'Immediate Blood Transfusion & Burn Unit', 'Direct SOS App Dispatch Link'],
+      phone: '+91 800-792-9111 / Toll Free: 108',
+      timing: '24x7 Non-Stop Emergency Services',
+      emergencyReady: true,
+      pmjayEmpanelled: true,
+      beds: '60 ICU/Trauma Beds',
+      doctorsCount: 20,
+      directionsUrl: 'https://maps.google.com/?q=Trauma+Center'
     }
   ],
   notifications: [
@@ -1033,12 +1137,77 @@ class UnifiedStore {
   }
 
   // Nearby Healthcare Centres
-  getNearbyCentres(filterType = 'all') {
-    let list = this.data.nearbyCentres || [];
-    if (filterType && filterType !== 'all') {
-      list = list.filter(c => c.type.toLowerCase().includes(filterType.toLowerCase()));
+  getNearbyCentres({ filterType = 'All', maxDistanceKm = null, search = '', userCoords = null } = {}) {
+    let list = JSON.parse(JSON.stringify(this.data.nearbyCentres || []));
+
+    // Calculate dynamic distance if user coordinates provided
+    if (userCoords && userCoords.lat && userCoords.lng) {
+      list.forEach(c => {
+        const cLat = userCoords.lat + (c.latOffset || 0);
+        const cLng = userCoords.lng + (c.lngOffset || 0);
+        c.lat = cLat;
+        c.lng = cLng;
+
+        const d = this.calculateDistanceKm(userCoords.lat, userCoords.lng, cLat, cLng);
+        c.distanceKm = Math.round(d * 10) / 10;
+        c.distance = `${c.distanceKm} km`;
+      });
+    } else {
+      // Default reference Springfield coords (lat 17.3850, lng 78.4867)
+      const baseLat = 17.3850;
+      const baseLng = 78.4867;
+      list.forEach(c => {
+        c.lat = baseLat + (c.latOffset || 0);
+        c.lng = baseLng + (c.lngOffset || 0);
+      });
     }
+
+    // Sort ascending by distance
+    list.sort((a, b) => a.distanceKm - b.distanceKm);
+
+    // Filter by Facility Type
+    if (filterType && filterType !== 'All' && filterType !== 'all') {
+      list = list.filter(c => 
+        c.category.toLowerCase() === filterType.toLowerCase() || 
+        c.type.toLowerCase() === filterType.toLowerCase() ||
+        (filterType.toLowerCase().includes('emergency') && c.emergencyReady)
+      );
+    }
+
+    // Filter by Max Distance
+    if (maxDistanceKm && maxDistanceKm > 0) {
+      list = list.filter(c => c.distanceKm <= maxDistanceKm);
+    }
+
+    // Filter by Search Term
+    if (search && search.trim() !== '') {
+      const q = search.toLowerCase().trim();
+      list = list.filter(c => 
+        c.name.toLowerCase().includes(q) || 
+        c.type.toLowerCase().includes(q) || 
+        c.location.toLowerCase().includes(q) || 
+        c.services.some(s => s.toLowerCase().includes(q))
+      );
+    }
+
     return list;
+  }
+
+  // Haversine Great Circle Distance Formula (km)
+  calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  getNearbyCentreById(id) {
+    return (this.data.nearbyCentres || []).find(c => c.id === id);
   }
 
   // Interactive Scheme Eligibility Evaluator

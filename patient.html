@@ -4,9 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Portal | SwasthyaConnect</title>
-  <meta name="description" content="SwasthyaConnect Patient Care Dashboard: health vitals, appointments, medical records, e-prescriptions, lab reports, telehealth video, and Indian Government Healthcare Schemes.">
+  <meta name="description" content="SwasthyaConnect Patient Care Dashboard: health vitals, appointments, medical records, e-prescriptions, lab reports, telehealth video, government schemes, and location-based nearby healthcare centres.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/portal.css">
+  
+  <!-- Leaflet Interactive Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 
@@ -66,14 +70,15 @@
           <span>Telemedicine</span>
           <span class="nav-badge" style="background:rgba(5, 150, 105, 0.2); color:#059669;">Live</span>
         </a>
-        <a href="#schemes" class="nav-link" data-tab="schemes" style="color:var(--hospital-teal-800); font-weight:700;">
+        <a href="#schemes" class="nav-link" data-tab="schemes">
           <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           <span>Government Schemes</span>
           <span class="nav-badge" style="background:rgba(2, 132, 199, 0.2); color:#0284c7;">India</span>
         </a>
-        <a href="#nearby" class="nav-link" data-tab="nearby">
+        <a href="#nearby" class="nav-link" data-tab="nearby" style="color:var(--hospital-teal-800); font-weight:700;">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span>Nearby Healthcare Centres</span>
+          <span class="nav-badge" style="background:rgba(13, 148, 136, 0.2); color:#0d9488;">GPS</span>
         </a>
         <a href="#emergency" class="nav-link" data-tab="emergency" style="color:var(--hospital-cross-red);">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -185,6 +190,25 @@
               <button class="btn btn-primary btn-sm" onclick="switchTab('schemes')">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 <span>Govt Schemes</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Prominent Nearby Healthcare Quick Action Card -->
+          <div class="portal-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(2, 132, 199, 0.08) 100%); border: 1.5px solid rgba(13, 148, 136, 0.25);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+              <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="brand-icon" style="width:48px; height:48px; background:var(--primary-gradient); flex-shrink:0;">
+                  <svg class="icon" style="width:24px; height:24px;" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                  <h3 style="font-size:1.15rem; margin-bottom:0.2rem;">📍 Nearby Healthcare Centres & Hospitals</h3>
+                  <p style="font-size:0.875rem; color:var(--text-secondary); margin:0;">Find verified government hospitals, PHCs, pharmacies, diagnostics, and 24x7 emergency services near your current location.</p>
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="handleDashboardFindHealthcare()">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                <span>Find Healthcare Near Me</span>
               </button>
             </div>
           </div>
@@ -327,8 +351,6 @@
               </div>
 
               <div class="dashboard-grid-3">
-                
-                <!-- Core Demographics -->
                 <div class="glass-panel" style="padding:1.25rem;">
                   <h4 style="font-size:1rem; margin-bottom:0.75rem; color:var(--hospital-teal-700);">Demographics</h4>
                   <p style="margin-bottom:0.5rem;"><strong>Age:</strong> <span id="prof-age">34 years</span></p>
@@ -337,7 +359,6 @@
                   <p><strong>Primary Language:</strong> English (US)</p>
                 </div>
 
-                <!-- Contact Info -->
                 <div class="glass-panel" style="padding:1.25rem;">
                   <h4 style="font-size:1rem; margin-bottom:0.75rem; color:var(--hospital-teal-700);">Contact Information</h4>
                   <p style="margin-bottom:0.5rem;"><strong>Phone:</strong> <span id="prof-phone">+1 (555) 234-8910</span></p>
@@ -345,14 +366,12 @@
                   <p><strong>Address:</strong> <span id="prof-address">742 Evergreen Terrace, Springfield, IL</span></p>
                 </div>
 
-                <!-- Insurance & Doctor -->
                 <div class="glass-panel" style="padding:1.25rem;">
                   <h4 style="font-size:1rem; margin-bottom:0.75rem; color:var(--hospital-teal-700);">Insurance & Care Team</h4>
                   <p style="margin-bottom:0.5rem;"><strong>Provider:</strong> <span id="prof-insurance">BlueCross BlueShield Premier</span></p>
                   <p style="margin-bottom:0.5rem;"><strong>Policy #:</strong> <span>BCS-994218-A</span></p>
                   <p><strong>Attending Cardiologist:</strong> Dr. Sarah Lin, MD</p>
                 </div>
-
               </div>
 
             </div>
@@ -394,8 +413,6 @@
 
         <!-- ================= TAB: MEDICAL RECORDS ================= -->
         <section class="tab-panel" id="tab-records">
-          
-          <!-- Allergies Section -->
           <div class="portal-card" style="margin-bottom: 2rem; border-left: 4px solid var(--hospital-cross-red);">
             <div class="portal-card-header">
               <h3 class="portal-card-title">
@@ -409,9 +426,7 @@
             </div>
           </div>
 
-          <!-- Previous Diagnoses & Medical History -->
           <div class="dashboard-grid-2" style="margin-bottom: 2rem;">
-            
             <div class="portal-card">
               <div class="portal-card-header">
                 <h3 class="portal-card-title">Previous Diagnoses</h3>
@@ -431,10 +446,8 @@
                 <!-- Rendered via JS -->
               </div>
             </div>
-
           </div>
 
-          <!-- Scans & Imaging Records -->
           <div class="portal-card">
             <div class="portal-card-header">
               <h3 class="portal-card-title">
@@ -447,7 +460,6 @@
               <!-- Rendered via JS -->
             </div>
           </div>
-
         </section>
 
         <!-- ================= TAB: PRESCRIPTIONS ================= -->
@@ -512,7 +524,6 @@
             </div>
           </div>
 
-          <!-- Telehealth Consultation History -->
           <div class="portal-card">
             <div class="portal-card-header">
               <h3 class="portal-card-title">Consultation History & Call Summaries</h3>
@@ -524,10 +535,8 @@
           </div>
         </section>
 
-        <!-- ================= TAB: GOVERNMENT HEALTHCARE SCHEMES (NEW) ================= -->
+        <!-- ================= TAB: GOVERNMENT HEALTHCARE SCHEMES ================= -->
         <section class="tab-panel" id="tab-schemes">
-          
-          <!-- Government Header Banner -->
           <div class="welcome-banner" style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(13, 148, 136, 0.12) 100%); border-color: rgba(2, 132, 199, 0.3);">
             <div class="welcome-text">
               <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
@@ -577,46 +586,163 @@
             <!-- Dynamically populated by JS -->
           </div>
 
-          <!-- Eligibility Checker Inline Promo Card -->
+          <!-- Eligibility Promo Banner -->
           <div class="portal-card" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%); border: 1.5px dashed var(--hospital-teal-500); padding: 1.75rem; text-align: center;">
             <div class="brand-icon" style="width:48px; height:48px; margin:0 auto 0.75rem; background:var(--primary-gradient);">
               <svg class="icon" style="width:24px; height:24px;" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </div>
             <h3 style="font-size:1.3rem; margin-bottom:0.35rem;">Wondering Which Government Schemes You Qualify For?</h3>
             <p style="max-width:600px; margin:0 auto 1.25rem; font-size:0.9rem; color:var(--text-secondary);">
-              Answer a few quick questions (State, age bracket, rural/urban setting) to receive instant personalized eligibility guidance across all 6 national healthcare programs.
+              Answer a few quick questions to receive instant personalized eligibility guidance across all 6 national healthcare programs.
             </p>
             <button class="btn btn-emerald btn-lg" onclick="PulseCareUI.openModal('eligibility-modal')">
               <span>Launch Interactive Scheme Eligibility Checker</span>
               <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
-              * Note: Eligibility calculations are for informational guidance only. Official determinations are made on the respective government portals.
-            </p>
           </div>
-
         </section>
 
-        <!-- ================= TAB: NEARBY HEALTHCARE CENTRES (NEW) ================= -->
+        <!-- ================= TAB: LOCATION-BASED NEARBY HEALTHCARE CENTRES ================= -->
         <section class="tab-panel" id="tab-nearby">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
-            <div>
-              <h3 style="font-size:1.4rem;">Find Nearby Government Healthcare Centres & Hospitals</h3>
-              <p>Locate verified public hospitals, Community Health Centres (CHCs), and Ayushman Arogya Mandirs with 24x7 emergency and PM-JAY empanelled desks.</p>
+          
+          <!-- Location Status Top Bar -->
+          <div class="welcome-banner" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(2, 132, 199, 0.12) 100%); border: 1.5px solid rgba(13, 148, 136, 0.3); margin-bottom:1.5rem;">
+            <div class="welcome-text">
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; flex-wrap:wrap;">
+                <span class="badge badge-emerald"><span class="pulse-dot"></span> GPS Geolocation Active</span>
+                <span class="badge badge-primary">Demo Data / Prototype Network</span>
+              </div>
+              <h1 style="font-size:1.85rem;" id="nearby-main-heading">📍 Healthcare Centres Near You</h1>
+              <p id="nearby-location-indicator" style="font-size:0.95rem; color:var(--text-primary); font-weight:600;">
+                Current Location: <span id="detected-location-text" style="color:var(--hospital-teal-700);">Springfield Central (Detected via Browser Geolocation)</span>
+              </p>
             </div>
-            
-            <!-- Type Filters -->
-            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-              <button class="btn btn-sm btn-secondary active" data-nearby-filter="all" onclick="filterNearbyCentres('all')">All Centres (4)</button>
-              <button class="btn btn-sm btn-secondary" data-nearby-filter="District Hospital" onclick="filterNearbyCentres('District Hospital')">District Civil Hospitals</button>
-              <button class="btn btn-sm btn-secondary" data-nearby-filter="Community Health" onclick="filterNearbyCentres('Community Health')">CHCs</button>
-              <button class="btn btn-sm btn-secondary" data-nearby-filter="Primary Health" onclick="filterNearbyCentres('Primary Health')">PHCs / Arogya Mandirs</button>
+            <div class="welcome-actions" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <button class="btn btn-emerald btn-sm" onclick="triggerDeviceGeolocation()">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                <span>Refresh GPS Location</span>
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="toggleManualLocationInput()">
+                <span>Enter Location Manually</span>
+              </button>
             </div>
           </div>
 
-          <div id="nearby-centres-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
-            <!-- Rendered by JS -->
+          <!-- Location Denied / Manual Location Search Bar -->
+          <div id="manual-location-box" class="glass-panel" style="display:none; padding:1.25rem; margin-bottom:1.5rem; border-left:4px solid var(--hospital-blue);">
+            <div style="margin-bottom:0.75rem;">
+              <h4 style="font-size:1rem; color:var(--text-primary); margin-bottom:2px;">📍 Enter Location Manually</h4>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Enter your city, village, district, or PIN code to calculate nearby facilities:</p>
+            </div>
+            <form id="manual-location-form" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <input type="text" id="manual-location-input" class="form-control" placeholder="e.g. Hyderabad, Vijayawada, Springfield, 500001..." style="flex:1; min-width:240px;" required>
+              <button type="submit" class="btn btn-primary">Set Location</button>
+              <button type="button" class="btn btn-secondary" onclick="toggleManualLocationInput()">Cancel</button>
+            </form>
           </div>
+
+          <!-- 🚨 Emergency Healthcare Callout Section -->
+          <div class="portal-card" style="border: 2px solid var(--hospital-cross-red); background: linear-gradient(135deg, rgba(225, 29, 72, 0.06) 0%, rgba(225, 29, 72, 0.02) 100%); margin-bottom: 2rem;">
+            <div class="portal-card-header" style="background: rgba(225, 29, 72, 0.1);">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <div class="brand-icon" style="width:32px; height:32px; background:var(--emergency-gradient);">
+                  <svg class="icon" style="width:16px; height:16px;" viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <h3 class="portal-card-title" style="color:var(--hospital-cross-red); font-size:1.15rem;">🚨 Emergency Healthcare (24x7 Trauma & Critical Care)</h3>
+              </div>
+              <span class="badge badge-danger">108 Trauma Response</span>
+            </div>
+            <div class="portal-card-body" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+              <div>
+                <p style="font-size:0.925rem; font-weight:700; margin-bottom:0.2rem;">Nearest Emergency Facility: <strong>Metro 24x7 Acute Trauma & Resuscitation Center</strong> (1.3 km away)</p>
+                <p style="font-size:0.825rem; color:var(--text-secondary); margin:0;">Level-1 Trauma ER, 24x7 Catheterization Lab, ICU Beds, and 108 ALS Ambulance Network.</p>
+              </div>
+              <button class="btn btn-danger btn-lg" onclick="triggerEmergencySOS()">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Get Emergency Help (SOS)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Map View -->
+          <div class="portal-card" style="margin-bottom:2rem; overflow:hidden;">
+            <div class="portal-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 class="portal-card-title">
+                <svg class="icon" style="color:var(--hospital-teal-600);" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                <span>Interactive Healthcare Map</span>
+              </h3>
+              <div style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                <span><span style="display:inline-block; width:10px; height:10px; background:#0284c7; border-radius:50%;"></span> You</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#e11d48; border-radius:50%;"></span> Emergency</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#0d9488; border-radius:50%;"></span> Hospital/CHC</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#059669; border-radius:50%;"></span> PHC/Arogya Mandir</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#d97706; border-radius:50%;"></span> Pharmacy</span>
+              </div>
+            </div>
+            <div class="portal-card-body" style="padding:0;">
+              <div id="healthcare-map" style="height: 380px; width:100%; z-index:10; background:#edf4f9;"></div>
+            </div>
+          </div>
+
+          <!-- Search & Dual Filter Controls -->
+          <div class="glass-panel" style="padding:1.25rem; margin-bottom:1.5rem;">
+            
+            <!-- Live Search Bar -->
+            <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem;">
+              <div style="flex:1; min-width:280px; position:relative;">
+                <input type="text" id="nearby-search-input" class="form-control" placeholder="Search healthcare centres near you by name, service, or locality..." style="padding-left:2.5rem;">
+                <svg class="icon" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="resetNearbyFilters()">Reset All</button>
+            </div>
+
+            <!-- Facility Type Filter Pills -->
+            <div style="margin-bottom:0.75rem;">
+              <strong style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.35rem;">Facility Type:</strong>
+              <div class="assistant-chips" id="nearby-type-pills">
+                <button class="chip-btn active" data-type="All" onclick="setNearbyTypeFilter('All')">All Facilities (8)</button>
+                <button class="chip-btn" data-type="Government Hospitals" onclick="setNearbyTypeFilter('Government Hospitals')">Govt Hospitals</button>
+                <button class="chip-btn" data-type="PHC" onclick="setNearbyTypeFilter('PHC')">PHC</button>
+                <button class="chip-btn" data-type="CHC" onclick="setNearbyTypeFilter('CHC')">CHC</button>
+                <button class="chip-btn" data-type="Ayushman Arogya Mandir" onclick="setNearbyTypeFilter('Ayushman Arogya Mandir')">Ayushman Arogya Mandir</button>
+                <button class="chip-btn" data-type="Clinics" onclick="setNearbyTypeFilter('Clinics')">Clinics</button>
+                <button class="chip-btn" data-type="Diagnostic Centres" onclick="setNearbyTypeFilter('Diagnostic Centres')">Diagnostic Centres</button>
+                <button class="chip-btn" data-type="Pharmacies" onclick="setNearbyTypeFilter('Pharmacies')">Pharmacies</button>
+                <button class="chip-btn chip-danger" data-type="Emergency Services" onclick="setNearbyTypeFilter('Emergency Services')">🚨 Emergency Services</button>
+              </div>
+            </div>
+
+            <!-- Distance Radius Filters -->
+            <div>
+              <strong style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.35rem;">Distance Radius:</strong>
+              <div class="assistant-chips" id="nearby-distance-pills">
+                <button class="chip-btn active" data-dist="null" onclick="setNearbyDistanceFilter(null)">All Distances</button>
+                <button class="chip-btn" data-dist="1" onclick="setNearbyDistanceFilter(1)">Within 1 km</button>
+                <button class="chip-btn" data-dist="5" onclick="setNearbyDistanceFilter(5)">Within 5 km</button>
+                <button class="chip-btn" data-dist="10" onclick="setNearbyDistanceFilter(10)">Within 10 km</button>
+                <button class="chip-btn" data-dist="25" onclick="setNearbyDistanceFilter(25)">Within 25 km</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Result Header -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <p id="nearby-results-count" style="font-size:0.9rem; color:var(--text-muted); margin:0;">Showing all facilities</p>
+            <span class="badge badge-emerald">Sorted by Proximity</span>
+          </div>
+
+          <!-- Healthcare Centre Cards Grid -->
+          <div id="nearby-centres-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(350px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+            <!-- Rendered via JS -->
+          </div>
+
+          <!-- Privacy Policy Message -->
+          <div style="background:var(--bg-input); padding:1rem 1.25rem; border-radius:var(--radius-sm); border:1px solid var(--border-light); font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:0.6rem;">
+            <svg class="icon" style="width:18px; height:18px; color:var(--hospital-teal-600); flex-shrink:0;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span><strong>Privacy Notice:</strong> Your location is used only to help find nearby healthcare services. You can disable location access at any time through your browser settings.</span>
+          </div>
+
         </section>
 
         <!-- ================= TAB: EMERGENCY INFORMATION ================= -->
@@ -682,6 +808,53 @@
 
   </div>
 
+  <!-- Location Permission Popup Modal (Shown after Patient Login) -->
+  <div class="modal-overlay" id="location-permission-modal">
+    <div class="modal-content" style="max-width:520px; text-align:center;">
+      <div class="modal-body" style="padding:2rem 1.5rem 1.5rem;">
+        <div class="brand-icon" style="width:64px; height:64px; margin:0 auto 1.25rem; background:var(--primary-gradient);">
+          <svg class="icon" style="width:32px; height:32px;" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3 style="font-size:1.4rem; margin-bottom:0.5rem; color:var(--text-primary);">Allow Location Access</h3>
+        <p style="font-size:0.95rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;">
+          Allow SwasthyaConnect to access your location to find nearby healthcare centres, hospitals, pharmacies, and emergency services.
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1.25rem;">
+          <button class="btn btn-primary btn-lg" onclick="grantLocationPermission()">
+            <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            <span>Allow Location</span>
+          </button>
+          <button class="btn btn-secondary" onclick="enterLocationManuallyFromModal()">
+            <span>Enter Location Manually</span>
+          </button>
+        </div>
+
+        <p style="font-size:0.75rem; color:var(--text-muted); margin:0;">
+          🔒 Your location is used only to help find nearby healthcare services. You can disable location access at any time through your browser settings.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Facility Details Modal -->
+  <div class="modal-overlay" id="facility-details-modal">
+    <div class="modal-content" style="max-width:680px;">
+      <div class="modal-header">
+        <div>
+          <span class="badge badge-primary" id="modal-fac-badge">Healthcare Facility</span>
+          <h3 class="modal-title" id="modal-fac-title" style="margin-top:4px;">Facility Details</h3>
+        </div>
+        <button class="btn-icon" data-close-modal="facility-details-modal" aria-label="Close modal">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="facility-modal-body">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- Scheme Details Modal -->
   <div class="modal-overlay" id="scheme-details-modal">
     <div class="modal-content" style="max-width:760px;">
@@ -721,7 +894,6 @@
           </p>
 
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            
             <div class="form-group">
               <label class="form-label" for="elig-age">Age Bracket</label>
               <select id="elig-age" class="form-control" required>
@@ -746,11 +918,9 @@
                 <option value="Other">Other States / UTs</option>
               </select>
             </div>
-
           </div>
 
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            
             <div class="form-group">
               <label class="form-label" for="elig-location">Residential Area</label>
               <select id="elig-location" class="form-control" required>
@@ -768,7 +938,6 @@
                 <option value="general" selected>General / Middle Income Category</option>
               </select>
             </div>
-
           </div>
 
           <div class="form-group">
@@ -781,11 +950,9 @@
             </select>
           </div>
 
-          <!-- Dynamic Result Display Container (Hidden Initially) -->
           <div id="eligibility-results-container" style="display:none; margin-top:1.5rem;">
             <!-- Populated via JS -->
           </div>
-
         </div>
 
         <div class="modal-footer">
@@ -887,26 +1054,29 @@
   <div class="modal-overlay" id="emergency-sos-modal">
     <div class="modal-content" style="max-width:540px; border-top: 4px solid var(--hospital-cross-red);">
       <div class="modal-header" style="background:rgba(225, 29, 72, 0.1);">
-        <h3 class="modal-title" style="color:var(--hospital-cross-red);">🚨 Emergency Dispatch Initiated</h3>
+        <h3 class="modal-title" style="color:var(--hospital-cross-red);">🚨 Emergency Dispatch Confirmation</h3>
         <button class="btn-icon" data-close-modal="emergency-sos-modal" aria-label="Close modal">
           <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div class="modal-body" style="text-align:center; padding:2rem 1.5rem;">
-        <div class="brand-icon" style="width:64px; height:64px; margin:0 auto 1.25rem; background:var(--emergency-gradient);">
-          <svg class="icon" style="width:32px; height:32px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <div class="modal-body" style="text-align:center; padding:1.75rem 1.25rem;">
+        <div class="brand-icon" style="width:60px; height:60px; margin:0 auto 1rem; background:var(--emergency-gradient);">
+          <svg class="icon" style="width:30px; height:30px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         </div>
-        <h3 style="margin-bottom:0.5rem; font-size:1.4rem;">Trauma Ambulance En Route</h3>
-        <p style="font-size:0.95rem; color:var(--text-secondary); margin-bottom:1.5rem;">
-          Dispatch ID <strong>#DISP-8921</strong> transmitted to Metro Health ER. Estimated paramedic arrival: <strong>6 - 8 mins</strong>.
+        <h3 style="margin-bottom:0.5rem; font-size:1.3rem;">Confirm Emergency Assistance Request</h3>
+        <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1.25rem;">
+          Are you experiencing an acute medical emergency? Requesting will transmit your current GPS coordinates to the Metro Health Emergency Room and 108 trauma network.
         </p>
-        <div class="glass-panel" style="padding:1rem; text-align:left; margin-bottom:1.5rem; font-size:0.85rem;">
-          <p><strong>Patient:</strong> Alex Johnson (MRN-2026-9082)</p>
-          <p><strong>Location:</strong> 742 Evergreen Terrace, Springfield (GPS: 39.7817° N, 89.6501° W)</p>
-          <p><strong>Emergency Contact Notified:</strong> Emma Johnson (+1 555-987-6543)</p>
-          <p><strong>Medical Alert:</strong> Penicillin Allergy Noted on Paramedic Chart</p>
+        <div class="glass-panel" style="padding:0.85rem; text-align:left; margin-bottom:1.25rem; font-size:0.825rem;">
+          <p style="margin-bottom:3px;"><strong>Patient:</strong> Alex Johnson (MRN-2026-9082)</p>
+          <p style="margin-bottom:3px;"><strong>GPS Location:</strong> <span id="sos-coords-display">17.3850° N, 78.4867° E</span></p>
+          <p style="margin-bottom:3px;"><strong>Emergency Hotline:</strong> 108 / +91-800-SWASTHYA</p>
+          <p style="margin:0;"><strong>Safety Alert:</strong> Penicillin Allergy Transmitted</p>
         </div>
-        <button class="btn btn-primary" data-close-modal="emergency-sos-modal" style="width:100%;">Acknowledge & Keep Line Open</button>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn btn-secondary" data-close-modal="emergency-sos-modal" style="flex:1;">Cancel</button>
+          <button class="btn btn-danger" onclick="confirmSOSDispatch()" style="flex:1;">Confirm & Dispatch</button>
+        </div>
       </div>
     </div>
   </div>
