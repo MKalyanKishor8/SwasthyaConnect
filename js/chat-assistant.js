@@ -1,8 +1,95 @@
 /**
  * SwasthyaConnect - 24/7 AI Clinical Triage & Immediate Response Assistant (js/chat-assistant.js)
+ * Supports Multilingual Clinical Triage: English, Hindi (हिंदी), and Telugu (తెలుగు).
  */
 
 (function () {
+  let currentLang = 'en'; // 'en', 'hi', 'te'
+
+  const i18n = {
+    en: {
+      title: 'Swasthya AI Care Assistant',
+      onlineStatus: '● Online • Instant Clinical Response',
+      welcome: 'Hello! 👋 I am your <strong>24/7 Clinical Triage Assistant</strong>. How can I assist you right now?',
+      inputPlaceholder: 'Ask symptoms, medicines, lab reports, appointments...',
+      chips: [
+        { text: '🩺 Check my vitals', prompt: 'Check my latest vitals' },
+        { text: '🗓️ Next appointment', prompt: 'When is my next appointment?' },
+        { text: '💊 Refill medicine', prompt: 'How do I request a medicine refill?' },
+        { text: '❤️ BP guidance', prompt: 'I have high blood pressure symptoms' },
+        { text: '🚨 Emergency SOS', prompt: 'I have severe chest pain or emergency', danger: true }
+      ],
+      authorBot: 'Swasthya Care Triage',
+      authorUser: 'You',
+      justNow: 'Just now',
+      emergencyTitle: 'CRITICAL EMERGENCY ALERT:',
+      emergencyText: 'If you or the patient are experiencing acute crushing chest pain, severe shortness of breath, sudden numbness, or facial drooping, please do not wait.',
+      call108: 'Call 108 immediately or click below to dispatch a trauma ambulance:',
+      sosBtn: '🚨 Trigger Emergency Ambulance (108)',
+      vitalsTitle: 'Latest Telemetry for',
+      vitalsStatus: 'Status: All cardiovascular parameters are stable. Continue current daily routine.',
+      aptTitle: 'Upcoming Consultation:',
+      aptBtn: '📹 Join Telehealth Video Room',
+      rxTitle: 'Active Prescriptions & Refills:',
+      labsTitle: 'Diagnostic Records Available:',
+      fallback: 'I can help you review your latest vitals, schedule consultations with Dr. Sarah Lin, check medication refills, or download diagnostic lab reports.<br><br>For urgent clinical concerns, call our 24x7 hospital hotline at <strong>108 / +91-800-SWASTHYA</strong>.'
+    },
+    hi: {
+      title: 'स्वास्थ्य एआई सहायक',
+      onlineStatus: '● ऑनलाइन • त्वरित चिकित्सा सहायता',
+      welcome: 'नमस्ते! 👋 मैं आपका <strong>24/7 स्वास्थ्य क्लिनिकल सहायक</strong> हूँ। मैं आज आपकी क्या मदद कर सकता हूँ?',
+      inputPlaceholder: 'लक्षण, दवाइयाँ, लैब रिपोर्ट, अपॉइंटमेंट के बारे में पूछें...',
+      chips: [
+        { text: '🩺 मेरी वाइटल्स जांचें', prompt: 'मेरी वाइटल्स जांचें' },
+        { text: '🗓️ अगली अपॉइंटमेंट', prompt: 'मेरी अगली अपॉइंटमेंट कब है?' },
+        { text: '💊 दवा रीफिल करें', prompt: 'दवाइयाँ रीफिल कैसे करें?' },
+        { text: '❤️ बीपी (BP) सलाह', prompt: 'हाई ब्लड प्रेशर में क्या करें?' },
+        { text: '🚨 आपातकालीन SOS', prompt: 'मुझे सीने में तेज दर्द या इमरजेंसी है', danger: true }
+      ],
+      authorBot: 'स्वास्थ्य केयर सहायता',
+      authorUser: 'आप',
+      justNow: 'अभी-अभी',
+      emergencyTitle: 'गंभीर आपातकालीन चेतावनी (CRITICAL ALERT):',
+      emergencyText: 'यदि मरीज को सीने में तेज दर्द, सांस लेने में अत्यधिक तकलीफ, चक्कर या शरीर सुन्न होने की समस्या हो रही है, तो कृपया तुरंत कार्रवाई करें।',
+      call108: 'तुरंत 108 पर कॉल करें या आपातकालीन एम्बुलेंस बुलाने के लिए नीचे क्लिक करें:',
+      sosBtn: '🚨 आपातकालीन एम्बुलेंस बुलाएं (108)',
+      vitalsTitle: 'का नवीनतम वाइटल्स रिकॉर्ड',
+      vitalsStatus: 'स्थिति: सभी हृदय और स्वास्थ्य पैरामीटर सामान्य हैं। डॉक्टर के निर्देशानुसार दैनिक दिनचर्या जारी रखें।',
+      aptTitle: 'आगामी डॉक्टर परामर्श:',
+      aptBtn: '📹 वीडियो टेलीहेल्थ रूम में शामिल हों',
+      rxTitle: 'सक्रिय दवाइयाँ और रीफिल स्थिति:',
+      labsTitle: 'उपलब्ध डायग्नोस्टिक लैब रिपोर्ट:',
+      fallback: 'मैं आपके वाइटल्स चेक करने, डॉ. सारा लिन के साथ अपॉइंटमेंट बुक करने, दवाओं के रीफिल या लैब रिपोर्ट डाउनलोड करने में आपकी सहायता कर सकता हूँ।<br><br>आपात स्थिति के लिए हमारी 24x7 हेल्पलाइन <strong>108 / +91-800-SWASTHYA</strong> पर कॉल करें।'
+    },
+    te: {
+      title: 'స్వాస్థ్య AI హెల్త్ అసిస్టెంట్',
+      onlineStatus: '● ఆన్‌లైన్ • తక్షణ వైద్య సహాయం',
+      welcome: 'నమస్కారం! 👋 నేను మీ <strong>24/7 స్వాస్థ్య వైద్య సహాయకుడిని</strong>. మీకు ఎలా సహాయపడగలను?',
+      inputPlaceholder: 'లక్షణాలు, మందులు, ల్యాబ్ రిపోర్టులు, అపాయింట్‌మెంట్ల గురించి అడగండి...',
+      chips: [
+        { text: '🩺 నా వైటల్స్ చూడండి', prompt: 'నా తాజా వైటల్స్ ఎలా ఉన్నాయి?' },
+        { text: '🗓️ తదుపరి అపాయింట్‌మెంట్', prompt: 'నా తదుపరి డాక్టర్ అపాయింట్‌మెంట్ ఎప్పుడు?' },
+        { text: '💊 మందుల రీఫిల్', prompt: 'మందులు రీఫిల్ ఎలా చేయాలి?' },
+        { text: '❤️ రక్తపోటు (BP) సలహా', prompt: 'రక్తపోటు లక్షణాలు మరియు జాగ్రత్తలు' },
+        { text: '🚨 అత్యవసర సహాయం', prompt: 'నాకు తీవ్రమైన ఛాతీ నొప్పి లేదా ఎమర్జెన్సీ ఉంది', danger: true }
+      ],
+      authorBot: 'స్వాస్థ్య కేర్ అసిస్టెంట్',
+      authorUser: 'మీరు',
+      justNow: 'ఇప్పుడే',
+      emergencyTitle: 'తీవ్రమైన అత్యవసర హెచ్చరిక (EMERGENCY):',
+      emergencyText: 'మీకు లేదా రోగికి తీవ్రమైన ఛాతీ నొప్పి, శ్వాస తీసుకోవడంలో ఇబ్బంది, అకస్మాత్తుగా శరీర భాగాలు తిమ్మిరి ఎక్కడం వంటి లక్షణాలు ఉంటే ఆలస్యం చేయవద్దు.',
+      call108: 'వెంటనే 108 నంబరుకు కాల్ చేయండి లేదా అంబులెన్స్ కోసం క్రింది బటన్ నొక్కండి:',
+      sosBtn: '🚨 అత్యవసర అంబులెన్స్ పిలవండి (108)',
+      vitalsTitle: 'యొక్క తాజా వైటల్స్ నివేదిక',
+      vitalsStatus: 'స్థితి: మీ గుండె మరియు శరీర కొలతలు సాధారణంగా ఉన్నాయి. వైద్యుల సలహా ప్రకారం మందులు వాడండి.',
+      aptTitle: 'రాబోయే డాక్టర్ అపాయింట్‌మెంట్:',
+      aptBtn: '📹 వీడియో టెలిహెల్త్ కన్సల్టేషన్ లో చేరండి',
+      rxTitle: 'ప్రస్తుత మందులు & రీఫిల్ వివరాలు:',
+      labsTitle: 'లభ్యమయ్యే డయాగ్నోస్టిక్ ల్యాబ్ రిపోర్టులు:',
+      fallback: 'నేను మీ తాజా వైటల్స్ చెక్ చేయడం, డాక్టర్ సారా లిన్‌తో అపాయింట్‌మెంట్‌లు షెడ్యూల్ చేయడం, మందుల రీఫిల్ లేదా ల్యాబ్ రిపోర్ట్‌లను డౌన్‌లోడ్ చేయడంలో మీకు సహాయపడగలను.<br><br>అత్యవసర వైద్య సహాయం కొరకు మా 24x7 హెల్ప్‌లైన్ <strong>108 / +91-800-SWASTHYA</strong> కు కాల్ చేయండి.'
+    }
+  };
+
   const assistantHTML = `
     <!-- Floating Medical Assistant Chat Widget -->
     <div id="swasthya-assistant-container">
@@ -23,26 +110,35 @@
         
         <!-- Header -->
         <div class="assistant-header">
-          <div style="display:flex; align-items:center; gap:0.75rem;">
-            <div class="brand-icon" style="width:36px; height:36px; background:var(--primary-gradient);">
-              <svg class="icon" style="width:20px; height:20px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <div style="display:flex; align-items:center; gap:0.6rem; flex:1; min-width:0;">
+            <div class="brand-icon" style="width:34px; height:34px; background:var(--primary-gradient); flex-shrink:0;">
+              <svg class="icon" style="width:18px; height:18px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
             </div>
-            <div>
-              <h4 style="font-size:0.95rem; margin-bottom:1px; color:var(--text-primary);">Swasthya AI Care Assistant</h4>
-              <p style="font-size:0.75rem; color:var(--hospital-healing-green); margin:0;">● Online • Instant Clinical Response</p>
+            <div style="min-width:0;">
+              <h4 id="assistant-header-title" style="font-size:0.9rem; margin-bottom:1px; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Swasthya AI Care Assistant</h4>
+              <p id="assistant-header-status" style="font-size:0.7rem; color:var(--hospital-healing-green); margin:0;">● Online • Instant Response</p>
             </div>
           </div>
-          <button id="swasthya-assistant-close" class="btn-icon" style="width:32px; height:32px;" aria-label="Close Chat">
-            <svg class="icon" style="width:16px; height:16px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+
+          <!-- Language Selector -->
+          <div style="display:flex; align-items:center; gap:0.35rem;">
+            <select id="assistant-lang-select" class="form-control" style="padding:0.2rem 0.4rem; font-size:0.75rem; height:auto; width:auto; background:var(--bg-input); border:1px solid var(--border-light); border-radius:6px; cursor:pointer;">
+              <option value="en">English</option>
+              <option value="hi">हिंदी (Hindi)</option>
+              <option value="te">తెలుగు (Telugu)</option>
+            </select>
+            <button id="swasthya-assistant-close" class="btn-icon" style="width:28px; height:28px;" aria-label="Close Chat">
+              <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
         </div>
 
         <!-- Body Messages -->
         <div id="assistant-messages-body" class="assistant-messages">
           <!-- Initial Welcome Message -->
-          <div class="assistant-msg bot-msg">
-            <div class="msg-author">Swasthya Care Triage</div>
-            <div class="msg-bubble">
+          <div class="assistant-msg bot-msg" id="assistant-initial-msg">
+            <div class="msg-author" id="initial-msg-author">Swasthya Care Triage</div>
+            <div class="msg-bubble" id="initial-msg-bubble">
               Hello! 👋 I am your <strong>24/7 Clinical Triage Assistant</strong>. How can I assist you right now?
             </div>
             <div class="msg-time">Just now</div>
@@ -50,11 +146,7 @@
 
           <!-- Quick Suggestion Chips -->
           <div id="assistant-chips-container" class="assistant-chips">
-            <button class="chip-btn" onclick="sendQuickPrompt('Check my latest vitals')">🩺 Check my vitals</button>
-            <button class="chip-btn" onclick="sendQuickPrompt('When is my next appointment?')">🗓️ Next appointment</button>
-            <button class="chip-btn" onclick="sendQuickPrompt('How do I request a medicine refill?')">💊 Refill medicine</button>
-            <button class="chip-btn" onclick="sendQuickPrompt('I have high blood pressure symptoms')">❤️ BP guidance</button>
-            <button class="chip-btn chip-danger" onclick="sendQuickPrompt('I have severe chest pain or emergency')">🚨 Emergency SOS</button>
+            <!-- Injected via JS based on language -->
           </div>
         </div>
 
@@ -66,7 +158,7 @@
         <!-- Input Bar -->
         <form id="assistant-form" class="assistant-input-bar">
           <input type="text" id="assistant-input-field" class="form-control" placeholder="Ask symptoms, medicines, lab reports, appointments..." autocomplete="off" required>
-          <button type="submit" class="btn btn-primary btn-sm" style="padding:0.6rem 1rem;">
+          <button type="submit" class="btn btn-primary btn-sm" style="padding:0.6rem 0.85rem;">
             <svg class="icon" style="width:16px; height:16px;" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </form>
@@ -134,10 +226,10 @@
       position: absolute;
       bottom: 60px;
       right: 0;
-      width: 380px;
-      height: 520px;
+      width: 390px;
+      height: 540px;
       max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 100px);
+      max-height: calc(100vh - 90px);
       display: none;
       flex-direction: column;
       border-radius: 20px;
@@ -155,12 +247,13 @@
     }
 
     .assistant-header {
-      padding: 1rem 1.25rem;
+      padding: 0.85rem 1.15rem;
       border-bottom: 1px solid var(--border-light, #d8e5ee);
       background: var(--bg-surface-elevated, #ffffff);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.5rem;
     }
 
     .assistant-messages {
@@ -175,7 +268,7 @@
     .assistant-msg {
       display: flex;
       flex-direction: column;
-      max-width: 85%;
+      max-width: 88%;
     }
 
     .assistant-msg.bot-msg {
@@ -309,7 +402,7 @@
 
   document.head.appendChild(style);
 
-  // Inject HTML into DOM when loaded
+  // Initialize Widget
   function initWidget() {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = assistantHTML;
@@ -320,6 +413,13 @@
     const closeBtn = document.getElementById('swasthya-assistant-close');
     const form = document.getElementById('assistant-form');
     const input = document.getElementById('assistant-input-field');
+    const langSelect = document.getElementById('assistant-lang-select');
+
+    if (langSelect) {
+      langSelect.addEventListener('change', (e) => {
+        setLanguage(e.target.value);
+      });
+    }
 
     if (launcher && win) {
       launcher.addEventListener('click', () => {
@@ -344,6 +444,43 @@
         handleUserMessage(text);
       });
     }
+
+    // Initial language setup
+    setLanguage('en');
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    const t = i18n[lang] || i18n.en;
+
+    const titleEl = document.getElementById('assistant-header-title');
+    if (titleEl) titleEl.textContent = t.title;
+
+    const statusEl = document.getElementById('assistant-header-status');
+    if (statusEl) statusEl.textContent = t.onlineStatus;
+
+    const initialAuthor = document.getElementById('initial-msg-author');
+    if (initialAuthor) initialAuthor.textContent = t.authorBot;
+
+    const initialBubble = document.getElementById('initial-msg-bubble');
+    if (initialBubble) initialBubble.innerHTML = t.welcome;
+
+    const inputField = document.getElementById('assistant-input-field');
+    if (inputField) inputField.placeholder = t.inputPlaceholder;
+
+    // Render chips for selected language
+    const chipsContainer = document.getElementById('assistant-chips-container');
+    if (chipsContainer) {
+      chipsContainer.innerHTML = t.chips.map(c => `
+        <button class="chip-btn ${c.danger ? 'chip-danger' : ''}" onclick="sendQuickPrompt('${escapeSingleQuotes(c.prompt)}')">
+          ${c.text}
+        </button>
+      `).join('');
+    }
+  }
+
+  function escapeSingleQuotes(str) {
+    return str.replace(/'/g, "\\'");
   }
 
   if (document.readyState === 'loading') {
@@ -379,14 +516,15 @@
     const messagesBody = document.getElementById('assistant-messages-body');
     if (!messagesBody) return;
 
+    const t = i18n[currentLang] || i18n.en;
     const div = document.createElement('div');
     div.className = `assistant-msg ${sender === 'user' ? 'user-msg' : 'bot-msg'}`;
 
-    const author = sender === 'user' ? 'You' : 'Swasthya Care Triage';
+    const author = sender === 'user' ? t.authorUser : t.authorBot;
     div.innerHTML = `
       <div class="msg-author">${author}</div>
       <div class="msg-bubble">${text}</div>
-      <div class="msg-time">Just now</div>
+      <div class="msg-time">${t.justNow}</div>
     `;
 
     messagesBody.appendChild(div);
@@ -395,70 +533,137 @@
 
   function generateClinicalResponse(q) {
     const text = q.toLowerCase();
+    const t = i18n[currentLang] || i18n.en;
     const session = window.PulseCareStore ? window.PulseCareStore.getSession() : null;
     const pat = window.PulseCareStore ? (window.PulseCareStore.getPatientById(session?.id || 'pat-1') || window.PulseCareStore.getPatients()[0]) : null;
 
     // 1. Emergency / Chest Pain / Shortness of Breath
-    if (text.includes('chest pain') || text.includes('emergency') || text.includes('breathing') || text.includes('severe') || text.includes('sos')) {
-      return `
-        🚨 <strong style="color:#e11d48;">CRITICAL EMERGENCY ALERT:</strong><br>
-        If you or the patient are experiencing acute crushing chest pain, severe shortness of breath, sudden numbness, or facial drooping, please do not wait.<br><br>
-        📞 <strong>Call 108 immediately</strong> or click the button below to dispatch a trauma ambulance:<br>
-        <button class="btn btn-danger btn-sm" style="margin-top:0.5rem;" onclick="if(window.triggerEmergencySOS) window.triggerEmergencySOS();">🚨 Trigger Emergency Ambulance (108)</button>
-      `;
+    if (
+      text.includes('chest pain') || text.includes('emergency') || text.includes('breathing') || text.includes('severe') || text.includes('sos') ||
+      text.includes('दर्द') || text.includes('इमरजेंसी') || text.includes('सांस') || text.includes('आपातकालीन') ||
+      text.includes('నొప్పి') || text.includes('ఛాతీ') || text.includes('ఎమర్జెన్సీ') || text.includes('శ్వాస') || text.includes('అత్యవసర')
+    ) {
+      if (currentLang === 'hi') {
+        return `
+          🚨 <strong style="color:#e11d48;">गंभीर आपातकालीन चेतावनी (CRITICAL ALERT):</strong><br>
+          यदि मरीज को सीने में तेज दबाव, सांस लेने में अत्यधिक तकलीफ, चक्कर या शरीर सुन्न होने की समस्या हो रही है, तो कृपया तुरंत कार्रवाई करें।<br><br>
+          📞 <strong>तुरंत 108 पर कॉल करें</strong> या आपातकालीन एम्बुलेंस बुलाने के लिए नीचे क्लिक करें:<br>
+          <button class="btn btn-danger btn-sm" style="margin-top:0.5rem;" onclick="if(window.triggerEmergencySOS) window.triggerEmergencySOS();">🚨 आपातकालीन एम्बुलेंस बुलाएं (108)</button>
+        `;
+      } else if (currentLang === 'te') {
+        return `
+          🚨 <strong style="color:#e11d48;">తీవ్రమైన అత్యవసర హెచ్చరిక (EMERGENCY ALERT):</strong><br>
+          మీకు లేదా రోగికి తీవ్రమైన ఛాతీ నొప్పి, శ్వాస ఆడకపోవడం, తలతిరగడం లేదా అకస్మాత్తుగా శరీర భాగాలు తిమ్మిరి ఎక్కడం వంటి లక్షణాలు ఉంటే ఆలస్యం చేయవద్దు.<br><br>
+          📞 <strong>వెంటనే 108 నంబరుకు కాల్ చేయండి</strong> లేదా క్రింది బటన్ నొక్కండి:<br>
+          <button class="btn btn-danger btn-sm" style="margin-top:0.5rem;" onclick="if(window.triggerEmergencySOS) window.triggerEmergencySOS();">🚨 అత్యవసర అంబులెన్స్ పిలవండి (108)</button>
+        `;
+      } else {
+        return `
+          🚨 <strong style="color:#e11d48;">${t.emergencyTitle}</strong><br>
+          ${t.emergencyText}<br><br>
+          📞 <strong>${t.call108}</strong><br>
+          <button class="btn btn-danger btn-sm" style="margin-top:0.5rem;" onclick="if(window.triggerEmergencySOS) window.triggerEmergencySOS();">${t.sosBtn}</button>
+        `;
+      }
     }
 
     // 2. Vitals Check
-    if (text.includes('vital') || text.includes('heart rate') || text.includes('pulse') || text.includes('bp') || text.includes('blood pressure')) {
-      if (pat && pat.vitals) {
+    if (
+      text.includes('vital') || text.includes('heart rate') || text.includes('pulse') || text.includes('bp') || text.includes('blood pressure') ||
+      text.includes('वाइटल्स') || text.includes('बीपी') || text.includes('ब्लड प्रेशर') || text.includes('धड़कन') ||
+      text.includes('వైటల్స్') || text.includes('రక్తపోటు') || text.includes('గుండె')
+    ) {
+      if (currentLang === 'hi') {
         return `
-          🩺 <strong>Latest Telemetry for ${pat.name}:</strong><br>
-          • <strong>Blood Pressure:</strong> ${pat.vitals.bloodPressure} mmHg (Normal)<br>
-          • <strong>Heart Rate:</strong> ${pat.vitals.heartRate} BPM (Normal Sinus Rhythm)<br>
-          • <strong>Oxygen (SpO₂):</strong> ${pat.vitals.spO2}% (Optimal)<br>
-          • <strong>Temperature:</strong> ${pat.vitals.temperature || '98.6 °F'}<br><br>
-          <em>Status: All cardiovascular parameters are stable. Continue current daily routine.</em>
+          🩺 <strong>${pat ? pat.name : 'अलेक्स जॉनसन'} का नवीनतम वाइटल्स रिकॉर्ड:</strong><br>
+          • <strong>रक्तचाप (Blood Pressure):</strong> ${pat?.vitals?.bloodPressure || '118/78'} mmHg (सामान्य)<br>
+          • <strong>हृदय गति (Heart Rate):</strong> ${pat?.vitals?.heartRate || 72} BPM (संतुलित)<br>
+          • <strong>ऑक्सीजन (SpO₂):</strong> ${pat?.vitals?.spO2 || 99}% (उत्कृष्ट)<br>
+          • <strong>तापमान (Temperature):</strong> ${pat?.vitals?.temperature || '98.6 °F'}<br><br>
+          <em>स्थिति: आपके सभी कार्डियोवैस्कुलर पैरामीटर स्थिर और सामान्य हैं।</em>
+        `;
+      } else if (currentLang === 'te') {
+        return `
+          🩺 <strong>${pat ? pat.name : 'అలెక్స్ జాన్సన్'} యొక్క తాజా వైటల్స్ నివేదిక:</strong><br>
+          • <strong>రక్తపోటు (Blood Pressure):</strong> ${pat?.vitals?.bloodPressure || '118/78'} mmHg (సాధారణం)<br>
+          • <strong>గుండె స్పందన (Heart Rate):</strong> ${pat?.vitals?.heartRate || 72} BPM (ఆప్టిమల్)<br>
+          • <strong>ఆక్సిజన్ (SpO₂):</strong> ${pat?.vitals?.spO2 || 99}% (చాలా బాగుంది)<br>
+          • <strong>శరీర ఉష్ణోగ్రత:</strong> ${pat?.vitals?.temperature || '98.6 °F'}<br><br>
+          <em>స్థితి: మీ గుండె మరియు శరీర కొలతలు స్థిరంగా ఉన్నాయి.</em>
+        `;
+      } else {
+        return `
+          🩺 <strong>Latest Telemetry for ${pat ? pat.name : 'Patient'}:</strong><br>
+          • <strong>Blood Pressure:</strong> ${pat?.vitals?.bloodPressure || '118/78'} mmHg (Normal)<br>
+          • <strong>Heart Rate:</strong> ${pat?.vitals?.heartRate || 72} BPM (Normal Sinus Rhythm)<br>
+          • <strong>Oxygen (SpO₂):</strong> ${pat?.vitals?.spO2 || 99}% (Optimal)<br>
+          • <strong>Temperature:</strong> ${pat?.vitals?.temperature || '98.6 °F'}<br><br>
+          <em>${t.vitalsStatus}</em>
         `;
       }
-      return `🩺 Your vitals are streaming live via Bluetooth cuff. Resting blood pressure is <strong>118/78 mmHg</strong> and pulse is <strong>72 BPM</strong>.`;
     }
 
     // 3. Appointments & Schedule
-    if (text.includes('appointment') || text.includes('schedule') || text.includes('dr. lin') || text.includes('doctor') || text.includes('consult')) {
-      return `
-        🗓️ <strong>Upcoming Consultation:</strong><br>
-        You have a <strong>Telehealth Video Visit</strong> with <strong>Dr. Sarah Lin, MD (Cardiologist)</strong> scheduled for <strong>Friday, Sep 04 at 10:30 AM (EDT)</strong>.<br><br>
-        <button class="btn btn-emerald btn-sm" onclick="if(window.joinTelehealthRoom) window.joinTelehealthRoom('apt-101');">📹 Join Telehealth Video Room</button>
-      `;
+    if (
+      text.includes('appointment') || text.includes('schedule') || text.includes('dr. lin') || text.includes('doctor') || text.includes('consult') ||
+      text.includes('अपॉइंटमेंट') || text.includes('डॉक्टर') || text.includes('परामर्श') ||
+      text.includes('అపాయింట్‌మెంట్') || text.includes('డాక్టర్') || text.includes('కన్సల్టేషన్')
+    ) {
+      if (currentLang === 'hi') {
+        return `
+          🗓️ <strong>आगामी डॉक्टर परामर्श:</strong><br>
+          आपकी <strong>डॉ. सारा लिन (MD, कार्डियोलॉजिस्ट)</strong> के साथ <strong>शुक्रवार, 04 सितंबर को सुबह 10:30 बजे</strong> वीडियो टेलीहेल्थ परामर्श तय है।<br><br>
+          <button class="btn btn-emerald btn-sm" onclick="if(window.joinTelehealthRoom) window.joinTelehealthRoom('apt-101');">📹 वीडियो टेलीहेल्थ रूम में शामिल हों</button>
+        `;
+      } else if (currentLang === 'te') {
+        return `
+          🗓️ <strong>రాబోయే డాక్టర్ అపాయింట్‌మెంట్:</strong><br>
+          మీకు <strong>డాక్టర్ సారా లిన్ (MD, కార్డియాలజిస్ట్)</strong> గారితో <strong>శుక్రవారం, సెప్టెంబర్ 04 ఉదయం 10:30 గంటలకు</strong> టెలిహెల్త్ వీడియో కన్సల్టేషన్ ఉంది.<br><br>
+          <button class="btn btn-emerald btn-sm" onclick="if(window.joinTelehealthRoom) window.joinTelehealthRoom('apt-101');">📹 వీడియో టెలిహెల్త్ రూమ్‌లో చేరండి</button>
+        `;
+      } else {
+        return `
+          🗓️ <strong>Upcoming Consultation:</strong><br>
+          You have a <strong>Telehealth Video Visit</strong> with <strong>Dr. Sarah Lin, MD (Cardiologist)</strong> scheduled for <strong>Friday, Sep 04 at 10:30 AM (EDT)</strong>.<br><br>
+          <button class="btn btn-emerald btn-sm" onclick="if(window.joinTelehealthRoom) window.joinTelehealthRoom('apt-101');">📹 Join Telehealth Video Room</button>
+        `;
+      }
     }
 
     // 4. Refill / Medications
-    if (text.includes('refill') || text.includes('medicine') || text.includes('prescription') || text.includes('lisinopril') || text.includes('pills') || text.includes('pharmacy')) {
-      return `
-        💊 <strong>Active Prescriptions & Refills:</strong><br>
-        • <strong>Lisinopril 10mg:</strong> 68/90 pills remaining (3 refills left)<br>
-        • <strong>Atorvastatin 20mg:</strong> 42/90 pills remaining (2 refills left)<br>
-        • <strong>Omega-3 1000mg:</strong> 95/120 capsules remaining<br><br>
-        You can request an instant refill directly in the <a href="patient.html#prescriptions" style="font-weight:700; color:var(--hospital-teal-600);" onclick="if(window.switchTab) window.switchTab('prescriptions');">Prescriptions Tab</a> or with your assigned pharmacy (CVS #4192).
-      `;
+    if (
+      text.includes('refill') || text.includes('medicine') || text.includes('prescription') || text.includes('lisinopril') || text.includes('pills') || text.includes('pharmacy') ||
+      text.includes('दवा') || text.includes('रीफिल') || text.includes('गोली') || text.includes('फार्मेसी') ||
+      text.includes('మందులు') || text.includes('రీఫిల్') || text.includes('మాత్రలు') || text.includes('ఫార్మసీ')
+    ) {
+      if (currentLang === 'hi') {
+        return `
+          💊 <strong>सक्रिय दवाइयाँ और रीफिल स्थिति:</strong><br>
+          • <strong>Lisinopril 10mg:</strong> 68/90 गोलियां शेष (3 रीफिल बाकी)<br>
+          • <strong>Atorvastatin 20mg:</strong> 42/90 गोलियां शेष (2 रीफिल बाकी)<br>
+          • <strong>Omega-3 1000mg:</strong> 95/120 कैप्सूल शेष<br><br>
+          आप <a href="patient.html#prescriptions" style="font-weight:700; color:var(--hospital-teal-600);" onclick="if(window.switchTab) window.switchTab('prescriptions');">दवाइयाँ (Prescriptions) टैब</a> से 1-क्लिक में तुरंत रीफिल मंगा सकते हैं।
+        `;
+      } else if (currentLang === 'te') {
+        return `
+          💊 <strong>ప్రస్తుత మందులు & రీఫిల్ వివరాలు:</strong><br>
+          • <strong>Lisinopril 10mg:</strong> 68/90 మాత్రలు మిగిలి ఉన్నాయి (3 రీఫిల్స్ మిగిలి ఉన్నాయి)<br>
+          • <strong>Atorvastatin 20mg:</strong> 42/90 మాత్రలు మిగిలి ఉన్నాయి (2 రీఫిల్స్)<br>
+          • <strong>Omega-3 1000mg:</strong> 95/120 క్యాప్సూల్స్ మిగిలి ఉన్నాయి<br><br>
+          మీరు <a href="patient.html#prescriptions" style="font-weight:700; color:var(--hospital-teal-600);" onclick="if(window.switchTab) window.switchTab('prescriptions');">Prescriptions ట్యాబ్</a> ద్వారా 1-క్లిక్ రీఫిల్ ఆర్డర్ చేయవచ్చు.
+        `;
+      } else {
+        return `
+          💊 <strong>Active Prescriptions & Refills:</strong><br>
+          • <strong>Lisinopril 10mg:</strong> 68/90 pills remaining (3 refills left)<br>
+          • <strong>Atorvastatin 20mg:</strong> 42/90 pills remaining (2 refills left)<br>
+          • <strong>Omega-3 1000mg:</strong> 95/120 capsules remaining<br><br>
+          You can request an instant refill directly in the <a href="patient.html#prescriptions" style="font-weight:700; color:var(--hospital-teal-600);" onclick="if(window.switchTab) window.switchTab('prescriptions');">Prescriptions Tab</a>.
+        `;
+      }
     }
 
-    // 5. Labs & Diagnostics
-    if (text.includes('lab') || text.includes('report') || text.includes('ecg') || text.includes('blood test') || text.includes('scan') || text.includes('x-ray')) {
-      return `
-        📑 <strong>Diagnostic Records Available:</strong><br>
-        1. <strong>Comprehensive Metabolic Panel (CMP-14):</strong> Normal (Aug 25)<br>
-        2. <strong>Lipid Profile Panel:</strong> Optimal LDL 94 mg/dL (Aug 20)<br>
-        3. <strong>12-Lead ECG:</strong> Normal Sinus Rhythm (Aug 15)<br><br>
-        View full parameter tables & download official PDFs in the <a href="patient.html#records" style="font-weight:700; color:var(--hospital-teal-600);" onclick="if(window.switchTab) window.switchTab('records');">Medical Records Tab</a>.
-      `;
-    }
-
-    // 6. Default Fallback
-    return `
-      🏥 <strong>Swasthya Care Assistance:</strong><br>
-      I can help you review your latest vitals, schedule consultations with Dr. Sarah Lin, check medication refills, or download diagnostic lab reports.<br><br>
-      For urgent clinical concerns, call our 24x7 hospital hotline at <strong>108 / +91-800-SWASTHYA</strong> or start an encrypted chat with your care team.
-    `;
+    // 5. Fallback Response
+    return t.fallback;
   }
 })();
