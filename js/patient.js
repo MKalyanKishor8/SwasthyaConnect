@@ -1,589 +1,821 @@
 /**
- * PulseCare OS - Patient Portal Controller (js/patient.js)
+ * SwasthyaConnect - Comprehensive Patient Portal Controller (js/patient.js)
  */
 
+let currentPatient = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Check active session or fallback to default patient
-  let session = PulseCareStore.getCurrentSession();
+  // Ensure authenticated session
+  const session = PulseCareStore.getSession();
   if (!session || session.role !== 'patient') {
-    session = {
-      id: 'pat-1',
-      name: 'Alex Johnson',
-      email: 'alex.johnson@example.com',
-      role: 'patient'
-    };
-    PulseCareStore.setSession(session);
+    const pat = PulseCareStore.getPatientById('pat-1') || PulseCareStore.getPatients()[0];
+    PulseCareStore.setSession({
+      id: pat.id,
+      name: pat.name,
+      email: pat.email,
+      role: 'patient',
+      bloodType: pat.bloodType,
+      mrn: pat.mrn
+    }, true);
   }
 
-  const patient = PulseCareStore.getPatientById(session.id) || PulseCareStore.getPatients()[0];
+  const activeSession = PulseCareStore.getSession();
+  currentPatient = PulseCareStore.getPatientById(activeSession?.id || 'pat-1') || PulseCareStore.getPatients()[0];
 
-  // Initialize UI components
-  initUserInfo(patient);
   initNavigation();
-  renderOverview(patient);
-  renderVitals(patient);
-  renderAppointments(patient.id);
-  renderPrescriptions(patient.id);
-  renderLabReports(patient.id);
-  renderDoctorDirectory();
-  renderChatMessages(patient.id, 'doc-1');
-  bindInteractiveActions(patient);
+  initNotificationCenter();
+  renderPatientData();
+  renderAppointments();
+  renderPrescriptions();
+  renderMedicalRecords();
+  renderScans();
+  renderTelehealthHistory();
+  renderChat();
+  initBookingWizard();
+  initChatForm();
 
-  // Listen for storage updates across windows/tabs
-  window.addEventListener('pulsecare:state_change', () => {
-    const updatedPat = PulseCareStore.getPatientById(patient.id) || patient;
-    renderOverview(updatedPat);
-    renderVitals(updatedPat);
-    renderAppointments(updatedPat.id);
-    renderPrescriptions(updatedPat.id);
+  // Listen to cross-portal state changes
+  window.addEventListener('swasthya:state_change', () => {
+    currentPatient = PulseCareStore.getPatientById(currentPatient.id) || PulseCareStore.getPatients()[0];
+    renderPatientData();
+    renderAppointments();
+    renderPrescriptions();
+    renderMedicalRecords();
+    renderScans();
+    renderTelehealthHistory();
   });
 });
 
-// Update User info in Topbar & Sidebar
-function initUserInfo(patient) {
-  const nameEls = document.querySelectorAll('.patient-name');
-  nameEls.forEach(el => el.textContent = patient.name);
-
-  const emailEls = document.querySelectorAll('.patient-email');
-  emailEls.forEach(el => el.textContent = patient.email);
-
-  const avatarEls = document.querySelectorAll('.patient-avatar-initials');
-  const initials = patient.name.split(' ').map(n => n[0]).join('').substring(0, 2);
-  avatarEls.forEach(el => el.textContent = initials);
-
-  const bloodTypeEl = document.getElementById('pat-blood-type');
-  if (bloodTypeEl) bloodTypeEl.textContent = patient.bloodType;
-
-  const ageEl = document.getElementById('pat-age');
-  if (ageEl) ageEl.textContent = `${patient.age} yrs (${patient.gender})`;
-
-  const conditionsEl = document.getElementById('pat-conditions');
-  if (conditionsEl) conditionsEl.textContent = patient.chronicConditions.join(', ');
-}
-
-// Navigation Tabs Handling
+// Tab Navigation
 function initNavigation() {
   const navLinks = document.querySelectorAll('.sidebar-nav .nav-link[data-tab]');
+  const pageTitle = document.getElementById('current-page-title');
+
+  const titles = {
+    overview: 'Patient Health Dashboard',
+    profile: 'Patient Demographics & Profile',
+    vitals: 'Biometric Vitals & Live Telemetry',
+    appointments: 'Consultations & Scheduling',
+    records: 'Electronic Medical Records (EHR)',
+    prescriptions: 'Active Medications & Refills',
+    telehealth: 'Encrypted Telehealth Virtual Consultations',
+    emergency: 'Emergency Information & Rapid Response',
+    messages: 'Care Team Encrypted Chat'
+  };
+
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      const targetTab = link.getAttribute('data-tab');
-      switchTab(targetTab);
+      const tab = link.getAttribute('data-tab');
+      switchTab(tab);
     });
   });
 
-  // Also support hash navigation (e.g. #appointments)
-  if (window.location.hash) {
-    const hashTab = window.location.hash.replace('#', '');
-    if (document.getElementById(`tab-${hashTab}`)) {
-      switchTab(hashTab);
-    }
+  const hash = window.location.hash.replace('#', '');
+  if (hash && titles[hash]) {
+    switchTab(hash);
   }
 }
 
 function switchTab(tabId) {
-  // Update sidebar active states
-  document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
-    if (link.getAttribute('data-tab') === tabId) {
-      link.classList.add('active');
+  const navLinks = document.querySelectorAll('.sidebar-nav .nav-link[data-tab]');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  const pageTitle = document.getElementById('current-page-title');
+
+  const titles = {
+    overview: 'Patient Health Dashboard',
+    profile: 'Patient Demographics & Profile',
+    vitals: 'Biometric Vitals & Live Telemetry',
+    appointments: 'Consultations & Scheduling',
+    records: 'Electronic Medical Records (EHR)',
+    prescriptions: 'Active Medications & Refills',
+    telehealth: 'Encrypted Telehealth Virtual Consultations',
+    emergency: 'Emergency Information & Rapid Response',
+    messages: 'Care Team Encrypted Chat'
+  };
+
+  navLinks.forEach(l => {
+    if (l.getAttribute('data-tab') === tabId) {
+      l.classList.add('active');
     } else {
-      link.classList.remove('active');
+      l.classList.remove('active');
     }
   });
 
-  // Switch visible tab panel
-  document.querySelectorAll('.tab-panel').forEach(panel => {
-    panel.classList.remove('active');
+  tabPanels.forEach(p => {
+    if (p.id === `tab-${tabId}`) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
   });
 
-  const targetPanel = document.getElementById(`tab-${tabId}`);
-  if (targetPanel) {
-    targetPanel.classList.add('active');
+  if (pageTitle && titles[tabId]) {
+    pageTitle.textContent = titles[tabId];
   }
 
-  // Update Page Title Header
-  const titleMap = {
-    overview: 'Patient Health Overview',
-    vitals: 'Biometric Telemetry & Vitals',
-    appointments: 'Appointments & Consultations',
-    prescriptions: 'Medications & Prescriptions',
-    labs: 'Lab Results & Diagnostics',
-    messages: 'Telehealth Secure Messaging'
-  };
-
-  const pageTitle = document.getElementById('current-page-title');
-  if (pageTitle && titleMap[tabId]) {
-    pageTitle.textContent = titleMap[tabId];
-  }
-
-  // Close mobile nav if open
+  window.location.hash = tabId;
   const sidebar = document.querySelector('.portal-sidebar');
-  if (sidebar) sidebar.classList.remove('open');
+  if (sidebar && sidebar.classList.contains('open')) {
+    sidebar.classList.remove('open');
+  }
 }
 
-// Render Overview Dashboard
-function renderOverview(patient) {
-  // Vitals summary
+// Render Patient Profile & Dashboard Data
+function renderPatientData() {
+  if (!currentPatient) return;
+
+  // Header & sidebar names
+  document.querySelectorAll('.patient-name').forEach(el => el.textContent = currentPatient.name);
+  const initials = currentPatient.name.split(' ').map(n => n[0]).join('');
+  document.querySelectorAll('.patient-avatar-initials').forEach(el => el.textContent = initials);
+
+  // MRN & Blood Group
+  const mrn = currentPatient.mrn || 'MRN-2026-9082';
+  const mrnEl = document.getElementById('sidebar-mrn');
+  if (mrnEl) mrnEl.textContent = mrn;
+  const profMrn = document.getElementById('prof-mrn');
+  if (profMrn) profMrn.textContent = mrn;
+  const mrnBadge = document.getElementById('pat-mrn-badge');
+  if (mrnBadge) mrnBadge.textContent = mrn;
+
+  const bloodEl = document.getElementById('pat-blood-type');
+  if (bloodEl) bloodEl.textContent = currentPatient.bloodType || 'O+';
+  const profBlood = document.getElementById('prof-blood');
+  if (profBlood) profBlood.textContent = currentPatient.bloodType || 'O+';
+
+  // Age & Gender
+  const ageGenderEl = document.getElementById('pat-age-gender');
+  if (ageGenderEl) ageGenderEl.textContent = `${currentPatient.age} yrs • ${currentPatient.gender}`;
+  const profAge = document.getElementById('prof-age');
+  if (profAge) profAge.textContent = `${currentPatient.age} years`;
+  const profGender = document.getElementById('prof-gender');
+  if (profGender) profGender.textContent = currentPatient.gender;
+  const profDob = document.getElementById('prof-dob');
+  if (profDob) profDob.textContent = currentPatient.dob || '1992-04-15';
+
+  // Contact Info
+  const profPhone = document.getElementById('prof-phone');
+  if (profPhone) profPhone.textContent = currentPatient.phone;
+  const profEmail = document.getElementById('prof-email');
+  if (profEmail) profEmail.textContent = currentPatient.email;
+  const profAddress = document.getElementById('prof-address');
+  if (profAddress) profAddress.textContent = currentPatient.address;
+
+  // Insurance
+  const profInsurance = document.getElementById('prof-insurance');
+  if (profInsurance) {
+    profInsurance.textContent = typeof currentPatient.insurance === 'object' ? currentPatient.insurance.provider : currentPatient.insurance;
+  }
+
+  // Health Status
+  const healthStatusEl = document.getElementById('dash-health-status');
+  if (healthStatusEl && currentPatient.healthStatus) {
+    healthStatusEl.innerHTML = `Current Health Status: <strong style="color:var(--hospital-healing-green);">${currentPatient.healthStatus}</strong>`;
+  }
+
+  // Vitals
+  const vit = currentPatient.vitals || {};
   const hrEl = document.getElementById('ov-heart-rate');
+  if (hrEl) hrEl.textContent = vit.heartRate || 72;
+  const vitHr = document.getElementById('vit-hr-val');
+  if (vitHr) vitHr.textContent = vit.heartRate || 72;
+
   const bpEl = document.getElementById('ov-bp');
+  if (bpEl) bpEl.textContent = vit.bloodPressure || '118/78';
+  const vitBp = document.getElementById('vit-bp-val');
+  if (vitBp) vitBp.textContent = vit.bloodPressure || '118/78';
+
+  const tempEl = document.getElementById('ov-temp');
+  if (tempEl) tempEl.textContent = vit.temperature ? vit.temperature.split(' ')[0] : '98.6';
+  const vitTemp = document.getElementById('vit-temp-val');
+  if (vitTemp) vitTemp.textContent = vit.temperature || '98.6 °F';
+
   const o2El = document.getElementById('ov-spo2');
-  const glEl = document.getElementById('ov-glucose');
+  if (o2El) o2El.textContent = vit.spO2 || 99;
+  const vitO2 = document.getElementById('vit-spo2-val');
+  if (vitO2) vitO2.textContent = vit.spO2 || 99;
 
-  if (hrEl) hrEl.textContent = patient.vitals.heartRate;
-  if (bpEl) bpEl.textContent = patient.vitals.bloodPressure;
-  if (o2El) o2El.textContent = patient.vitals.spO2;
-  if (glEl) glEl.textContent = patient.vitals.glucose;
+  const vitRr = document.getElementById('vit-rr-val');
+  if (vitRr) vitRr.textContent = vit.respiratoryRate ? vit.respiratoryRate.split(' ')[0] : '16';
 
-  // Upcoming appointments list
-  const apts = PulseCareStore.getAppointments({ patientId: patient.id })
-    .filter(a => a.status !== 'cancelled' && a.status !== 'completed');
+  const vitWeight = document.getElementById('vit-weight-val');
+  if (vitWeight) vitWeight.textContent = vit.weight ? vit.weight.split(' ')[0] : '168';
 
-  const container = document.getElementById('ov-appointments-list');
-  if (!container) return;
-
-  if (apts.length === 0) {
-    container.innerHTML = `
-      <div style="text-align:center; padding: 2rem; color: var(--text-muted);">
-        <p>No upcoming appointments scheduled.</p>
-        <button class="btn btn-sm btn-outline" style="margin-top: 0.75rem;" onclick="PulseCareUI.openModal('book-apt-modal')">Book New Consultation</button>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = apts.slice(0, 3).map(apt => {
-    const d = new Date(apt.date + 'T00:00:00');
-    const day = d.getDate();
-    const month = d.toLocaleString('default', { month: 'short' });
-    const isVideo = apt.type.includes('Video') || apt.type.includes('Telehealth');
-
-    return `
-      <div class="appointment-item">
-        <div class="appointment-meta">
-          <div class="appointment-time-box">
-            <span class="day">${day}</span>
-            <span class="month">${month}</span>
-          </div>
-          <div class="appointment-info">
-            <h4>${PulseCareUI.escapeHTML(apt.doctorName)}</h4>
-            <p>${PulseCareUI.escapeHTML(apt.doctorSpecialty)} • ${apt.time} (${apt.type})</p>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap: 0.5rem;">
-          <span class="badge ${apt.status === 'waiting' ? 'badge-amber' : 'badge-emerald'}">
-            ${apt.status}
-          </span>
-          ${isVideo ? `
-            <button class="btn btn-sm btn-primary" onclick="joinTelehealthRoom('${apt.id}')">
-              <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-              Join Call
-            </button>
-          ` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
+  // Render SVG Sparkline
+  renderSparkline(currentPatient.vitalsHistory || []);
 }
 
-// Render Vitals tab
-function renderVitals(patient) {
-  const vitals = patient.vitals;
-  const setVal = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
+// 7-Day Vitals Sparkline
+function renderSparkline(history) {
+  const container = document.getElementById('vitals-sparkline');
+  if (!container || !history.length) return;
 
-  setVal('vit-hr-val', vitals.heartRate);
-  setVal('vit-bp-val', vitals.bloodPressure);
-  setVal('vit-spo2-val', vitals.spO2);
-  setVal('vit-glu-val', vitals.glucose);
-  setVal('vit-temp-val', vitals.temperature);
-  setVal('vit-weight-val', vitals.weight);
-  setVal('vit-bmi-val', vitals.bmi);
+  const width = 600;
+  const height = 150;
+  const padding = 25;
 
-  // Render SVG Sparkline for Vitals History
-  const svgContainer = document.getElementById('vitals-sparkline');
-  if (svgContainer && patient.vitalsHistory) {
-    const history = patient.vitalsHistory;
-    const points = history.map((h, i) => {
-      const x = 30 + (i * 80);
-      const y = 140 - ((h.hr - 60) * 3); // Map HR (60-100) to Y coordinates
-      return `${x},${y}`;
-    }).join(' ');
+  const dates = history.map(h => h.date);
+  const hrs = history.map(h => h.hr);
+  const minHr = Math.min(...hrs) - 5;
+  const maxHr = Math.max(...hrs) + 5;
 
-    const labels = history.map((h, i) => {
-      const x = 30 + (i * 80);
-      return `<text x="${x}" y="175" fill="var(--text-muted)" font-size="11" text-anchor="middle">${h.date}</text>`;
-    }).join('');
+  const points = hrs.map((hr, idx) => {
+    const x = padding + (idx / (hrs.length - 1)) * (width - 2 * padding);
+    const y = height - padding - ((hr - minHr) / (maxHr - minHr)) * (height - 2 * padding);
+    return { x, y, hr, date: dates[idx] };
+  });
 
-    const circles = history.map((h, i) => {
-      const x = 30 + (i * 80);
-      const y = 140 - ((h.hr - 60) * 3);
-      return `
-        <circle cx="${x}" cy="${y}" r="4" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
-        <text x="${x}" y="${y - 10}" fill="var(--text-primary)" font-size="11" font-weight="700" text-anchor="middle">${h.hr} bpm</text>
-      `;
-    }).join('');
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
-    svgContainer.innerHTML = `
-      <svg viewBox="0 0 480 190" width="100%" height="190" style="overflow: visible;">
-        <defs>
-          <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.3"/>
-            <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.0"/>
-          </linearGradient>
-        </defs>
-        <line x1="20" y1="140" x2="450" y2="140" stroke="var(--border-light)" stroke-dasharray="4"/>
-        <line x1="20" y1="80" x2="450" y2="80" stroke="var(--border-light)" stroke-dasharray="4"/>
-        <polyline fill="none" stroke="url(#primaryGrad)" stroke="#0284c7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${points}" />
-        ${circles}
-        ${labels}
-      </svg>
-    `;
+  const dotsSvg = points.map(p => `
+    <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#0d9488" stroke="#ffffff" stroke-width="2" />
+    <text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-primary)">${p.hr} bpm</text>
+    <text x="${p.x}" y="${height - 5}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${p.date}</text>
+  `).join('');
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:auto; overflow:visible;">
+      <defs>
+        <linearGradient id="sparkline-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0d9488" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#0d9488" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+      <path d="${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#sparkline-grad)"/>
+      <path d="${pathD}" fill="none" stroke="#0d9488" stroke-width="3" stroke-linecap="round"/>
+      ${dotsSvg}
+    </svg>
+  `;
+}
+
+// Render Appointments (Upcoming vs Past)
+function renderAppointments() {
+  const allApts = PulseCareStore.getAppointments(currentPatient.id);
+  const upcomingContainer = document.getElementById('appointments-upcoming-list');
+  const pastContainer = document.getElementById('appointments-past-list');
+  const ovContainer = document.getElementById('ov-appointments-list');
+
+  const upcoming = allApts.filter(a => a.status !== 'completed' && a.status !== 'cancelled');
+  const past = allApts.filter(a => a.status === 'completed');
+
+  // Overview quick view
+  if (ovContainer) {
+    if (upcoming.length === 0) {
+      ovContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No upcoming appointments scheduled.</p>`;
+    } else {
+      ovContainer.innerHTML = upcoming.slice(0, 2).map(apt => createAppointmentItemHTML(apt)).join('');
+    }
+  }
+
+  // Full Upcoming list
+  if (upcomingContainer) {
+    if (upcoming.length === 0) {
+      upcomingContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No upcoming appointments. Click "Book New Appointment" to schedule.</p>`;
+    } else {
+      upcomingContainer.innerHTML = upcoming.map(apt => createAppointmentItemHTML(apt, true)).join('');
+    }
+  }
+
+  // Full Past list
+  if (pastContainer) {
+    if (past.length === 0) {
+      pastContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No past appointment records found.</p>`;
+    } else {
+      pastContainer.innerHTML = past.map(apt => createPastAppointmentHTML(apt)).join('');
+    }
   }
 }
 
-// Render Appointments tab
-function renderAppointments(patientId) {
-  const apts = PulseCareStore.getAppointments({ patientId });
-  const container = document.getElementById('appointments-full-list');
-  if (!container) return;
+function createAppointmentItemHTML(apt, full = false) {
+  const dateObj = new Date(apt.date + 'T00:00:00');
+  const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const month = monthNames[dateObj.getMonth()] || 'SEP';
+  const day = dateObj.getDate() || '04';
 
-  if (apts.length === 0) {
-    container.innerHTML = `
-      <div style="text-align:center; padding: 3rem; color: var(--text-muted);">
-        <p>No appointment records found.</p>
-        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="PulseCareUI.openModal('book-apt-modal')">Book Your First Consultation</button>
-      </div>
-    `;
-    return;
-  }
+  const isTelehealth = apt.type.toLowerCase().includes('telehealth') || apt.type.toLowerCase().includes('video');
+  const isReadyForCall = isTelehealth && (apt.status === 'confirmed' || apt.status === 'in-consultation');
 
-  container.innerHTML = apts.map(apt => {
-    const d = new Date(apt.date + 'T00:00:00');
-    const day = d.getDate();
-    const month = d.toLocaleString('default', { month: 'short' });
-    const isVideo = apt.type.includes('Video') || apt.type.includes('Telehealth');
-
-    let badgeClass = 'badge-primary';
-    if (apt.status === 'confirmed') badgeClass = 'badge-emerald';
-    if (apt.status === 'waiting') badgeClass = 'badge-amber';
-    if (apt.status === 'cancelled') badgeClass = 'badge-rose';
-    if (apt.status === 'completed') badgeClass = 'badge-purple';
-
-    return `
-      <div class="appointment-item" style="padding: 1.25rem;">
-        <div class="appointment-meta">
-          <div class="appointment-time-box">
-            <span class="day">${day}</span>
-            <span class="month">${month}</span>
-          </div>
-          <div class="appointment-info">
-            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.25rem;">
-              <h4>${PulseCareUI.escapeHTML(apt.doctorName)}</h4>
-              <span class="badge ${badgeClass}">${apt.status}</span>
-            </div>
-            <p><strong>Specialty:</strong> ${PulseCareUI.escapeHTML(apt.doctorSpecialty)} | <strong>Time:</strong> ${apt.time} (${apt.type})</p>
-            <p style="margin-top:0.25rem; font-size: 0.8rem; color: var(--text-secondary);"><strong>Reason:</strong> ${PulseCareUI.escapeHTML(apt.reason)}</p>
-            ${apt.notes ? `<p style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;"><em>Clinical Note: ${PulseCareUI.escapeHTML(apt.notes)}</em></p>` : ''}
-          </div>
+  return `
+    <div class="appointment-item">
+      <div class="appointment-meta">
+        <div class="appointment-time-box">
+          <span class="day">${day}</span>
+          <span class="month">${month}</span>
         </div>
-        <div style="display:flex; flex-direction:column; gap:0.5rem; align-items: flex-end;">
-          ${isVideo && apt.status !== 'cancelled' ? `
-            <button class="btn btn-sm btn-primary" onclick="joinTelehealthRoom('${apt.id}')">
-              <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-              Join Telehealth
-            </button>
-          ` : ''}
-          ${apt.status !== 'cancelled' && apt.status !== 'completed' ? `
-            <button class="btn btn-sm btn-secondary" style="color: var(--accent-rose);" onclick="cancelAppointmentAction('${apt.id}')">Cancel</button>
-          ` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Render Prescriptions tab
-function renderPrescriptions(patientId) {
-  const rxs = PulseCareStore.getPrescriptions(patientId);
-  const container = document.getElementById('prescriptions-list');
-  if (!container) return;
-
-  if (rxs.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1;">No active prescriptions recorded.</p>`;
-    return;
-  }
-
-  container.innerHTML = rxs.map(rx => {
-    const percentLeft = Math.round((rx.pillsRemaining / rx.totalPills) * 100);
-
-    return `
-      <div class="rx-card">
-        <div class="rx-badge-top">
-          <span class="badge badge-emerald">Active Rx</span>
-          <span style="font-size: 0.775rem; color: var(--text-muted);">Refills: <strong>${rx.refillsRemaining}</strong> left</span>
-        </div>
-        <div>
-          <div class="rx-name">${PulseCareUI.escapeHTML(rx.medicationName)}</div>
-          <div class="rx-dosage">${PulseCareUI.escapeHTML(rx.strength)} • ${PulseCareUI.escapeHTML(rx.dosage)}</div>
-          <p style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.35rem;">
-            <strong>Indication:</strong> ${PulseCareUI.escapeHTML(rx.purpose)}<br/>
-            <strong>Prescribed By:</strong> ${PulseCareUI.escapeHTML(rx.doctorName)}
+        <div class="appointment-info">
+          <h4>${apt.reason}</h4>
+          <p><strong>${apt.doctorName}</strong> &bull; ${apt.doctorSpecialty || 'Specialist'}</p>
+          <p style="font-size:0.775rem; color:var(--text-muted); margin-top:2px;">
+            ${apt.time} &bull; <span class="badge ${isTelehealth ? 'badge-purple' : 'badge-emerald'}" style="padding:0.1rem 0.4rem;">${apt.type}</span>
+            ${apt.doctorRoom ? `&bull; ${apt.doctorRoom}` : ''}
           </p>
         </div>
-
-        <div>
-          <div style="display:flex; justify-content:space-between; font-size: 0.8rem; margin-bottom: 0.35rem;">
-            <span>Supply: ${rx.pillsRemaining} of ${rx.totalPills} left</span>
-            <strong>${percentLeft}%</strong>
-          </div>
-          <div class="rx-progress-bar">
-            <div class="rx-progress-fill" style="width: ${percentLeft}%;"></div>
-          </div>
-        </div>
-
-        <button class="btn btn-sm btn-outline" style="width: 100%; margin-top: auto;" 
-                onclick="refillPrescriptionAction('${rx.id}')"
-                ${rx.refillsRemaining <= 0 ? 'disabled' : ''}>
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          ${rx.refillsRemaining > 0 ? '1-Click Refill Request' : 'No Refills Left'}
-        </button>
       </div>
-    `;
-  }).join('');
-}
-
-// Render Lab Reports tab
-function renderLabReports(patientId) {
-  const labs = PulseCareStore.getLabReports(patientId);
-  const container = document.getElementById('lab-reports-list');
-  if (!container) return;
-
-  container.innerHTML = labs.map(lab => `
-    <div class="portal-card" style="margin-bottom: 1rem;">
-      <div class="portal-card-header">
-        <div style="display:flex; align-items:center; gap:0.75rem;">
-          <div class="metric-icon-wrap cyan">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <div>
-            <h4 style="font-size: 1rem;">${PulseCareUI.escapeHTML(lab.testName)}</h4>
-            <p style="font-size: 0.775rem; color: var(--text-muted);">${lab.category} • ${lab.date} • ${PulseCareUI.escapeHTML(lab.labFacility)}</p>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-          <span class="badge badge-emerald">${lab.status}</span>
-          <button class="btn btn-sm btn-secondary" onclick="viewLabReportModal('${lab.id}')">View Report</button>
-        </div>
-      </div>
-      <div class="portal-card-body" style="padding: 1rem 1.5rem; font-size: 0.875rem;">
-        <p><strong>Clinical Summary:</strong> ${PulseCareUI.escapeHTML(lab.summary)}</p>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <span class="badge ${apt.status === 'waiting' ? 'badge-amber' : 'badge-emerald'}">${apt.status}</span>
+        ${isReadyForCall ? `
+          <button class="btn btn-sm btn-emerald" onclick="joinTelehealthRoom('${apt.id}')">
+            <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            <span>Join Video</span>
+          </button>
+        ` : ''}
       </div>
     </div>
-  `).join('');
+  `;
 }
 
-// Render Doctors in dropdown for appointment booking
-function renderDoctorDirectory() {
-  const select = document.getElementById('book-doctor-select');
-  if (!select) return;
-
-  const docs = PulseCareStore.getDoctors();
-  select.innerHTML = docs.map(d => `
-    <option value="${d.id}">${d.name} (${d.specialty})</option>
-  `).join('');
+function createPastAppointmentHTML(apt) {
+  return `
+    <div class="appointment-item" style="opacity:0.9;">
+      <div class="appointment-meta">
+        <div class="appointment-time-box" style="background:var(--bg-hover); color:var(--text-primary);">
+          <span class="day">${apt.date.split('-')[2]}</span>
+          <span class="month">${apt.date.split('-')[1]}</span>
+        </div>
+        <div class="appointment-info">
+          <h4>${apt.reason}</h4>
+          <p><strong>${apt.doctorName}</strong> &bull; ${apt.doctorSpecialty || 'Specialist'}</p>
+          <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+            Encounter Note: <em>"${apt.notes || 'Consultation concluded successfully.'}"</em>
+          </p>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-purple">Completed</span>
+      </div>
+    </div>
+  `;
 }
 
-// Render Chat messages
-function renderChatMessages(patientId, doctorId) {
+// Render Prescriptions
+function renderPrescriptions() {
+  const rxs = PulseCareStore.getPrescriptions(currentPatient.id);
+  const fullContainer = document.getElementById('prescriptions-list');
+  const ovContainer = document.getElementById('ov-prescriptions-list');
+
+  if (ovContainer) {
+    ovContainer.innerHTML = rxs.slice(0, 2).map(rx => `
+      <div class="glass-panel" style="padding:1rem; margin-bottom:0.75rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+          <strong style="font-size:1rem;">${rx.medicationName} ${rx.strength}</strong>
+          <span class="badge badge-emerald">Active</span>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">${rx.dosage}</p>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted);">
+          <span>${rx.pillsRemaining} of ${rx.totalPills} remaining</span>
+          <span>${rx.refillsRemaining} refills left</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (fullContainer) {
+    if (rxs.length === 0) {
+      fullContainer.innerHTML = `<p style="color:var(--text-muted);">No active prescriptions found.</p>`;
+      return;
+    }
+
+    fullContainer.innerHTML = rxs.map(rx => {
+      const pct = Math.round((rx.pillsRemaining / rx.totalPills) * 100);
+      return `
+        <div class="rx-card">
+          <div class="rx-badge-top">
+            <span class="badge badge-emerald">Active Rx</span>
+            <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">Rx #${rx.id}</span>
+          </div>
+
+          <div>
+            <h4 class="rx-name">${rx.medicationName} <span style="font-size:0.95rem; color:var(--hospital-teal-600);">${rx.strength}</span></h4>
+            <p class="rx-dosage">${rx.dosage}</p>
+            <p style="font-size:0.775rem; color:var(--text-muted); margin-top:4px;">
+              <strong>Indication:</strong> ${rx.purpose} &bull; <strong>Prescribed by:</strong> ${rx.doctorName}
+            </p>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+              <strong>Pharmacy:</strong> ${rx.pharmacy || 'CVS Pharmacy #4192'}
+            </p>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+              <span>Supply: <strong>${rx.pillsRemaining}</strong> / ${rx.totalPills} units</span>
+              <span><strong>${rx.refillsRemaining}</strong> Refills Left</span>
+            </div>
+            <div class="rx-progress-bar">
+              <div class="rx-progress-fill" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:auto; pt:0.5rem;">
+            <button class="btn btn-sm btn-primary" style="width:100%;" onclick="handleRefillRequest('${rx.id}')">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>1-Click Refill Request</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+function handleRefillRequest(rxId) {
+  const res = PulseCareStore.requestRefill(rxId);
+  if (res.success) {
+    PulseCareUI.showToast('Refill Authorized', `Refill order for ${res.rx.medicationName} transmitted to pharmacy network!`, 'success');
+    renderPrescriptions();
+  } else {
+    PulseCareUI.showToast('Refill Failed', res.message, 'error');
+  }
+}
+
+// Render Medical Records (Allergies, Diagnoses, History, Labs)
+function renderMedicalRecords() {
+  if (!currentPatient) return;
+
+  // Allergies
+  const allergyContainer = document.getElementById('allergies-container');
+  if (allergyContainer && currentPatient.allergies) {
+    allergyContainer.innerHTML = `
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
+        ${currentPatient.allergies.map(al => `
+          <div class="glass-panel" style="padding:1rem; border-left:3px solid var(--hospital-cross-red);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <strong style="color:var(--hospital-cross-red); font-size:1rem;">${al.allergen}</strong>
+              <span class="badge badge-danger">${al.severity}</span>
+            </div>
+            <p style="font-size:0.8rem; color:var(--text-muted);">Reaction: ${al.reaction}</p>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // Previous Diagnoses
+  const diagnosesContainer = document.getElementById('diagnoses-container');
+  if (diagnosesContainer && currentPatient.previousDiagnoses) {
+    diagnosesContainer.innerHTML = currentPatient.previousDiagnoses.map(d => `
+      <div style="padding:0.75rem 0; border-bottom:1px solid var(--border-light);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>${d.name}</strong>
+          <span class="badge badge-primary">${d.code}</span>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Diagnosed: ${d.date} by ${d.doctor} ${d.status ? `(${d.status})` : ''}
+        </p>
+      </div>
+    `).join('');
+  }
+
+  // Medical History
+  const historyContainer = document.getElementById('history-container');
+  if (historyContainer && currentPatient.medicalHistory) {
+    historyContainer.innerHTML = currentPatient.medicalHistory.map(h => `
+      <div style="padding:0.75rem 0; border-bottom:1px solid var(--border-light);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>${h.event}</strong>
+          <span class="badge badge-purple">${h.year}</span>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Facility: ${h.facility} &bull; Outcome: ${h.outcome}
+        </p>
+      </div>
+    `).join('');
+  }
+
+  // Diagnostic Labs
+  const labs = PulseCareStore.getLabReports(currentPatient.id);
+  const labContainer = document.getElementById('lab-reports-list');
+  if (labContainer) {
+    if (labs.length === 0) {
+      labContainer.innerHTML = `<p style="color:var(--text-muted);">No lab reports uploaded.</p>`;
+    } else {
+      labContainer.innerHTML = labs.map(lab => `
+        <div class="appointment-item">
+          <div class="appointment-meta">
+            <div class="appointment-time-box" style="background:var(--hospital-healing-green);">
+              <span class="day">LAB</span>
+              <span class="month">REP</span>
+            </div>
+            <div class="appointment-info">
+              <h4>${lab.title}</h4>
+              <p><strong>${lab.facility}</strong> &bull; Authenticated: ${lab.date}</p>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+                ${lab.summary}
+              </p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="badge badge-emerald">${lab.status}</span>
+            <button class="btn btn-sm btn-outline" onclick="openLabModal('${lab.id}')">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>View Full Report</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+// Render Scans and Imaging Records
+function renderScans() {
+  const scans = PulseCareStore.getScans(currentPatient.id);
+  const scanContainer = document.getElementById('scans-list');
+  if (!scanContainer) return;
+
+  if (scans.length === 0) {
+    scanContainer.innerHTML = `<p style="color:var(--text-muted);">No imaging scan records archived.</p>`;
+  } else {
+    scanContainer.innerHTML = scans.map(sc => `
+      <div class="appointment-item">
+        <div class="appointment-meta">
+          <div class="appointment-time-box" style="background:var(--hospital-blue);">
+            <span class="day">SCAN</span>
+            <span class="month">IMG</span>
+          </div>
+          <div class="appointment-info">
+            <h4>${sc.title}</h4>
+            <p><strong>${sc.modality}</strong> &bull; Date: ${sc.date}</p>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+              Radiologist: ${sc.radiologist} &bull; Impression: <em>"${sc.impression}"</em>
+            </p>
+          </div>
+        </div>
+        <div>
+          <span class="badge badge-primary">${sc.status}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// Telehealth History
+function renderTelehealthHistory() {
+  const container = document.getElementById('telehealth-history-container');
+  if (!container) return;
+
+  const prevApts = PulseCareStore.getAppointments(currentPatient.id).filter(a => a.type.toLowerCase().includes('telehealth') && a.status === 'completed');
+
+  if (prevApts.length === 0) {
+    container.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No completed video consultation archives yet.</p>`;
+  } else {
+    container.innerHTML = prevApts.map(apt => `
+      <div class="appointment-item">
+        <div class="appointment-meta">
+          <div class="appointment-time-box" style="background:var(--primary-gradient);">
+            <span class="day">HD</span>
+            <span class="month">VIDEO</span>
+          </div>
+          <div class="appointment-info">
+            <h4>${apt.reason}</h4>
+            <p><strong>${apt.doctorName}</strong> &bull; Completed on ${apt.date}</p>
+            <p style="font-size:0.8rem; color:var(--text-muted);">Summary: ${apt.notes}</p>
+          </div>
+        </div>
+        <span class="badge badge-purple">Archived</span>
+      </div>
+    `).join('');
+  }
+}
+
+// Interactive Telehealth WebRTC Room Simulator
+window.joinTelehealthRoom = function(aptId) {
+  const apt = PulseCareStore.getAppointments().find(a => a.id === aptId) || PulseCareStore.getAppointments()[0];
+  const modalBody = document.getElementById('telehealth-modal-body');
+
+  modalBody.innerHTML = `
+    <div style="background:#000000; border-radius:var(--radius-md); overflow:hidden; position:relative; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
+      <div style="text-align:center; color:#ffffff;">
+        <div class="user-avatar" style="width:80px; height:80px; font-size:2rem; margin:0 auto 1rem; background:var(--primary-gradient);">SL</div>
+        <h3 style="color:#ffffff; font-size:1.3rem;">Dr. Sarah Lin, MD (Cardiologist)</h3>
+        <p style="color:#10b981; font-size:0.9rem;">● Encrypted WebRTC HD Stream Live (1080p 60fps)</p>
+        <p style="font-size:0.8rem; color:#94a3b8; margin-top:4px;">Encounter: ${apt ? apt.reason : 'Cardiology Consultation'}</p>
+      </div>
+
+      <!-- Self PIP feed -->
+      <div style="position:absolute; bottom:16px; right:16px; width:140px; aspect-ratio:4/3; background:#1e293b; border:2px solid #0d9488; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:0.75rem;">
+        <span>Self (Patient)</span>
+      </div>
+    </div>
+
+    <!-- Call Control Bar -->
+    <div style="display:flex; justify-content:center; gap:1rem; padding:0.5rem 0;">
+      <button class="btn btn-secondary btn-icon" title="Toggle Microphone" onclick="PulseCareUI.showToast('Microphone', 'Audio unmuted', 'info')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <button class="btn btn-secondary btn-icon" title="Toggle Camera" onclick="PulseCareUI.showToast('Camera', 'HD Camera stream active', 'info')">
+        <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      </button>
+      <button class="btn btn-secondary btn-icon" title="Share Screen" onclick="PulseCareUI.showToast('Screen Share', 'Sharing vitals telemetry monitor...', 'info')">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </button>
+      <button class="btn btn-danger" onclick="PulseCareUI.closeModal('telehealth-modal'); PulseCareUI.showToast('Call Ended', 'Telehealth consultation session saved to health chart.', 'info')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/></svg>
+        <span>End Call</span>
+      </button>
+    </div>
+  `;
+
+  PulseCareUI.openModal('telehealth-modal');
+};
+
+// Emergency SOS Trigger
+window.triggerEmergencySOS = function() {
+  PulseCareUI.openModal('emergency-sos-modal');
+  PulseCareUI.showToast('Emergency SOS Broadcast', 'Ambulance & Emergency Room team alerted with your live GPS location.', 'error');
+};
+
+// Lab Modal Detail View
+window.openLabModal = function(labId) {
+  const lab = PulseCareStore.getLabReports().find(l => l.id === labId);
+  if (!lab) return;
+
+  const modalBody = document.getElementById('lab-modal-body');
+  modalBody.innerHTML = `
+    <div style="border-bottom:2px solid var(--hospital-teal-600); padding-bottom:1rem; margin-bottom:1rem;">
+      <h3 style="font-size:1.3rem;">${lab.title}</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted);">${lab.facility} &bull; Specimen Date: ${lab.date}</p>
+      <p style="font-size:0.85rem; color:var(--text-muted);">Attending Physician: ${lab.doctorName}</p>
+    </div>
+
+    <div style="margin-bottom:1.5rem;">
+      <h4 style="font-size:1rem; margin-bottom:0.5rem;">Pathologist Clinical Summary</h4>
+      <p style="font-size:0.9rem; line-height:1.6; background:var(--bg-input); padding:1rem; border-radius:var(--radius-sm);">${lab.summary}</p>
+    </div>
+
+    <h4 style="font-size:1rem; margin-bottom:0.5rem;">Test Biomarkers</h4>
+    <div class="doctor-table-wrap" style="margin-bottom:1.5rem;">
+      <table class="doctor-table">
+        <thead>
+          <tr>
+            <th>Analyte / Parameter</th>
+            <th>Patient Result</th>
+            <th>Reference Interval</th>
+            <th>Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(lab.results || []).map(r => `
+            <tr>
+              <td><strong>${r.test}</strong></td>
+              <td style="font-weight:700; color:var(--hospital-teal-700);">${r.value}</td>
+              <td>${r.normalRange}</td>
+              <td><span class="badge badge-emerald">${r.flag}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+      <button class="btn btn-secondary" onclick="PulseCareUI.showToast('Download PDF', 'Generating authenticated diagnostic PDF document...', 'info')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download Official PDF</span>
+      </button>
+      <button class="btn btn-primary" data-close-modal="lab-report-modal">Done</button>
+    </div>
+  `;
+
+  PulseCareUI.openModal('lab-report-modal');
+};
+
+// Notification Center
+function initNotificationCenter() {
+  const bellBtn = document.getElementById('notif-bell-btn');
+  const dropdown = document.getElementById('notif-dropdown');
+  const itemsContainer = document.getElementById('notif-items-container');
+  const dot = document.getElementById('notif-badge-dot');
+
+  function renderNotifs() {
+    const notifs = PulseCareStore.getNotifications(currentPatient.id);
+    const unread = notifs.filter(n => !n.read).length;
+
+    if (dot) {
+      dot.style.display = unread > 0 ? 'inline-block' : 'none';
+    }
+
+    if (itemsContainer) {
+      if (notifs.length === 0) {
+        itemsContainer.innerHTML = `<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:1rem;">No notifications.</p>`;
+      } else {
+        itemsContainer.innerHTML = notifs.map(n => `
+          <div style="padding:0.6rem; border-radius:6px; background:${n.read ? 'transparent' : 'var(--bg-hover)'}; border:1px solid var(--border-light); font-size:0.8rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+              <strong style="color:var(--text-primary);">${n.title}</strong>
+              <span style="font-size:0.7rem; color:var(--text-muted);">${n.time}</span>
+            </div>
+            <p style="font-size:0.775rem; color:var(--text-secondary); margin:0;">${n.message}</p>
+          </div>
+        `).join('');
+      }
+    }
+  }
+
+  if (bellBtn && dropdown) {
+    bellBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = dropdown.style.display === 'block';
+      dropdown.style.display = isOpen ? 'none' : 'block';
+      if (!isOpen) {
+        renderNotifs();
+      }
+    });
+
+    document.addEventListener('click', () => {
+      dropdown.style.display = 'none';
+    });
+  }
+
+  window.clearAllNotifications = function() {
+    const notifs = PulseCareStore.getNotifications(currentPatient.id);
+    notifs.forEach(n => PulseCareStore.markNotificationRead(n.id));
+    renderNotifs();
+    PulseCareUI.showToast('Notifications', 'All notifications cleared.', 'info');
+  };
+
+  renderNotifs();
+}
+
+// Appointment Booking Wizard
+function initBookingWizard() {
+  const form = document.getElementById('book-appointment-form');
+  const docSelect = document.getElementById('book-doctor-select');
+
+  if (docSelect) {
+    const doctors = PulseCareStore.getDoctors();
+    docSelect.innerHTML = doctors.map(d => `
+      <option value="${d.id}">${d.name} (${d.specialty}) &bull; ${d.hospital}</option>
+    `).join('');
+  }
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const docId = docSelect.value;
+      const doc = PulseCareStore.getDoctorById(docId);
+      const date = document.getElementById('book-date').value;
+      const time = document.getElementById('book-time').value;
+      const type = document.getElementById('book-type').value;
+      const reason = document.getElementById('book-reason').value;
+
+      PulseCareStore.addAppointment({
+        patientId: currentPatient.id,
+        patientName: currentPatient.name,
+        doctorId: doc.id,
+        doctorName: doc.name,
+        doctorSpecialty: doc.specialty,
+        doctorRoom: doc.department,
+        date,
+        time,
+        type,
+        reason,
+        status: 'confirmed'
+      });
+
+      PulseCareUI.closeModal('book-apt-modal');
+      PulseCareUI.showToast('Consultation Booked', `Appointment confirmed with ${doc.name} for ${date} at ${time}.`, 'success');
+      renderAppointments();
+      switchTab('appointments');
+    });
+  }
+}
+
+// Chat Functionality
+function renderChat() {
   const container = document.getElementById('chat-messages-container');
   if (!container) return;
 
-  const msgs = PulseCareStore.getMessages(patientId, doctorId);
-  container.innerHTML = msgs.map(m => {
-    const isPatient = m.senderRole === 'patient';
-    return `
-      <div class="chat-bubble ${isPatient ? 'outgoing' : 'incoming'}">
-        <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">
-          ${isPatient ? 'You' : PulseCareUI.escapeHTML(m.senderName)} • ${m.timestamp}
-        </div>
-        <div>${PulseCareUI.escapeHTML(m.text)}</div>
-      </div>
-    `;
-  }).join('');
+  const msgs = PulseCareStore.getMessages(currentPatient.id, 'doc-1');
+  container.innerHTML = msgs.map(m => `
+    <div class="chat-bubble ${m.senderId === currentPatient.id ? 'outgoing' : 'incoming'}">
+      <div style="font-size:0.75rem; font-weight:700; margin-bottom:2px; opacity:0.85;">${m.senderName}</div>
+      <div>${m.text}</div>
+      <div style="font-size:0.65rem; margin-top:4px; text-align:right; opacity:0.75;">${m.timestamp}</div>
+    </div>
+  `).join('');
 
   container.scrollTop = container.scrollHeight;
 }
 
-// Bind Action Handlers
-function bindInteractiveActions(patient) {
-  // Appointment Form
-  const bookForm = document.getElementById('book-appointment-form');
-  if (bookForm) {
-    bookForm.addEventListener('submit', (e) => {
+function initChatForm() {
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('chat-input-msg');
+
+  if (form && input) {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const doctorId = document.getElementById('book-doctor-select').value;
-      const doc = PulseCareStore.getDoctorById(doctorId);
-      const date = document.getElementById('book-date').value;
-      const time = document.getElementById('book-time').value;
-      const type = document.getElementById('book-type').value;
-      const reason = document.getElementById('book-reason').value.trim();
-
-      if (!date || !reason) {
-        PulseCareUI.showToast('Incomplete Booking', 'Please select a date and enter the reason for your visit.', 'error');
-        return;
-      }
-
-      PulseCareStore.addAppointment({
-        patientId: patient.id,
-        patientName: patient.name,
-        doctorId: doc.id,
-        doctorName: doc.name,
-        doctorSpecialty: doc.specialty,
-        date,
-        time,
-        type,
-        reason
-      });
-
-      PulseCareUI.closeModal('book-apt-modal');
-      PulseCareUI.showToast('Appointment Confirmed', `Scheduled consultation with ${doc.name} on ${date} at ${time}.`, 'success');
-      bookForm.reset();
-      renderAppointments(patient.id);
-      renderOverview(patient);
-    });
-  }
-
-  // Chat Send Form
-  const chatForm = document.getElementById('chat-form');
-  if (chatForm) {
-    chatForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = document.getElementById('chat-input-msg');
       const text = input.value.trim();
       if (!text) return;
 
-      PulseCareStore.addMessage({
-        senderId: patient.id,
-        senderName: patient.name,
-        senderRole: 'patient',
-        recipientId: 'doc-1',
-        recipientName: 'Dr. Sarah Lin, MD',
-        text
-      });
-
+      PulseCareStore.sendMessage(currentPatient.id, currentPatient.name, 'doc-1', text);
       input.value = '';
-      renderChatMessages(patient.id, 'doc-1');
+      renderChat();
 
-      // Auto response simulation from Dr. Sarah Lin
+      // Simulated auto-reply from cardiologist
       setTimeout(() => {
-        PulseCareStore.addMessage({
-          senderId: 'doc-1',
-          senderName: 'Dr. Sarah Lin, MD',
-          senderRole: 'doctor',
-          recipientId: patient.id,
-          recipientName: patient.name,
-          text: `Thank you for the update, Alex. I have logged this into your medical record. Please let me know if any symptoms change before our visit!`
-        });
-        renderChatMessages(patient.id, 'doc-1');
-        PulseCareUI.showToast('New Clinical Reply', 'Dr. Sarah Lin sent you a reply.', 'info');
-      }, 1400);
+        PulseCareStore.sendMessage('doc-1', 'Dr. Sarah Lin, MD', currentPatient.id, 'Thank you Alex! Your note is logged in your medical record. I will review this during our encounter.');
+        renderChat();
+      }, 1200);
     });
   }
 }
-
-// Global action helpers accessible in template
-window.refillPrescriptionAction = function (rxId) {
-  const updated = PulseCareStore.refillPrescription(rxId);
-  if (updated) {
-    PulseCareUI.showToast('Refill Transmitted', `Refill submitted for ${updated.medicationName}. Sent to CVS Pharmacy.`, 'success');
-    renderPrescriptions(updated.patientId);
-  } else {
-    PulseCareUI.showToast('Refill Unavailable', 'No refills remaining. Please consult your physician.', 'error');
-  }
-};
-
-window.cancelAppointmentAction = function (aptId) {
-  if (confirm('Are you sure you want to cancel this appointment?')) {
-    PulseCareStore.updateAppointmentStatus(aptId, 'cancelled');
-    PulseCareUI.showToast('Appointment Cancelled', 'Your appointment has been cancelled.', 'info');
-    const pat = PulseCareStore.getCurrentSession();
-    renderAppointments(pat.id);
-    renderOverview(pat);
-  }
-};
-
-window.joinTelehealthRoom = function (aptId) {
-  const apt = PulseCareStore.getAppointments().find(a => a.id === aptId);
-  const roomDocName = apt ? apt.doctorName : 'Dr. Sarah Lin, MD';
-  const modalContent = document.getElementById('telehealth-modal-body');
-  if (modalContent) {
-    modalContent.innerHTML = `
-      <div style="text-align:center; padding: 1.5rem 0;">
-        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-gradient); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 2rem;">
-          <svg class="icon" style="width: 40px; height: 40px;" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-        </div>
-        <h3 style="margin-bottom: 0.5rem;">Connected to Secure Telehealth Room</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">Encrypted WebRTC Session with <strong>${PulseCareUI.escapeHTML(roomDocName)}</strong></p>
-        
-        <div style="background: var(--bg-input); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
-          <div style="display:flex; justify-content:space-around; align-items:center;">
-            <div style="text-align:center;">
-              <span class="pulse-dot" style="color: var(--accent-emerald);"></span>
-              <p style="font-size:0.75rem; margin-top:4px;">Audio HD: Active</p>
-            </div>
-            <div style="text-align:center;">
-              <span class="pulse-dot" style="color: var(--accent-emerald);"></span>
-              <p style="font-size:0.75rem; margin-top:4px;">Video 1080p: Active</p>
-            </div>
-            <div style="text-align:center;">
-              <span class="pulse-dot" style="color: var(--primary-500);"></span>
-              <p style="font-size:0.75rem; margin-top:4px;">Latency: 18ms</p>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn btn-danger" onclick="PulseCareUI.closeModal('telehealth-modal')">End Consultation</button>
-      </div>
-    `;
-  }
-  PulseCareUI.openModal('telehealth-modal');
-};
-
-window.viewLabReportModal = function (labId) {
-  const lab = PulseCareStore.data.labReports.find(l => l.id === labId);
-  if (!lab) return;
-
-  const modalBody = document.getElementById('lab-modal-body');
-  if (modalBody) {
-    modalBody.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
-        <div>
-          <h3>${PulseCareUI.escapeHTML(lab.testName)}</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">${lab.category} • ${lab.date}</p>
-        </div>
-        <span class="badge badge-emerald">${lab.status}</span>
-      </div>
-
-      <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-size: 0.9rem;">
-        <p><strong>Testing Facility:</strong> ${PulseCareUI.escapeHTML(lab.labFacility)}</p>
-        <p><strong>Ordering Physician:</strong> ${PulseCareUI.escapeHTML(lab.doctorName)}</p>
-      </div>
-
-      <div style="margin-bottom: 1.5rem;">
-        <h4 style="margin-bottom: 0.5rem; font-size: 0.95rem;">Biomarker Analysis & Clinical Findings:</h4>
-        <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">${PulseCareUI.escapeHTML(lab.summary)}</p>
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
-        <button class="btn btn-secondary" onclick="PulseCareUI.closeModal('lab-report-modal')">Close</button>
-        <button class="btn btn-primary" onclick="PulseCareUI.showToast('Downloaded', 'Mock report PDF saved to downloads', 'success')">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download Official PDF
-        </button>
-      </div>
-    `;
-  }
-  PulseCareUI.openModal('lab-report-modal');
-};
