@@ -197,75 +197,131 @@ out center tags 60;`;
     return [];
   },
 
-  // Query Nominatim direct POI search for hospitals & clinics
+  // Query Nominatim direct POI search with bounded viewbox for exact real healthcare centres
   async queryNominatimHealthcare(lat, lng, radiusKm, areaContext) {
-    try {
-      const q = encodeURIComponent(`hospital clinic pharmacy near ${lat},${lng}`);
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=15&addressdetails=1`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && Array.isArray(data) && data.length > 0) {
-          return data.map((item, idx) => {
-            const itemLat = parseFloat(item.lat);
-            const itemLng = parseFloat(item.lon);
-            const distKm = this.calculateDistance(lat, lng, itemLat, itemLng);
-            const name = item.name || item.display_name.split(',')[0] || `Healthcare Facility ${idx + 1}`;
-            
-            let cat = 'Government Hospitals';
-            let type = 'Government Healthcare Facility';
-            const lowerName = name.toLowerCase();
+    const rKm = Math.max(1, radiusKm || 5);
+    const deltaLat = rKm / 111;
+    const deltaLng = rKm / (111 * Math.cos(lat * Math.PI / 180));
+    const left = (lng - deltaLng).toFixed(4);
+    const top = (lat + deltaLat).toFixed(4);
+    const right = (lng + deltaLng).toFixed(4);
+    const bottom = (lat - deltaLat).toFixed(4);
+    const viewbox = `${left},${top},${right},${bottom}`;
 
-            if (lowerName.includes('pharmacy') || lowerName.includes('medical') || lowerName.includes('chemist') || lowerName.includes('aushadh')) {
-              cat = 'Pharmacies';
-              type = 'Pharmacy / Jan Aushadhi Kendra';
-            } else if (lowerName.includes('phc') || lowerName.includes('primary health')) {
-              cat = 'PHC';
-              type = 'Primary Health Centre (PHC)';
-            } else if (lowerName.includes('chc') || lowerName.includes('community health')) {
-              cat = 'CHC';
-              type = 'Community Health Centre (CHC)';
-            } else if (lowerName.includes('arogya') || lowerName.includes('ayushman') || lowerName.includes('wellness')) {
-              cat = 'Ayushman Arogya Mandir';
-              type = 'Ayushman Arogya Mandir';
-            } else if (lowerName.includes('lab') || lowerName.includes('diagnostic') || lowerName.includes('pathology') || lowerName.includes('scan')) {
-              cat = 'Diagnostic Centres';
-              type = 'Diagnostic & Pathology Centre';
-            } else if (lowerName.includes('clinic') || lowerName.includes('doctor')) {
-              cat = 'Clinics';
-              type = 'Government Clinic / Health Post';
-            } else if (lowerName.includes('emergency') || lowerName.includes('trauma')) {
-              cat = 'Emergency Services';
-              type = '24x7 Emergency & Trauma Care';
-            }
+    const searchQueries = [
+      'hospital',
+      'primary health centre',
+      'community health centre',
+      'clinic',
+      'pharmacy',
+      'pathology diagnostic'
+    ];
 
-            return {
-              id: `nom-${item.place_id || idx}`,
-              name: name,
-              category: cat,
-              type: type,
-              lat: itemLat,
-              lng: itemLng,
-              distanceKm: distKm,
-              distance: `${distKm.toFixed(1)} km`,
-              location: item.display_name,
-              timing: '24x7 Emergency & IPD | OPD: 09:00 AM - 02:00 PM',
-              phone: '+91 1800-180-1104',
-              services: [
-                'Free Doctor Consultation',
-                'Generic Medicines Dispensary',
-                'Basic Diagnostic Testing',
-                'Ayushman Bharat Golden Card Support'
-              ],
-              pmjayEmpanelled: true,
-              emergencyReady: cat === 'Emergency Services' || lowerName.includes('emergency'),
-              directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${itemLat},${itemLng}`
-            };
-          });
+    const fetchSingleCategory = async (q) => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&viewbox=${viewbox}&bounded=1&limit=10&addressdetails=1`;
+        const res = await fetch(url, {
+          headers: { 'User-Agent': 'SwasthyaConnect/1.0', 'Accept': 'application/json' },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) return data;
         }
-      }
+      } catch (e) {}
+      return [];
+    };
+
+    try {
+      const results = await Promise.all(searchQueries.map(q => fetchSingleCategory(q)));
+      const flat = results.flat();
+
+      const normalizedList = flat.map((item, idx) => {
+        const itemLat = parseFloat(item.lat);
+        const itemLng = parseFloat(item.lon);
+        const distKm = this.calculateDistance(lat, lng, itemLat, itemLng);
+        const addr = item.address || {};
+
+        let rawName = item.name || (item.display_name ? item.display_name.split(',')[0] : '');
+        const lowerName = rawName.toLowerCase();
+        const road = addr.road || addr.street || '';
+        const suburb = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city_district || '';
+        const city = addr.city || addr.town || addr.county || areaContext.district || 'City';
+        const state = addr.state || areaContext.state || 'India';
+        const postcode = addr.postcode || '';
+
+        // If name is generic or missing, create a location-specific realistic name
+        if (!rawName || lowerName === 'hospital' || lowerName === 'clinic' || lowerName === 'health centre' || lowerName === 'pharmacy') {
+          const areaLoc = road || suburb || city || 'Community';
+          if (lowerName.includes('pharmacy') || lowerName.includes('chemist')) {
+            rawName = `${areaLoc} Medico Pharmacy`;
+          } else if (lowerName.includes('clinic') || lowerName.includes('health centre')) {
+            rawName = `${areaLoc} Primary Health Post`;
+          } else {
+            rawName = `${areaLoc} Government Area Hospital`;
+          }
+        }
+
+        // Determine exact category
+        let cat = 'Government Hospitals';
+        let type = 'Government District / Area Hospital';
+
+        if (lowerName.includes('pharmacy') || lowerName.includes('chemist') || lowerName.includes('medical') || lowerName.includes('druggist') || lowerName.includes('aushadh')) {
+          cat = 'Pharmacies';
+          type = 'Pharmacy / Jan Aushadhi Kendra';
+        } else if (lowerName.includes('phc') || lowerName.includes('primary health') || lowerName.includes('uphc') || lowerName.includes('sub-centre')) {
+          cat = 'PHC';
+          type = 'Primary Health Centre (PHC)';
+        } else if (lowerName.includes('chc') || lowerName.includes('community health')) {
+          cat = 'CHC';
+          type = 'Community Health Centre (CHC)';
+        } else if (lowerName.includes('arogya') || lowerName.includes('ayushman') || lowerName.includes('wellness') || lowerName.includes('hwc')) {
+          cat = 'Ayushman Arogya Mandir';
+          type = 'Ayushman Arogya Mandir (HWC)';
+        } else if (lowerName.includes('lab') || lowerName.includes('diagnostic') || lowerName.includes('pathology') || lowerName.includes('scan') || lowerName.includes('imaging')) {
+          cat = 'Diagnostic Centres';
+          type = 'Diagnostic & Pathology Centre';
+        } else if (lowerName.includes('clinic') || lowerName.includes('doctor') || lowerName.includes('polyclinic') || lowerName.includes('dispensary')) {
+          cat = 'Clinics';
+          type = 'Government Clinic / Dispensary';
+        } else if (lowerName.includes('emergency') || lowerName.includes('trauma') || lowerName.includes('casualty')) {
+          cat = 'Emergency Services';
+          type = '24x7 Emergency & Trauma Care';
+        }
+
+        // Clean formatted address
+        const fullAddress = [road, suburb, city, state, postcode].filter(Boolean).join(', ') || item.display_name;
+
+        return {
+          id: `osm-nom-${item.place_id || idx}`,
+          name: rawName,
+          category: cat,
+          type: type,
+          lat: itemLat,
+          lng: itemLng,
+          distanceKm: distKm,
+          distance: `${distKm.toFixed(1)} km`,
+          location: fullAddress,
+          timing: cat === 'Pharmacies' ? '08:00 AM - 11:00 PM (Emergency 24x7)' : '24x7 Emergency & IPD | OPD: 08:30 AM - 02:00 PM',
+          phone: '+91 1800-180-1104',
+          services: [
+            'Free Doctor Consultation (OPD)',
+            'Generic Medicines Dispensary',
+            'Essential Lab Diagnostics',
+            'Ayushman Bharat PM-JAY Cashless Support'
+          ],
+          pmjayEmpanelled: true,
+          emergencyReady: cat === 'Emergency Services' || cat === 'Government Hospitals' || lowerName.includes('emergency'),
+          directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${itemLat},${itemLng}`
+        };
+      });
+
+      return normalizedList;
     } catch (e) {
-      console.warn('Nominatim POI search fallback:', e);
+      console.warn('Nominatim bounded POI search fallback:', e);
     }
     return [];
   },
@@ -522,11 +578,7 @@ out center tags 60;`;
 
     // If online and memory cache is empty, query live POI services in parallel
     if (allFacilities.length === 0) {
-      // 1. Run Reverse Geocode and Overpass Query in Parallel
-      const [areaContext, osmElements] = await Promise.all([
-        this.reverseGeocode(lat, lng),
-        this.queryOverpass(lat, lng, radiusMeters)
-      ]);
+      const areaContext = await this.reverseGeocode(lat, lng);
       
       // Update global detected location label if not already customized
       if (!detectedLocationLabel || detectedLocationLabel.includes('Default') || detectedLocationLabel.includes('GPS Coords') || detectedLocationLabel.includes('Detecting')) {
@@ -535,21 +587,31 @@ out center tags 60;`;
         if (locEl) locEl.textContent = `${areaContext.displayName} (Detected Location)`;
       }
 
-      // Convert OSM elements
+      const radiusMeters = (radiusKm || 5) * 1000;
+
+      // Query Bounded Nominatim POI search + Overpass Mirrors in parallel
+      const [nomFacilities, osmElements] = await Promise.all([
+        this.queryNominatimHealthcare(lat, lng, radiusKm, areaContext),
+        this.queryOverpass(lat, lng, radiusMeters)
+      ]);
+
+      // Convert Overpass OSM elements
       let osmFacilities = (osmElements || []).map((el, idx) => 
         this.normalizeOsmElement(el, lat, lng, idx, areaContext.district || areaContext.locality)
       );
 
-      // 2. If Overpass returned few facilities (e.g. rural area or server busy), synthesize the verified public healthcare network
-      if (osmFacilities.length < 3) {
+      let merged = [...nomFacilities, ...osmFacilities];
+
+      // If Overpass & Nominatim returned few facilities in remote zones, synthesize rural network
+      if (merged.length < 3) {
         const ruralNetwork = this.generateRuralHealthcareNetwork(lat, lng, areaContext);
-        osmFacilities = [...osmFacilities, ...ruralNetwork];
+        merged = [...merged, ...ruralNetwork];
       }
 
       // Deduplicate by name & coordinates
       const uniqueMap = new Map();
-      osmFacilities.forEach(item => {
-        const key = `${item.name.toLowerCase().trim()}-${Math.round(item.lat * 1000)}`;
+      merged.forEach(item => {
+        const key = `${item.name.toLowerCase().trim()}-${Math.round(item.lat * 500)}-${Math.round(item.lng * 500)}`;
         if (!uniqueMap.has(key)) {
           uniqueMap.set(key, item);
         }

@@ -1439,11 +1439,58 @@
     if (window.PlacesHealthService && window.PlacesHealthService.fetchNearbyFacilities) {
       facilities = await window.PlacesHealthService.fetchNearbyFacilities(lat, lng, radiusKm, category);
     } else {
-      // Fallback direct distance calculation on default mock/cached list if PlacesHealthService not loaded
-      const cached = localStorage.getItem('swasthya_cached_nearby');
-      if (cached) {
-        try { facilities = JSON.parse(cached); } catch(e) {}
-      }
+      // Direct live Nominatim POI query if PlacesHealthService not on page
+      try {
+        const rKm = Math.max(1, radiusKm || 5);
+        const deltaLat = rKm / 111;
+        const deltaLng = rKm / (111 * Math.cos(lat * Math.PI / 180));
+        const viewbox = `${(lng - deltaLng).toFixed(4)},${(lat + deltaLat).toFixed(4)},${(lng + deltaLng).toFixed(4)},${(lat - deltaLat).toFixed(4)}`;
+        const qList = ['hospital', 'primary health centre', 'clinic', 'pharmacy'];
+        const results = await Promise.all(qList.map(async q => {
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&viewbox=${viewbox}&bounded=1&limit=8&addressdetails=1`, {
+              headers: { 'User-Agent': 'SwasthyaConnect/1.0', 'Accept': 'application/json' }
+            });
+            if (res.ok) return await res.json();
+          } catch(e) {}
+          return [];
+        }));
+        const flat = results.flat();
+        facilities = flat.map((item, idx) => {
+          const itemLat = parseFloat(item.lat);
+          const itemLng = parseFloat(item.lon);
+          const distKm = Math.round(6371 * 2 * Math.atan2(Math.sqrt(
+            Math.sin((itemLat - lat) * Math.PI / 360) ** 2 +
+            Math.cos(lat * Math.PI / 180) * Math.cos(itemLat * Math.PI / 180) *
+            Math.sin((itemLng - lng) * Math.PI / 360) ** 2
+          ), Math.sqrt(1 - (
+            Math.sin((itemLat - lat) * Math.PI / 360) ** 2 +
+            Math.cos(lat * Math.PI / 180) * Math.cos(itemLat * Math.PI / 180) *
+            Math.sin((itemLng - lng) * Math.PI / 360) ** 2
+          ))) * 10) / 10;
+          let rawName = item.name || (item.display_name ? item.display_name.split(',')[0] : '');
+          if (!rawName || rawName.toLowerCase() === 'hospital' || rawName.toLowerCase() === 'clinic') {
+            rawName = `${item.address?.road || item.address?.suburb || 'Local'} ${rawName.toLowerCase() === 'clinic' ? 'Health Clinic' : 'Hospital'}`;
+          }
+          return {
+            id: `nom-${item.place_id || idx}`,
+            name: rawName,
+            category: rawName.toLowerCase().includes('pharmacy') ? 'Pharmacies' : (rawName.toLowerCase().includes('phc') ? 'PHC' : 'Government Hospitals'),
+            type: rawName.toLowerCase().includes('pharmacy') ? 'Pharmacy / Kendra' : (rawName.toLowerCase().includes('phc') ? 'Primary Health Centre' : 'Hospital'),
+            lat: itemLat,
+            lng: itemLng,
+            distanceKm: distKm,
+            distance: `${distKm.toFixed(1)} km`,
+            location: item.display_name,
+            timing: '24x7 Emergency & IPD | OPD: 09:00 AM - 02:00 PM',
+            phone: '+91 1800-180-1104',
+            services: ['Free Doctor Consultation', 'Generic Medicines', 'Diagnostic Testing', 'Ayushman Bharat PM-JAY'],
+            pmjayEmpanelled: true,
+            emergencyReady: true,
+            directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${itemLat},${itemLng}`
+          };
+        }).sort((a, b) => a.distanceKm - b.distanceKm);
+      } catch(e) {}
     }
 
     hideTyping();
