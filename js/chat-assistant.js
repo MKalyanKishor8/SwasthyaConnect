@@ -1115,8 +1115,22 @@
 
   document.head.appendChild(styleEl);
 
-  // Initialize Widget
+  // Initialize Widget ONLY when logged into patient portal
   function initWidget() {
+    const isPatientPage = window.location.pathname.endsWith('patient.html') || 
+                          window.location.pathname.endsWith('/patient') ||
+                          document.getElementById('patient-portal-body') ||
+                          document.querySelector('.portal-sidebar [data-tab="nearby"]');
+    
+    // Check authenticated session
+    const session = typeof PulseCareStore !== 'undefined' ? PulseCareStore.getSession() : null;
+    const isPatientSession = session && session.role === 'patient';
+
+    // Strictly show ONLY when logged into the Patient Portal
+    if (!isPatientPage && !isPatientSession) {
+      return;
+    }
+
     const wrap = document.createElement('div');
     wrap.innerHTML = widgetHTML;
     document.body.appendChild(wrap);
