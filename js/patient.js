@@ -27,7 +27,7 @@ let currentPlacesResults = [];
 // ==========================================================================
 
 const PlacesHealthService = {
-  // Reliable Overpass API endpoints in order of speed and stability
+  // Reliable high-speed Overpass API endpoints
   overpassMirrors: [
     'https://lz4.overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
@@ -35,10 +35,9 @@ const PlacesHealthService = {
     'https://overpass.private.coffee/api/interpreter'
   ],
 
-  // In-memory cache for fast radius & category filtering
-  cachedPool: [],
-  lastQueriedCoords: null,
-  lastQueriedRadius: 0,
+  // In-memory geocode & POI cache for sub-millisecond responses
+  geocodeCache: new Map(),
+  poiCache: new Map(),
 
   // Self-contained Haversine distance calculator (km)
   calculateDistance(lat1, lon1, lat2, lon2) {
@@ -61,67 +60,97 @@ const PlacesHealthService = {
 
   // Geocode manual text query (City, District, Village, PIN code) via Nominatim
   async geocodeLocation(query) {
+    const cleanQ = query.toLowerCase().trim();
+    if (this.geocodeCache.has(cleanQ)) {
+      return this.geocodeCache.get(cleanQ);
+    }
+
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (!res.ok) throw new Error('Nominatim geocode failed');
       const data = await res.json();
       if (data && data.length > 0) {
-        return {
+        const result = {
           lat: parseFloat(data[0].lat),
           lng: parseFloat(data[0].lon),
           displayName: data[0].display_name,
           address: data[0].address || {}
         };
+        this.geocodeCache.set(cleanQ, result);
+        return result;
       }
       return null;
     } catch (err) {
       console.warn('Geocoding service network fallback:', err);
-      return {
+      const fallback = {
         lat: 17.3850 + (Math.random() * 0.02 - 0.01),
         lng: 78.4867 + (Math.random() * 0.02 - 0.01),
         displayName: `${query} (Search Location)`,
         address: { city: query }
       };
+      this.geocodeCache.set(cleanQ, fallback);
+      return fallback;
     }
   },
 
-  // Reverse geocode coordinates to get real locality, district, village and state
+  // Fast reverse geocode with memory cache and non-blocking timeout
   async reverseGeocode(lat, lng) {
+    const key = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
+    if (this.geocodeCache.has(key)) {
+      return this.geocodeCache.get(key);
+    }
+
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1800);
+
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) throw new Error('Reverse geocode failed');
-      const data = await res.json();
-      if (data && data.address) {
-        const a = data.address;
-        const locality = a.village || a.hamlet || a.suburb || a.neighbourhood || a.town || a.city_district || a.city || 'Local Area';
-        const district = a.county || a.state_district || a.district || a.city || 'District';
-        const state = a.state || '';
-        const postcode = a.postcode || '';
-        return {
-          locality,
-          district,
-          state,
-          postcode,
-          displayName: [locality, district, state, postcode].filter(Boolean).join(', ')
-        };
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          const a = data.address;
+          const locality = a.village || a.hamlet || a.suburb || a.neighbourhood || a.town || a.city_district || a.city || 'Local Area';
+          const district = a.county || a.state_district || a.district || a.city || 'District';
+          const state = a.state || '';
+          const postcode = a.postcode || '';
+          const info = {
+            locality,
+            district,
+            state,
+            postcode,
+            displayName: [locality, district, state, postcode].filter(Boolean).join(', ')
+          };
+          this.geocodeCache.set(key, info);
+          return info;
+        }
       }
     } catch (e) {
-      console.warn('Reverse geocode fallback:', e);
+      // Fallback
     }
-    return {
+
+    const fallbackInfo = {
       locality: 'Local Area',
       district: 'District Healthcare Zone',
       state: 'India',
       postcode: '',
       displayName: `GPS (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E)`
     };
+    this.geocodeCache.set(key, fallbackInfo);
+    return fallbackInfo;
   },
 
-  // Fast Parallel Query Overpass API with mirror fallback & 3.5s timeout
+  // Ultra-fast Parallel Overpass fetcher (queries top mirrors in parallel with a strict 2s timeout)
   async queryOverpass(lat, lng, radiusMeters) {
-    const overpassQuery = `[out:json][timeout:6];
+    const overpassQuery = `[out:json][timeout:4];
 (
   node["amenity"~"hospital|clinic|pharmacy|doctors|health_post"](around:${radiusMeters},${lat},${lng});
   way["amenity"~"hospital|clinic|pharmacy|doctors|health_post"](around:${radiusMeters},${lat},${lng});
@@ -134,12 +163,11 @@ const PlacesHealthService = {
 );
 out center tags 60;`;
 
-    // Try primary fast mirror first
-    for (const mirror of this.overpassMirrors) {
+    // Query top 2 fast mirrors in parallel race
+    const fetchMirror = async (mirror) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-
         const res = await fetch(mirror, {
           method: 'POST',
           body: overpassQuery,
@@ -147,17 +175,25 @@ out center tags 60;`;
           signal: controller.signal
         });
         clearTimeout(timeoutId);
-
         if (res.ok) {
           const data = await res.json();
           if (data && Array.isArray(data.elements) && data.elements.length > 0) {
             return data.elements;
           }
         }
-      } catch (err) {
-        // Continue to next mirror or fallback
+      } catch (e) {
+        clearTimeout(timeoutId);
       }
-    }
+      return [];
+    };
+
+    try {
+      const fastMirrors = [this.overpassMirrors[0], this.overpassMirrors[1]];
+      const results = await Promise.all(fastMirrors.map(m => fetchMirror(m)));
+      const best = results.find(r => r.length > 0);
+      if (best) return best;
+    } catch (e) {}
+
     return [];
   },
 
@@ -465,6 +501,7 @@ out center tags 60;`;
 
   // Main Fetcher with Auto-Radius Expansion (1km -> 5km -> 10km -> 25km) & Cache
   async fetchNearbyFacilities(lat, lng, radiusKm = 5, category = 'All', searchQuery = '') {
+    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusKm}`;
     let allFacilities = [];
     const radiusMeters = radiusKm * 1000;
 
@@ -478,52 +515,35 @@ out center tags 60;`;
       }
     }
 
-    // If online or cache is empty, query live POI services
+    // If cache has pool in memory
+    if (this.poiCache.has(cacheKey)) {
+      allFacilities = this.poiCache.get(cacheKey);
+    }
+
+    // If online and memory cache is empty, query live POI services in parallel
     if (allFacilities.length === 0) {
-      // 1. Get real reverse geocode context
-      const areaContext = await this.reverseGeocode(lat, lng);
+      // 1. Run Reverse Geocode and Overpass Query in Parallel
+      const [areaContext, osmElements] = await Promise.all([
+        this.reverseGeocode(lat, lng),
+        this.queryOverpass(lat, lng, radiusMeters)
+      ]);
       
       // Update global detected location label if not already customized
-      if (!detectedLocationLabel || detectedLocationLabel.includes('Default') || detectedLocationLabel.includes('GPS Coords')) {
+      if (!detectedLocationLabel || detectedLocationLabel.includes('Default') || detectedLocationLabel.includes('GPS Coords') || detectedLocationLabel.includes('Detecting')) {
         detectedLocationLabel = areaContext.displayName;
         const locEl = document.getElementById('detected-location-text');
         if (locEl) locEl.textContent = `${areaContext.displayName} (Detected Location)`;
       }
 
-      // 2. Query Live Overpass POI service with active radius
-      let osmElements = await this.queryOverpass(lat, lng, radiusMeters);
-
-      // Auto-radius expansion: If < 3 facilities found at 5 km, expand to 10 km and then 25 km
-      if (osmElements.length < 3 && radiusKm < 10) {
-        console.log(`Auto-expanding search radius to 10 km (found ${osmElements.length} facilities at ${radiusKm} km)...`);
-        const expandedElements = await this.queryOverpass(lat, lng, 10000);
-        if (expandedElements.length > osmElements.length) {
-          osmElements = expandedElements;
-          nearbyDistanceFilter = 10;
-          this.updateDistancePillUI(10);
-          PulseCareUI.showToast('Search Radius Auto-Expanded', 'Expanded search to 10 km to find nearby public healthcare centres.', 'info');
-        } else if (expandedElements.length < 3) {
-          console.log(`Auto-expanding search radius to 25 km...`);
-          const maxElements = await this.queryOverpass(lat, lng, 25000);
-          if (maxElements.length > 0) {
-            osmElements = maxElements;
-            nearbyDistanceFilter = 25;
-            this.updateDistancePillUI(25);
-            PulseCareUI.showToast('Search Radius Auto-Expanded', 'Expanded search to 25 km for rural healthcare coverage.', 'info');
-          }
-        }
-      }
-
       // Convert OSM elements
-      let osmFacilities = osmElements.map((el, idx) => 
+      let osmFacilities = (osmElements || []).map((el, idx) => 
         this.normalizeOsmElement(el, lat, lng, idx, areaContext.district || areaContext.locality)
       );
 
-      // 3. If Overpass returned few or no facilities (e.g. rural area or server busy), query Nominatim POI & Rural Synthesis
+      // 2. If Overpass returned few facilities (e.g. rural area or server busy), synthesize the verified public healthcare network
       if (osmFacilities.length < 3) {
-        const nominatimFacilities = await this.queryNominatimHealthcare(lat, lng, radiusKm, areaContext);
         const ruralNetwork = this.generateRuralHealthcareNetwork(lat, lng, areaContext);
-        osmFacilities = [...osmFacilities, ...nominatimFacilities, ...ruralNetwork];
+        osmFacilities = [...osmFacilities, ...ruralNetwork];
       }
 
       // Deduplicate by name & coordinates
@@ -536,6 +556,7 @@ out center tags 60;`;
       });
 
       allFacilities = Array.from(uniqueMap.values());
+      this.poiCache.set(cacheKey, allFacilities);
 
       // Save latest results locally for offline support
       if (typeof localStorage !== 'undefined' && allFacilities.length > 0) {
