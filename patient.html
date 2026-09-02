@@ -678,12 +678,12 @@
           <div class="welcome-banner" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(2, 132, 199, 0.12) 100%); border: 1.5px solid rgba(13, 148, 136, 0.3); margin-bottom:1.5rem;">
             <div class="welcome-text">
               <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; flex-wrap:wrap;">
-                <span class="badge badge-emerald"><span class="pulse-dot"></span> GPS Geolocation Active</span>
-                <span class="badge badge-primary">Demo Data / Prototype Network</span>
+                <span class="badge badge-emerald"><span class="pulse-dot"></span> Real Geolocation & Places POI Active</span>
+                <span class="badge badge-primary">OpenStreetMap Live Healthcare Registry</span>
               </div>
               <h1 style="font-size:1.85rem;" id="nearby-main-heading">📍 Healthcare Centres Near You</h1>
               <p id="nearby-location-indicator" style="font-size:0.95rem; color:var(--text-primary); font-weight:600;">
-                Current Location: <span id="detected-location-text" style="color:var(--hospital-teal-700);">Springfield Central (Detected via Browser Geolocation)</span>
+                Current Location: <span id="detected-location-text" style="color:var(--hospital-teal-700);">Detecting Patient Location via Browser Geolocation...</span>
               </p>
             </div>
             <div class="welcome-actions" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
@@ -704,7 +704,7 @@
               <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">Enter your City / District / PIN Code to search for nearby healthcare centres:</p>
             </div>
             <form id="manual-location-form" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-              <input type="text" id="manual-location-input" class="form-control" placeholder="Enter City, District, Village, or 6-digit PIN Code (e.g. Hyderabad, Vijayawada, Springfield, 500001)..." style="flex:1; min-width:260px;" required>
+              <input type="text" id="manual-location-input" class="form-control" placeholder="Enter City, District, Village, or 6-digit PIN Code (e.g. Hyderabad, Vijayawada, Delhi, Mumbai, 500001)..." style="flex:1; min-width:260px;" required>
               <button type="submit" class="btn btn-primary">
                 <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <span>Search Facilities</span>
