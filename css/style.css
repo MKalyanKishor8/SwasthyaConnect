@@ -92,12 +92,40 @@
   --shadow-sm: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 10px 30px -4px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 30px rgba(13, 148, 136, 0.35);
+/* Rural Low Data Mode (Optimized for low-bandwidth connections) */
+.low-data-mode *,
+.low-data-mode *::before,
+.low-data-mode *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.low-data-mode {
+  --primary-gradient: #0d9488 !important;
+  --primary-gradient-hover: #0f766e !important;
+  --accent-emerald-gradient: #059669 !important;
+  --hospital-red-gradient: #e11d48 !important;
+  --emergency-gradient: #dc2626 !important;
+}
+
+.low-data-mode .ambient-glow-1,
+.low-data-mode .ambient-glow-2,
+.low-data-mode .ambient-blob,
+.low-data-mode .glow-orb {
+  display: none !important;
 }
 
 /* Base Reset */
 *, *::before, *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
   margin: 0;
   padding: 0;
 }

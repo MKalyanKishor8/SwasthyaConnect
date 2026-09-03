@@ -739,6 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMedicalRecords();
   renderScans();
   renderTelehealthHistory();
+  renderDoctorsList();
   renderGovernmentSchemes();
   initSchemesSearchAndFilter();
   initEligibilityChecker();
@@ -764,6 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMedicalRecords();
     renderScans();
     renderTelehealthHistory();
+    renderDoctorsList();
     renderGovernmentSchemes(currentSchemeCategory);
     refreshNearbyCentresAndMap();
   });
@@ -772,6 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('swasthyaLanguageChanged', (e) => {
     renderPatientData();
     renderAppointments();
+    renderDoctorsList();
     renderGovernmentSchemes(currentSchemeCategory);
     if (currentPlacesResults && currentPlacesResults.length > 0) {
       renderNearbyCards(currentPlacesResults);
@@ -792,8 +795,10 @@ function initNavigation() {
 
   const titles = {
     overview: 'Patient Health Dashboard',
+    dashboard: 'Patient Health Dashboard',
     profile: 'My Patient Profile & Demographics',
     appointments: 'Scheduled Consultations & Appointments',
+    doctors: 'Find a Doctor & Rural Specialist',
     records: 'Electronic Medical Records (EHR)',
     prescriptions: 'Active Medications & Pharmacy Refills',
     labs: 'Diagnostic Lab Reports & Pathology',
@@ -824,8 +829,10 @@ function switchTab(tabId) {
 
   const titles = {
     overview: 'Patient Health Dashboard',
+    dashboard: 'Patient Health Dashboard',
     profile: 'My Patient Profile & Demographics',
     appointments: 'Scheduled Consultations & Appointments',
+    doctors: 'Find a Doctor & Rural Specialist',
     records: 'Electronic Medical Records (EHR)',
     prescriptions: 'Active Medications & Pharmacy Refills',
     labs: 'Diagnostic Lab Reports & Pathology',
@@ -1501,9 +1508,28 @@ function renderAppointments() {
   const upcoming = allApts.filter(a => a.status !== 'completed' && a.status !== 'cancelled');
   const past = allApts.filter(a => a.status === 'completed');
 
+  const emptyUpcomingHTML = `
+    <div class="glass-panel" style="padding: 2.25rem 1.5rem; text-align: center; border: 1.5px dashed var(--border-light); border-radius: var(--radius-md); margin: 0.5rem 0;">
+      <div style="font-size: 2.25rem; margin-bottom: 0.5rem;">📅</div>
+      <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-primary);">No upcoming appointments</h4>
+      <p style="color: var(--text-secondary); font-size: 0.875rem; max-width: 420px; margin: 0 auto 1.25rem;">
+        You currently have no scheduled visits. Search our rural doctor network or book a new tele-consultation.
+      </p>
+      <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="PulseCareUI.openModal('book-apt-modal')">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Book Appointment</span>
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="switchTab('doctors')">
+          <span>Find a Doctor</span>
+        </button>
+      </div>
+    </div>
+  `;
+
   if (ovContainer) {
     if (upcoming.length === 0) {
-      ovContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No upcoming appointments scheduled.</p>`;
+      ovContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No upcoming appointments scheduled. <a href="#" onclick="event.preventDefault(); PulseCareUI.openModal('book-apt-modal');" style="color:var(--primary-600); font-weight:600;">Book now &rarr;</a></p>`;
     } else {
       ovContainer.innerHTML = upcoming.slice(0, 2).map(apt => createAppointmentItemHTML(apt)).join('');
     }
@@ -1511,7 +1537,7 @@ function renderAppointments() {
 
   if (upcomingContainer) {
     if (upcoming.length === 0) {
-      upcomingContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No upcoming appointments. Click "Book New Appointment" to schedule.</p>`;
+      upcomingContainer.innerHTML = emptyUpcomingHTML;
     } else {
       upcomingContainer.innerHTML = upcoming.map(apt => createAppointmentItemHTML(apt, true)).join('');
     }
@@ -1519,7 +1545,7 @@ function renderAppointments() {
 
   if (pastContainer) {
     if (past.length === 0) {
-      pastContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No past appointment records found.</p>`;
+      pastContainer.innerHTML = `<div class="glass-panel" style="padding:1.5rem; text-align:center; color:var(--text-muted); font-size:0.9rem;">No past appointment history recorded.</div>`;
     } else {
       pastContainer.innerHTML = past.map(apt => createPastAppointmentHTML(apt)).join('');
     }
@@ -2267,6 +2293,16 @@ function initNotificationCenter() {
 function initBookingWizard() {
   const form = document.getElementById('book-appointment-form');
   const docSelect = document.getElementById('book-doctor-select');
+  const dateInput = document.getElementById('book-date');
+
+  // Set min date to today
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    if (!dateInput.value || dateInput.value < today) {
+      dateInput.value = today;
+    }
+  }
 
   if (docSelect) {
     const doctors = PulseCareStore.getDoctors();
@@ -2285,6 +2321,11 @@ function initBookingWizard() {
       const type = document.getElementById('book-type').value;
       const reason = document.getElementById('book-reason').value;
 
+      if (!doc) {
+        PulseCareUI.showToast('Select Doctor', 'Please select an attending doctor.', 'error');
+        return;
+      }
+
       const appointmentData = {
         patientId: currentPatient.id,
         patientName: currentPatient.name,
@@ -2299,22 +2340,132 @@ function initBookingWizard() {
         status: 'confirmed'
       };
 
-      if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
-        SwasthyaOfflineManager.queueOfflineAction('BOOK_APPOINTMENT', appointmentData);
+      try {
+        if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
+          SwasthyaOfflineManager.queueOfflineAction('BOOK_APPOINTMENT', appointmentData);
+          PulseCareStore.addAppointment(appointmentData);
+          PulseCareUI.closeModal('book-apt-modal');
+          PulseCareUI.showToast('Appointment Saved (Offline)', `Consultation with ${doc.name} saved on device. Will auto-sync with servers when online.`, 'info');
+          renderAppointments();
+          switchTab('appointments');
+          return;
+        }
+
         PulseCareStore.addAppointment(appointmentData);
+
         PulseCareUI.closeModal('book-apt-modal');
-        PulseCareUI.showToast('Appointment Saved (Offline)', `Consultation with ${doc.name} saved on device. Will auto-sync with hospital servers when online.`, 'info');
+        PulseCareUI.showToast('Appointment Confirmed', `Appointment successfully booked with ${doc.name} for ${date} at ${time}.`, 'success');
         renderAppointments();
         switchTab('appointments');
-        return;
+      } catch (err) {
+        PulseCareUI.showToast('Booking Error', err.message || 'Unable to complete booking. Please select another date/time.', 'error');
       }
-
-      PulseCareStore.addAppointment(appointmentData);
-
-      PulseCareUI.closeModal('book-apt-modal');
-      PulseCareUI.showToast('Consultation Booked', `Appointment confirmed with ${doc.name} for ${date} at ${time}.`, 'success');
-      renderAppointments();
-      switchTab('appointments');
     });
   }
+}
+
+// ==========================================================================
+// DOCTORS DIRECTORY & SEARCH
+// ==========================================================================
+
+function renderDoctorsList(filterOptions = {}) {
+  const container = document.getElementById('doctors-cards-container');
+  if (!container) return;
+
+  let doctors = PulseCareStore.getDoctors();
+
+  const specialty = filterOptions.specialty || document.getElementById('filter-doc-specialty')?.value || 'All';
+  const location = filterOptions.location || document.getElementById('filter-doc-location')?.value || 'All';
+  const language = filterOptions.language || document.getElementById('filter-doc-language')?.value || 'All';
+
+  if (specialty !== 'All') {
+    doctors = doctors.filter(d => (d.specialty || '').toLowerCase().includes(specialty.toLowerCase()));
+  }
+
+  if (location !== 'All') {
+    doctors = doctors.filter(d => (d.hospital || '').toLowerCase().includes(location.toLowerCase()));
+  }
+
+  if (language !== 'All') {
+    doctors = doctors.filter(d => (d.languages || []).some(l => l.toLowerCase().includes(language.toLowerCase())));
+  }
+
+  if (doctors.length === 0) {
+    container.innerHTML = `
+      <div class="glass-panel" style="grid-column: 1 / -1; padding: 2.5rem; text-align: center;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🩺</div>
+        <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">No doctors matching selected filters</h4>
+        <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">Try resetting your filters to view all available specialists in the rural tele-health network.</p>
+        <button class="btn btn-primary btn-sm" onclick="resetDoctorFilters()">Reset All Filters</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = doctors.map(doc => `
+    <div class="glass-panel" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--primary-600); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+      <div>
+        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+          <div class="user-avatar" style="width: 52px; height: 52px; font-size: 1.2rem; background: var(--primary-gradient); flex-shrink: 0;">
+            ${doc.avatar}
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${doc.name}</h3>
+              <span class="badge badge-emerald" style="font-size: 0.7rem;">⭐ ${doc.rating || '4.9'}</span>
+            </div>
+            <p style="color: var(--primary-600); font-size: 0.85rem; font-weight: 600; margin: 2px 0 0;">${doc.specialty}</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem; font-size: 0.825rem; color: var(--text-secondary);">
+          <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+            <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; color:var(--primary-600);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span><strong>Facility:</strong> ${doc.hospital}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+            <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; color:var(--accent-emerald);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span><strong>Schedule:</strong> ${doc.availability || 'Mon - Sat (09:00 - 17:00)'}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; color:var(--text-muted);"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+            <span><strong>Languages:</strong> ${(doc.languages || ['English', 'Telugu', 'Hindi']).join(', ')}</span>
+          </div>
+        </div>
+
+        <p style="font-size: 0.825rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 1.25rem;">
+          ${doc.bio || 'Experienced clinician providing primary and specialized care for rural and underserved communities.'}
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; border-top: 1px solid var(--border-light); padding-top: 1rem;">
+        <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="bookDoctorDirectly('${doc.id}')">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Book Appointment</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterDoctorsList() {
+  renderDoctorsList();
+}
+
+function resetDoctorFilters() {
+  const spec = document.getElementById('filter-doc-specialty');
+  const loc = document.getElementById('filter-doc-location');
+  const lang = document.getElementById('filter-doc-language');
+  if (spec) spec.value = 'All';
+  if (loc) loc.value = 'All';
+  if (lang) lang.value = 'All';
+  renderDoctorsList();
+}
+
+function bookDoctorDirectly(doctorId) {
+  const docSelect = document.getElementById('book-doctor-select');
+  if (docSelect && doctorId) {
+    docSelect.value = doctorId;
+  }
+  PulseCareUI.openModal('book-apt-modal');
 }

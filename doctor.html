@@ -17,11 +17,12 @@
   <!-- Hospital Emergency Top Ticker -->
   <div class="emergency-top-ticker">
     <div class="emergency-ticker-left">
-      <span class="pulse-dot" style="color: #ffffff;"></span>
-      <span>24x7 Hospital Code Blue / Trauma Alarm: <strong class="emergency-ticker-phone">Ext. 9999</strong></span>
+      <span class="pulse-dot" style="background: #ffffff;"></span>
+      <span>Emergency Services: <strong>108 (Ambulance) / 112 (National Emergency)</strong></span>
     </div>
     <div class="emergency-ticker-right">
-      <span>🏥 Metro Health Hospital &bull; Physician Clinical Station</span>
+      <span>🏥 SwasthyaConnect</span>
+      <span>Rural Physician Tele-Station (Demo Mode)</span>
     </div>
   </div>
 
@@ -73,7 +74,7 @@
           </div>
           <div class="user-info">
             <div class="user-info-name doctor-name">Dr. Sarah Lin, MD</div>
-            <div class="user-info-role doctor-specialty">Cardiology</div>
+            <div class="user-info-role doctor-specialty">Cardiologist (Demo Profile)</div>
           </div>
         </div>
         <button class="btn btn-sm btn-secondary btn-logout" style="width: 100%;">
@@ -98,6 +99,11 @@
         </div>
 
         <div class="topbar-right">
+          <!-- Low Data Mode Toggle -->
+          <button class="low-data-btn low-data-toggle-btn" aria-pressed="false" title="Toggle Low Data Mode">
+            <span>⚡ Low Data</span>
+          </button>
+
           <!-- Language Switcher (English, Hindi, Telugu) -->
           <div class="lang-switcher-wrap" title="Change Language / भाषा बदलें / భాషను మార్చండి">
             <svg class="icon lang-globe-icon" viewBox="0 0 24 24" style="width:16px; height:16px; margin-right:4px;">
@@ -127,13 +133,22 @@
       <!-- Portal Body -->
       <div class="portal-body">
 
+        <!-- Doctor Verification Disclaimer Banner -->
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1.5px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: var(--text-primary);">
+          <span style="font-size: 1.25rem;">⚠️</span>
+          <div>
+            <strong>Doctor Verification Required (Prototype Demo Mode):</strong>
+            <span style="color: var(--text-secondary); margin-left: 4px;">Registered medical practitioners are verified before receiving clinical credentials. This station displays simulated demo patient queues.</span>
+          </div>
+        </div>
+
         <!-- ================= TAB: OVERVIEW (Command Center) ================= -->
         <section class="tab-panel active" id="tab-overview">
           
           <div class="welcome-banner">
             <div class="welcome-text">
               <h1>Good day, <span class="doctor-name">Dr. Sarah Lin, MD</span></h1>
-              <p><span class="doctor-dept">Cardiovascular Care Unit</span> &bull; Metro Health Academic Medical Center</p>
+              <p><span class="doctor-dept">Tele-Cardiology Wing</span> &bull; SwasthyaConnect District Tele-Health Network</p>
               <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
                 <span class="badge badge-emerald"><span class="pulse-dot"></span> Clinical Workstation Online</span>
                 <span class="badge badge-primary">EHR Synced</span>

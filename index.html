@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SwasthyaConnect | Modern Healthcare & Clinical Portal</title>
+  <title>SwasthyaConnect | Accessible Healthcare for Every Village</title>
+  <meta name="description" content="Connecting rural and underserved communities with accessible healthcare, doctors, appointments, health records and emergency support.">
   <meta name="theme-color" content="#0d9488">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -11,31 +12,206 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/animations.css">
+  <style>
+    /* Hero Action Buttons Grid */
+    .hero-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin: 1.25rem 0 0.5rem;
+    }
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.15rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: center;
+      border: 1px solid transparent;
+    }
+    .hero-btn-primary {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+    }
+    .hero-btn-primary:hover {
+      background: var(--primary-gradient-hover);
+      transform: translateY(-2px);
+      color: #ffffff;
+    }
+    .hero-btn-secondary {
+      background: var(--bg-surface);
+      color: var(--hospital-teal-800);
+      border-color: var(--border-subtle);
+    }
+    .hero-btn-secondary:hover {
+      background: var(--bg-hover);
+      transform: translateY(-2px);
+    }
+    .hero-btn-voice {
+      background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);
+    }
+    .hero-btn-voice:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+    .hero-btn-emergency {
+      background: var(--emergency-gradient);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
+    }
+    .hero-btn-emergency:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+    .prototype-disclaimer-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      padding: 0.6rem 0.85rem;
+      background: rgba(13, 148, 136, 0.06);
+      border-left: 3px solid var(--hospital-teal-600);
+      border-radius: var(--radius-xs);
+      margin-top: 0.5rem;
+    }
+    .low-data-btn {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all var(--transition-fast);
+    }
+    .low-data-btn.active {
+      background: var(--hospital-teal-600);
+      color: #ffffff;
+      border-color: var(--hospital-teal-600);
+    }
+    /* Main Navigation */
+    .nav-links-desktop {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-links-desktop a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: color var(--transition-fast);
+    }
+    .nav-links-desktop a:hover,
+    .nav-links-desktop a.active {
+      color: var(--hospital-teal-600);
+    }
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 6px;
+    }
+    /* Mobile Drawer */
+    .mobile-drawer {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100vh;
+      background: var(--bg-surface);
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      padding: 1.5rem;
+      flex-direction: column;
+      gap: 1rem;
+      transform: translateX(-100%);
+      transition: transform var(--transition-normal);
+    }
+    .mobile-drawer.open {
+      transform: translateX(0);
+    }
+    .mobile-drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+    }
+    .mobile-drawer-overlay.open {
+      display: block;
+    }
+    @media (max-width: 992px) {
+      .nav-links-desktop { display: none; }
+      .hamburger-btn { display: flex; }
+      .mobile-drawer { display: flex; }
+      .hero-actions-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Hospital Emergency & Accreditation Top Ticker -->
+  <!-- Hospital Emergency & Mission Top Ticker -->
   <div class="emergency-top-ticker">
     <div class="emergency-ticker-left">
-      <span class="pulse-dot" style="color: #ffffff;"></span>
-      <span>24x7 Emergency Trauma & Ambulance: <strong class="emergency-ticker-phone">108 / +91-800-SWASTHYA</strong></span>
+      <span class="pulse-dot" style="background: #ffffff;"></span>
+      <span>Emergency Services: <strong>108 (Ambulance) / 112 (National Emergency)</strong></span>
     </div>
     <div class="emergency-ticker-right">
-      <span>🏥 Metro Health Academic Medical Center</span>
-      <span>⭐ NABH & JCI Accredited Hospital</span>
+      <span>🏥 SwasthyaConnect</span>
+      <span>Accessible Healthcare for Every Village</span>
     </div>
   </div>
 
   <!-- App Header -->
   <header class="app-header">
-    <a href="index.html" class="brand-logo">
-      <div class="brand-icon">
-        <svg class="icon" style="width:22px; height:22px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      </div>
-      <span>Swasthya<span style="color:var(--hospital-teal-600); font-weight:700;">Connect</span></span>
-    </a>
+    <div style="display:flex; align-items:center; gap: 0.75rem;">
+      <button class="hamburger-btn" id="mobile-menu-open-btn" aria-label="Open Navigation Menu">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon">
+          <svg class="icon" style="width:22px; height:22px;" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <span>Swasthya<span style="color:var(--hospital-teal-600); font-weight:700;">Connect</span></span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="nav-links-desktop" aria-label="Main Navigation">
+      <a href="index.html" class="active" data-i18n="navHome">Home</a>
+      <a href="patient.html#doctors" data-i18n="navFindDoctor">Find Doctor</a>
+      <a href="patient.html#appointments" data-i18n="navAppointments">Appointments</a>
+      <a href="patient.html#records" data-i18n="navHealthRecords">Health Records</a>
+      <a href="patient.html#schemes" data-i18n="navSchemes">Health Schemes</a>
+      <a href="javascript:void(0)" onclick="if(window.SwasthyaVoiceAssistant) SwasthyaVoiceAssistant.toggleAssistant(true)" data-i18n="navVoiceAssistant">Voice Assistant</a>
+      <a href="#about" data-i18n="navAbout">About</a>
+    </nav>
 
     <div class="nav-actions">
+      <!-- Low Data Mode Toggle -->
+      <button class="low-data-btn low-data-toggle-btn" aria-pressed="false" title="Toggle Low Data Mode for rural low-bandwidth">
+        <span>⚡ Low Data</span>
+      </button>
+
       <!-- Language Switcher (English, Hindi, Telugu) -->
       <div class="lang-switcher-wrap" title="Change Language / भाषा बदलें / భాషను మార్చండి">
         <svg class="icon lang-globe-icon" viewBox="0 0 24 24" style="width:16px; height:16px; margin-right:4px;">
@@ -59,36 +235,88 @@
     </div>
   </header>
 
-  <!-- Main Auth Wrapper -->
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer-overlay" id="mobile-drawer-overlay"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile Navigation">
+    <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-light); padding-bottom:0.75rem;">
+      <span style="font-weight:800; font-size:1.1rem; color:var(--hospital-teal-800);">SwasthyaConnect</span>
+      <button class="btn-icon" id="mobile-menu-close-btn" aria-label="Close menu">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <nav style="display:flex; flex-direction:column; gap:0.85rem; margin-top:0.5rem;">
+      <a href="index.html" style="font-weight:700; color:var(--hospital-teal-600); text-decoration:none;">🏠 Home</a>
+      <a href="patient.html#doctors" style="text-decoration:none; color:var(--text-primary);">👨‍⚕️ Find Doctor</a>
+      <a href="patient.html#appointments" style="text-decoration:none; color:var(--text-primary);">📅 Book Appointment</a>
+      <a href="patient.html#records" style="text-decoration:none; color:var(--text-primary);">📁 Health Records</a>
+      <a href="patient.html#schemes" style="text-decoration:none; color:var(--text-primary);">🏛️ Government Health Schemes</a>
+      <a href="javascript:void(0)" onclick="document.getElementById('mobile-drawer').classList.remove('open'); document.getElementById('mobile-drawer-overlay').classList.remove('open'); if(window.SwasthyaVoiceAssistant) SwasthyaVoiceAssistant.toggleAssistant(true);" style="text-decoration:none; color:var(--text-primary);">🎙️ Voice Assistant</a>
+      <a href="patient.html#emergency" style="text-decoration:none; color:var(--hospital-cross-red); font-weight:700;">🚨 Emergency Help (108 / 112)</a>
+    </nav>
+    <div style="margin-top:auto; display:flex; flex-direction:column; gap:0.5rem; padding-top:1rem; border-top:1px solid var(--border-light);">
+      <a href="patient-login.html" class="btn btn-primary" style="text-align:center;">Patient Portal Sign In</a>
+      <a href="doctor-login.html" class="btn btn-secondary" style="text-align:center;">Doctor Portal Sign In</a>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
   <div class="auth-wrapper">
     <div class="ambient-glow-1"></div>
     <div class="ambient-glow-2"></div>
 
     <main class="auth-container">
       
-      <!-- Left Hero Showcase -->
+      <!-- Left Hero Showcase (Rural Healthcare Focused) -->
       <section class="auth-hero">
         <div class="auth-hero-badge">
           <span class="pulse-dot"></span>
-          <span>HIPAA COMPLIANT &bull; 256-BIT ENCRYPTION</span>
+          <span>Privacy-focused prototype &bull; Demo data only</span>
         </div>
 
         <h1 class="auth-hero-title">
-          Intelligent Healthcare for <span class="gradient-text">Patients & Clinicians</span>
+          Accessible Healthcare for <span class="gradient-text">Every Village</span>
         </h1>
 
         <p class="auth-hero-desc">
-          Experience frictionless care coordination with real-time biometric vitals monitoring, 1-click e-prescriptions, encrypted telehealth rooms, and integrated health records.
+          SwasthyaConnect helps rural and underserved communities find healthcare services, connect with doctors, manage appointments and access health information.
         </p>
 
-        <div class="auth-feature-list">
+        <!-- 4 Prominent Action Buttons -->
+        <div class="hero-actions-grid">
+          <a href="patient.html#doctors" class="hero-btn hero-btn-primary">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Find a Doctor</span>
+          </a>
+
+          <a href="patient.html#appointments" class="hero-btn hero-btn-secondary">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Book Appointment</span>
+          </a>
+
+          <button type="button" class="hero-btn hero-btn-voice" onclick="if(window.SwasthyaVoiceAssistant) SwasthyaVoiceAssistant.toggleAssistant(true);">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <span>🎙️ Open Voice Assistant</span>
+          </button>
+
+          <a href="patient.html#emergency" class="hero-btn hero-btn-emergency">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Emergency Help</span>
+          </a>
+        </div>
+
+        <div class="prototype-disclaimer-note">
+          ℹ️ <strong>Prototype Notice:</strong> This prototype uses demo data and is not intended for storing real medical information. Designed for rural accessibility and Smart India Hackathon demonstrations.
+        </div>
+
+        <!-- Rural Features Grid -->
+        <div class="auth-feature-list" id="about">
           <div class="auth-feature-item">
             <div class="auth-feature-icon">
               <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
             </div>
             <div class="auth-feature-text">
-              <h4>Live Telemetry</h4>
-              <p>Continuous vitals & blood pressure sync</p>
+              <h4>PHC & CHC Tele-Clinic</h4>
+              <p>Connect with specialist doctors from village clinics</p>
             </div>
           </div>
 
@@ -97,8 +325,8 @@
               <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             </div>
             <div class="auth-feature-text">
-              <h4>HD Telehealth</h4>
-              <p>Encrypted WebRTC virtual consultations</p>
+              <h4>Trilingual Voice AI</h4>
+              <p>Speak in English, Telugu (తెలుగు), or Hindi (हिन्दी)</p>
             </div>
           </div>
 
@@ -107,8 +335,8 @@
               <svg class="icon" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
             </div>
             <div class="auth-feature-text">
-              <h4>E-Prescriptions</h4>
-              <p>Direct pharmacy dispatch & refill tracking</p>
+              <h4>Jan Aushadhi Generics</h4>
+              <p>Affordable generic medicine e-prescriptions</p>
             </div>
           </div>
 
@@ -117,20 +345,20 @@
               <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
             <div class="auth-feature-text">
-              <h4>Unified EHR</h4>
-              <p>Complete medical history & diagnostic labs</p>
+              <h4>Govt Health Schemes</h4>
+              <p>NHM, Ayushman Bharat, PM-JANMAN, PMSSY & NACP</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Right Auth Card -->
+      <!-- Right Auth / Demo Gateway Card -->
       <section class="auth-card-container">
         <div class="glass-panel auth-card">
           
           <div class="auth-card-header">
-            <h2 class="auth-card-title">Welcome to SwasthyaConnect</h2>
-            <p class="auth-card-subtitle" id="role-badge-text">Patient Portal Sign In</p>
+            <h2 class="auth-card-title">SwasthyaConnect Portal</h2>
+            <p class="auth-card-subtitle" id="role-badge-text">Demo Access & Authentication Gateway</p>
           </div>
 
           <!-- Role Switcher -->
@@ -141,7 +369,7 @@
             </button>
             <button type="button" class="role-tab-btn" id="role-doctor-btn" role="tab" aria-selected="false">
               <svg class="icon" viewBox="0 0 24 24"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
-              <span>Doctor / MD</span>
+              <span>Doctor Portal</span>
             </button>
           </div>
 
@@ -149,16 +377,16 @@
           <div class="demo-quick-access">
             <div class="demo-quick-title">
               <span>⚡ One-Click Demo Access</span>
-              <span style="font-size:0.7rem; font-weight:normal; opacity:0.8;">Instant Fill</span>
+              <span style="font-size:0.7rem; font-weight:normal; opacity:0.8;">Instant Access</span>
             </div>
             <div class="demo-buttons-grid">
               <button type="button" class="btn-demo-pill" id="demo-patient-btn">
                 <span class="demo-avatar-dot dot-patient">AJ</span>
-                <span>Alex (Patient)</span>
+                <span>Alex (Demo Patient)</span>
               </button>
               <button type="button" class="btn-demo-pill" id="demo-doctor-btn">
                 <span class="demo-avatar-dot dot-doctor">SL</span>
-                <span>Dr. Sarah (MD)</span>
+                <span>Dr. Sarah (Demo MD)</span>
               </button>
             </div>
           </div>
@@ -166,7 +394,7 @@
           <!-- Login Form -->
           <form id="login-form" autocomplete="on">
             <div class="form-group">
-              <label class="form-label" for="auth-email">Email or Medical Record Number</label>
+              <label class="form-label" for="auth-email">Email or Health Record Identifier</label>
               <div class="input-with-icon">
                 <span class="input-icon-left">
                   <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -184,42 +412,35 @@
                 <span class="input-icon-left">
                   <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </span>
-                <input type="password" id="auth-password" class="form-control" placeholder="Enter your password" required value="PatientSecurePass123!">
+                <input type="password" id="auth-password" class="form-control" placeholder="Enter password" required value="PatientSecurePass123!">
                 <button type="button" class="password-toggle-btn" id="toggle-password-btn" aria-label="Toggle password visibility">
                   <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
               </div>
             </div>
 
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 1.5rem; font-size: 0.875rem;">
-              <label style="display:flex; align-items:center; gap: 0.5rem; cursor:pointer;">
-                <input type="checkbox" id="remember-me" checked>
-                <span>Remember this workstation</span>
-              </label>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-              <span>Sign In to SwasthyaConnect</span>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;">
+              <span>Sign In (Demo Mode)</span>
               <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
           </form>
 
-          <div class="auth-divider">or sign in with</div>
+          <div class="auth-divider">Official Helplines (India)</div>
 
-          <div class="social-auth-grid">
-            <button type="button" class="btn-social" id="biometric-login-btn">
-              <svg class="icon" style="color:var(--primary-600);" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-10 10c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
-              <span>Touch / Face ID</span>
-            </button>
-            <button type="button" class="btn-social" onclick="PulseCareUI.showToast('SSO Redirect', 'Redirecting to Hospital Active Directory SSO...', 'info')">
-              <svg class="icon" style="color:var(--accent-emerald);" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              <span>Hospital SSO</span>
-            </button>
+          <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; text-align: center; font-size: 0.825rem;">
+            <div style="padding: 0.5rem; background: var(--bg-hover); border-radius: var(--radius-sm);">
+              <div style="font-weight: 800; color: var(--hospital-cross-red);">108</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">National Ambulance</div>
+            </div>
+            <div style="padding: 0.5rem; background: var(--bg-hover); border-radius: var(--radius-sm);">
+              <div style="font-weight: 800; color: var(--hospital-teal-700);">104</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Health Advice / Telemedicine</div>
+            </div>
           </div>
 
-          <div class="auth-footer-text">
-            Don't have an account? 
-            <a href="#" style="font-weight:700;" onclick="event.preventDefault(); PulseCareUI.openModal('register-modal');">Register here</a>
+          <div class="auth-footer-text" style="margin-top:1.25rem;">
+            New to SwasthyaConnect? 
+            <a href="#" style="font-weight:700;" onclick="event.preventDefault(); PulseCareUI.openModal('register-modal');">Register demo account</a>
           </div>
 
         </div>
@@ -232,7 +453,7 @@
   <div class="modal-overlay" id="register-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Create SwasthyaConnect Account</h3>
+        <h3 class="modal-title">Create SwasthyaConnect Demo Account</h3>
         <button class="btn-icon" data-close-modal="register-modal" aria-label="Close modal">
           <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -240,28 +461,31 @@
       <form id="register-form">
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label" for="reg-name">Full Legal Name</label>
-            <input type="text" id="reg-name" class="form-control" placeholder="e.g. Alex Johnson" required>
+            <label class="form-label" for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" class="form-control" placeholder="e.g. Ramesh Kumar" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="reg-email">Email Address</label>
-            <input type="email" id="reg-email" class="form-control" placeholder="name@domain.com" required>
+            <input type="email" id="reg-email" class="form-control" placeholder="ramesh@example.com" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="reg-role">Account Type</label>
+            <label class="form-label" for="reg-role">Account Role</label>
             <select id="reg-role" class="form-control">
-              <option value="patient">Patient Care Portal</option>
-              <option value="doctor">Doctor / Clinician Portal</option>
+              <option value="patient">Patient Portal</option>
+              <option value="doctor">Doctor Portal (Verification Required)</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" for="reg-password">Create Secure Password</label>
-            <input type="password" id="reg-password" class="form-control" placeholder="Minimum 8 characters with numbers & symbols" required>
+            <label class="form-label" for="reg-password">Password</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="Minimum 6 characters" required>
           </div>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">
+            * Note: Doctor accounts require clinical verification in production. In this prototype, demo mode is enabled.
+          </p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="register-modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Complete Registration</button>
+          <button type="submit" class="btn btn-primary">Create Demo Account</button>
         </div>
       </form>
     </div>
@@ -271,13 +495,13 @@
   <div class="modal-overlay" id="forgot-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Reset Security Credentials</h3>
+        <h3 class="modal-title">Reset Credentials (Demo)</h3>
         <button class="btn-icon" data-close-modal="forgot-modal" aria-label="Close modal">
           <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal-body">
-        <p style="margin-bottom: 1.25rem;">Enter the verified email address associated with your medical chart or staff ID. We will send you an encrypted verification code.</p>
+        <p style="margin-bottom: 1.25rem;">Enter your registered email address to receive password reset instructions.</p>
         <div class="form-group">
           <label class="form-label">Registered Email</label>
           <input type="email" class="form-control" placeholder="e.g. alex.johnson@example.com" value="alex.johnson@example.com">
@@ -285,7 +509,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-close-modal="forgot-modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="PulseCareUI.closeModal('forgot-modal'); PulseCareUI.showToast('Reset Link Dispatched', 'Password reset instructions sent to your email inbox.', 'info');">Send Reset Link</button>
+        <button type="button" class="btn btn-primary" onclick="PulseCareUI.closeModal('forgot-modal'); PulseCareUI.showToast('Demo Reset Link', 'Password reset simulated for demo account.', 'info');">Send Reset Instructions</button>
       </div>
     </div>
   </div>
@@ -300,5 +524,32 @@
   <script src="js/theme.js"></script>
   <script src="js/animations.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/voice-assistant.js"></script>
+  <script>
+    // Mobile Drawer Navigation Toggles
+    const openBtn = document.getElementById('mobile-menu-open-btn');
+    const closeBtn = document.getElementById('mobile-menu-close-btn');
+    const drawer = document.getElementById('mobile-drawer');
+    const overlay = document.getElementById('mobile-drawer-overlay');
+
+    if (openBtn && drawer && overlay) {
+      openBtn.addEventListener('click', () => {
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+      });
+    }
+    if (closeBtn && drawer && overlay) {
+      closeBtn.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+      });
+    }
+    if (overlay && drawer) {
+      overlay.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+      });
+    }
+  </script>
 </body>
 </html>

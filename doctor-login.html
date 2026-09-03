@@ -14,15 +14,15 @@
 </head>
 <body>
 
-  <!-- Hospital Emergency & Accreditation Top Ticker -->
+  <!-- Hospital Emergency & Mission Top Ticker -->
   <div class="emergency-top-ticker">
     <div class="emergency-ticker-left">
-      <span class="pulse-dot" style="color: #ffffff;"></span>
-      <span>24x7 Emergency Trauma & Ambulance: <strong class="emergency-ticker-phone">108 / +91-800-SWASTHYA</strong></span>
+      <span class="pulse-dot" style="background: #ffffff;"></span>
+      <span>Emergency Services: <strong>108 (Ambulance) / 112 (National Emergency)</strong></span>
     </div>
     <div class="emergency-ticker-right">
-      <span>🏥 Metro Health Academic Medical Center</span>
-      <span>⭐ NABH & JCI Accredited Hospital</span>
+      <span>🏥 SwasthyaConnect</span>
+      <span>Accessible Healthcare for Every Village</span>
     </div>
   </div>
 
@@ -36,6 +36,11 @@
     </a>
 
     <div class="nav-actions">
+      <!-- Low Data Mode Toggle -->
+      <button class="low-data-btn low-data-toggle-btn" aria-pressed="false" title="Toggle Low Data Mode">
+        <span>⚡ Low Data</span>
+      </button>
+
       <!-- Language Switcher (English, Hindi, Telugu) -->
       <div class="lang-switcher-wrap" title="Change Language / भाषा बदलें / భాషను మార్చండి">
         <svg class="icon lang-globe-icon" viewBox="0 0 24 24" style="width:16px; height:16px; margin-right:4px;">
@@ -71,16 +76,16 @@
       <!-- Hero Left -->
       <section class="auth-hero">
         <div class="auth-hero-badge" style="background: rgba(2, 132, 199, 0.12); border-color: rgba(2, 132, 199, 0.3); color: var(--primary-600);">
-          <span class="pulse-dot" style="color: var(--primary-600);"></span>
-          <span>PHYSICIAN & CLINICAL PROVIDER HUB</span>
+          <span class="pulse-dot" style="background: var(--primary-600);"></span>
+          <span>Privacy-focused prototype &bull; Doctor verification required</span>
         </div>
 
         <h1 class="auth-hero-title">
-          Clinical Precision for <span class="gradient-text">Modern Physicians</span>
+          Clinical Tele-Care for <span class="gradient-text">Rural Physicians</span>
         </h1>
 
         <p class="auth-hero-desc">
-          Authorized hospital workstation gateway. Review patient waiting queues, inspect full electronic health records (EHR), author SOAP notes, and issue verified e-prescriptions.
+          Authorized rural telemedicine workstation. Review patient waiting queues, inspect electronic health records (EHR), author consultation notes, and issue verified generic e-prescriptions.
         </p>
 
         <div class="auth-feature-list">
@@ -109,8 +114,8 @@
               <svg class="icon" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
             </div>
             <div class="auth-feature-text">
-              <h4>SOAP & E-Prescribing</h4>
-              <p>Instant patient sync & DEA Surescripts routing</p>
+              <h4>Generic E-Prescribing</h4>
+              <p>Direct sync with Jan Aushadhi generic network</p>
             </div>
           </div>
 
@@ -119,8 +124,8 @@
               <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
             <div class="auth-feature-text">
-              <h4>HIPAA Certified</h4>
-              <p>End-to-end encrypted hospital station access</p>
+              <h4>Privacy Protected</h4>
+              <p>Demo prototype mode with simulated patient charts</p>
             </div>
           </div>
         </div>
@@ -165,7 +170,7 @@
             <div class="form-group">
               <div class="form-label">
                 <label for="doc-password-input">Clinical Master Password</label>
-                <a href="#" style="font-size:0.8rem;" onclick="event.preventDefault(); PulseCareUI.showToast('IT Helpdesk', 'Contact Metro Health IT at ext. 4400 for credentials reset.', 'info');">IT Helpdesk</a>
+                <a href="#" style="font-size:0.8rem;" onclick="event.preventDefault(); PulseCareUI.showToast('IT Helpdesk', 'Demo mode: Click quick access above or enter demo password.', 'info');">IT Helpdesk</a>
               </div>
               <div class="input-with-icon">
                 <span class="input-icon-left">

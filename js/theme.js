@@ -3,8 +3,9 @@
  */
 
 (function () {
-  // Theme Manager
+  // Theme & Low Data Mode Managers
   const THEME_STORAGE_KEY = 'swasthya_theme_mode';
+  const LOW_DATA_STORAGE_KEY = 'swasthya_low_data';
 
   function initTheme() {
     // Default explicitly to clean hospital Light Theme unless user previously chose dark
@@ -12,6 +13,45 @@
     
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcons(savedTheme);
+  }
+
+  function initLowDataMode() {
+    const isLowData = localStorage.getItem(LOW_DATA_STORAGE_KEY) === 'true';
+    if (isLowData) {
+      document.documentElement.classList.add('low-data-mode');
+    } else {
+      document.documentElement.classList.remove('low-data-mode');
+    }
+    updateLowDataButtons(isLowData);
+  }
+
+  function toggleLowDataMode() {
+    const isCurrentlyLowData = document.documentElement.classList.contains('low-data-mode');
+    const newState = !isCurrentlyLowData;
+    if (newState) {
+      document.documentElement.classList.add('low-data-mode');
+      localStorage.setItem(LOW_DATA_STORAGE_KEY, 'true');
+      showToast('⚡ Low Data Mode Active', 'Animations and heavy graphics reduced for low bandwidth.', 'info');
+    } else {
+      document.documentElement.classList.remove('low-data-mode');
+      localStorage.setItem(LOW_DATA_STORAGE_KEY, 'false');
+      showToast('Standard Mode', 'Full visual effects restored.', 'info');
+    }
+    updateLowDataButtons(newState);
+  }
+
+  function updateLowDataButtons(isActive) {
+    document.querySelectorAll('.low-data-toggle-btn').forEach(btn => {
+      if (isActive) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        btn.setAttribute('title', 'Low Data Mode: Active (Click to switch to standard)');
+      } else {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.setAttribute('title', 'Enable Low Data Mode for slow internet');
+      }
+    });
   }
 
   function toggleTheme() {
@@ -146,11 +186,17 @@
   // Document Ready Setup
   document.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    initLowDataMode();
     initMobileNav();
 
     // Bind Theme Toggle Buttons
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
       btn.addEventListener('click', toggleTheme);
+    });
+
+    // Bind Low Data Toggle Buttons
+    document.querySelectorAll('.low-data-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', toggleLowDataMode);
     });
 
     // Bind Modal Close buttons
@@ -181,12 +227,16 @@
   });
 
   // Expose to window
-  window.PulseCareUI = {
+  const UIInterface = {
     toggleTheme,
+    toggleLowDataMode,
+    initLowDataMode,
     showToast,
     openModal,
     closeModal,
     handleLogout,
     escapeHTML
   };
+  window.SwasthyaUI = UIInterface;
+  window.PulseCareUI = UIInterface;
 })();

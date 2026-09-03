@@ -19,15 +19,15 @@
 </head>
 <body>
 
-  <!-- Hospital Emergency Top Ticker -->
+  <!-- Hospital Emergency & Mission Top Ticker -->
   <div class="emergency-top-ticker">
     <div class="emergency-ticker-left">
-      <span class="pulse-dot" style="color: #ffffff;"></span>
-      <span>24x7 Emergency Trauma & Ambulance: <strong class="emergency-ticker-phone">108 / +91-800-SWASTHYA</strong></span>
+      <span class="pulse-dot" style="background: #ffffff;"></span>
+      <span>Emergency Services: <strong>108 (Ambulance) / 112 (National Emergency)</strong></span>
     </div>
     <div class="emergency-ticker-right">
-      <span>🏥 Metro Health Hospital &bull; In-Patient & OPD Services</span>
-      <span>⭐ NABH & JCI Accredited Hospital</span>
+      <span>🏥 SwasthyaConnect</span>
+      <span>Accessible Healthcare for Every Village</span>
     </div>
   </div>
 
@@ -57,6 +57,10 @@
         <a href="#appointments" class="nav-link" data-tab="appointments">
           <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <span data-i18n="navAppointments">Appointments & Tele-OPD</span>
+        </a>
+        <a href="#doctors" class="nav-link" data-tab="doctors">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span data-i18n="navFindDoctor">Find Doctor</span>
         </a>
         <a href="#schemes" class="nav-link" data-tab="schemes">
           <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -550,7 +554,7 @@
         <section class="tab-panel" id="tab-labs">
           <div style="margin-bottom: 1.5rem;">
             <h3 style="font-size: 1.4rem;">Diagnostic Lab Reports & Clinical Pathology</h3>
-            <p>Official diagnostic results authenticated by Quest Diagnostics & Metro Health Laboratories.</p>
+            <p>Official diagnostic results authenticated by District Health Diagnostic Laboratories.</p>
           </div>
           <div class="portal-card" style="margin-bottom: 2rem;">
             <div class="portal-card-header">
@@ -599,6 +603,74 @@
             <div class="portal-card-body" id="telehealth-history-container">
               <!-- Rendered via JS -->
             </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: FIND DOCTOR ================= -->
+        <section class="tab-panel" id="tab-doctors">
+          <div class="welcome-banner" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(2, 132, 199, 0.12) 100%); border-color: rgba(13, 148, 136, 0.3);">
+            <div class="welcome-text">
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                <span class="badge badge-emerald">🩺 Rural Healthcare Network</span>
+                <span class="badge badge-primary">Verified Demo Doctors</span>
+              </div>
+              <h1 style="font-size:1.85rem;">Find a Doctor & Specialist</h1>
+              <p style="max-width:720px;">
+                Connect with qualified physicians, pediatricians, cardiologists, and specialists across Primary Health Centres (PHCs), Community Health Centres (CHCs), and Tele-clinics.
+              </p>
+            </div>
+            <div class="welcome-actions">
+              <button class="btn btn-primary btn-sm" onclick="PulseCareUI.openModal('book-apt-modal')">
+                <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Book Appointment</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Doctor Filters -->
+          <div class="glass-panel" style="padding:1.25rem; margin-bottom:1.75rem;">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filter-doc-specialty">Specialty</label>
+                <select id="filter-doc-specialty" class="form-control" onchange="filterDoctorsList()">
+                  <option value="All">All Specialties</option>
+                  <option value="General Physician">General Physician</option>
+                  <option value="Pediatrician">Pediatrician</option>
+                  <option value="Cardiologist">Cardiologist</option>
+                  <option value="Dermatologist">Dermatologist</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filter-doc-location">Location / Facility</label>
+                <select id="filter-doc-location" class="form-control" onchange="filterDoctorsList()">
+                  <option value="All">All Facilities</option>
+                  <option value="Primary Health Centre">Primary Health Centre (PHC)</option>
+                  <option value="Community Health Centre">Community Health Centre (CHC)</option>
+                  <option value="District Hospital">District Hospital</option>
+                  <option value="Rural Tele-Clinic">Rural Tele-Clinic</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filter-doc-language">Language</label>
+                <select id="filter-doc-language" class="form-control" onchange="filterDoctorsList()">
+                  <option value="All">All Languages</option>
+                  <option value="English">English</option>
+                  <option value="Hindi">Hindi (हिन्दी)</option>
+                  <option value="Telugu">Telugu (తెలుగు)</option>
+                </select>
+              </div>
+
+              <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-outline" style="width:100%;" onclick="resetDoctorFilters()">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Doctors Grid -->
+          <div class="doctors-grid" id="doctors-cards-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:1.5rem;">
+            <!-- Rendered via JS -->
           </div>
         </section>
 
@@ -725,7 +797,7 @@
             </div>
             <div class="portal-card-body" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
               <div>
-                <p style="font-size:0.925rem; font-weight:700; margin-bottom:0.2rem;">Nearest Emergency Facility: <strong>Metro 24x7 Acute Trauma & Resuscitation Center</strong> (1.3 km away)</p>
+                <p style="font-size:0.925rem; font-weight:700; margin-bottom:0.2rem;">Nearest Emergency Facility: <strong>District Civil Hospital & Trauma Centre</strong> (1.2 km away)</p>
                 <p style="font-size:0.825rem; color:var(--text-secondary); margin:0;">Level-1 Trauma ER, 24x7 Catheterization Lab, ICU Beds, and 108 ALS Ambulance Network.</p>
               </div>
               <button class="btn btn-danger btn-lg" onclick="triggerEmergencySOS()">
@@ -884,17 +956,17 @@
               <!-- Hospital & Personal Contacts -->
               <div class="dashboard-grid-2" style="margin-bottom:1.5rem;">
                 <div class="glass-panel" style="padding:1.25rem;">
-                  <h4 style="font-size:1rem; margin-bottom:0.4rem; color:var(--hospital-teal-700);">District Civil Hospital Helpdesk</h4>
-                  <p style="font-size:1.2rem; font-weight:800; color:var(--text-primary); margin-bottom:0.25rem;">+91-800-SWASTHYA</p>
-                  <p style="font-size:0.825rem; color:var(--text-muted); margin-bottom:0.75rem;">Operator desk for ER triage and ICU bed status.</p>
-                  <a href="tel:18007927849" class="btn btn-sm btn-outline">Call Hospital Desk</a>
+                  <h4 style="font-size:1rem; margin-bottom:0.4rem; color:var(--hospital-teal-700);">District Health Helpdesk</h4>
+                  <p style="font-size:1.2rem; font-weight:800; color:var(--text-primary); margin-bottom:0.25rem;">108 / 104 (Official)</p>
+                  <p style="font-size:0.825rem; color:var(--text-muted); margin-bottom:0.75rem;">National Emergency Ambulance & Health Helpline.</p>
+                  <a href="tel:108" class="btn btn-sm btn-outline">Call 108 Ambulance</a>
                 </div>
 
                 <div class="glass-panel" style="padding:1.25rem;">
                   <h4 style="font-size:1rem; margin-bottom:0.4rem; color:var(--hospital-teal-700);">Designated Primary Emergency Contact</h4>
                   <p style="font-size:1.1rem; font-weight:800; color:var(--text-primary); margin-bottom:0.25rem;">Emma Johnson (Spouse)</p>
-                  <p style="font-size:0.85rem; color:var(--hospital-healing-green); font-weight:700; margin-bottom:0.75rem;">+1 (555) 987-6543</p>
-                  <a href="tel:15559876543" class="btn btn-sm btn-emerald">Call Contact</a>
+                  <p style="font-size:0.85rem; color:var(--hospital-healing-green); font-weight:700; margin-bottom:0.75rem;">+91 98765 43211</p>
+                  <a href="tel:9876543211" class="btn btn-sm btn-emerald">Call Contact</a>
                 </div>
               </div>
 
@@ -1181,12 +1253,12 @@
         </div>
         <h3 style="margin-bottom:0.5rem; font-size:1.3rem;">Confirm Emergency Assistance Request</h3>
         <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1.25rem;">
-          Are you experiencing an acute medical emergency? Requesting will transmit your current GPS coordinates to the Metro Health Emergency Room and 108 trauma network.
+          Are you experiencing a medical emergency? In this prototype demo, emergency guidance coordinates with the 108 trauma network.
         </p>
         <div class="glass-panel" style="padding:0.85rem; text-align:left; margin-bottom:1.25rem; font-size:0.825rem;">
-          <p style="margin-bottom:3px;"><strong>Patient:</strong> Alex Johnson (MRN-2026-9082)</p>
+          <p style="margin-bottom:3px;"><strong>Patient:</strong> Alex Johnson (Demo Record)</p>
           <p style="margin-bottom:3px;"><strong>GPS Location:</strong> <span id="sos-coords-display">17.3850° N, 78.4867° E</span></p>
-          <p style="margin-bottom:3px;"><strong>Emergency Hotline:</strong> 108 / +91-800-SWASTHYA</p>
+          <p style="margin-bottom:3px;"><strong>Emergency Hotline:</strong> 108 (Ambulance) / 112</p>
           <p style="margin:0;"><strong>Safety Alert:</strong> Penicillin Allergy Transmitted</p>
         </div>
         <div style="display:flex; gap:0.5rem;">

@@ -15,14 +15,16 @@ const initialSeedData = {
       name: 'Dr. Sarah Lin, MD',
       email: 'sarah.lin@swasthyaconnect.health',
       role: 'doctor',
-      specialty: 'Cardiology & Internal Medicine',
-      department: 'Cardiovascular Care Unit (Room 304, 3rd Floor)',
-      hospital: 'Metro Health Academic Medical Center',
+      specialty: 'Cardiologist',
+      department: 'Tele-Cardiology Wing',
+      hospital: 'District Hospital & Tele-Care Centre',
+      locationType: 'District Hospital',
+      languages: ['English', 'Hindi'],
       rating: 4.9,
       reviewsCount: 142,
       avatar: 'SL',
       availability: 'Mon, Tue, Thu, Fri (09:00 - 17:00)',
-      bio: 'Board-certified Cardiologist with 12+ years of clinical experience specializing in preventive cardiovascular care, hypertension management, and non-invasive diagnostics.',
+      bio: 'Cardiologist specializing in preventive heart health, hypertension management, and tele-cardiology for rural clinics. (Demo Doctor Profile)',
       stats: {
         totalPatients: 384,
         experienceYears: 12,
@@ -32,17 +34,85 @@ const initialSeedData = {
     },
     {
       id: 'doc-2',
+      name: 'Dr. Rajesh Sharma, MBBS, MD',
+      email: 'rajesh.sharma@swasthyaconnect.health',
+      role: 'doctor',
+      specialty: 'General Physician',
+      department: 'Primary Care & Outpatient Ward',
+      hospital: 'Primary Health Centre (PHC) - Rampur',
+      locationType: 'Primary Health Centre',
+      languages: ['English', 'Hindi'],
+      rating: 4.92,
+      reviewsCount: 185,
+      avatar: 'RS',
+      availability: 'Mon - Sat (08:30 - 15:30)',
+      bio: 'Experienced rural healthcare physician dedicated to fever management, infection control, and primary wellness. (Demo Doctor Profile)',
+      stats: {
+        totalPatients: 640,
+        experienceYears: 10,
+        consultationsToday: 9,
+        satisfactionRate: '98%'
+      }
+    },
+    {
+      id: 'doc-3',
+      name: 'Dr. Ananya Reddy, MBBS, DCH',
+      email: 'ananya.reddy@swasthyaconnect.health',
+      role: 'doctor',
+      specialty: 'Pediatrician',
+      department: 'Maternal & Child Health Ward',
+      hospital: 'Community Health Centre (CHC)',
+      locationType: 'Community Health Centre',
+      languages: ['English', 'Telugu', 'Hindi'],
+      rating: 4.95,
+      reviewsCount: 210,
+      avatar: 'AR',
+      availability: 'Mon - Fri (09:00 - 16:00)',
+      bio: 'Pediatrician focusing on childhood nutrition, immunization drives, and seasonal pediatric infections. (Demo Doctor Profile)',
+      stats: {
+        totalPatients: 520,
+        experienceYears: 11,
+        consultationsToday: 8,
+        satisfactionRate: '99%'
+      }
+    },
+    {
+      id: 'doc-4',
+      name: 'Dr. Priya Desai, MBBS, MD',
+      email: 'priya.desai@swasthyaconnect.health',
+      role: 'doctor',
+      specialty: 'Dermatologist',
+      department: 'Skin & Allergy Tele-Clinic',
+      hospital: 'Rural Tele-Clinic Network',
+      locationType: 'Rural Tele-Clinic',
+      languages: ['English', 'Hindi', 'Telugu'],
+      rating: 4.88,
+      reviewsCount: 115,
+      avatar: 'PD',
+      availability: 'Tue, Thu, Sat (10:00 - 15:00)',
+      bio: 'Dermatologist offering tele-dermatology consultations for rural skin conditions, allergies, and fungal dermatitis. (Demo Doctor Profile)',
+      stats: {
+        totalPatients: 310,
+        experienceYears: 8,
+        consultationsToday: 5,
+        satisfactionRate: '97%'
+      }
+    },
+    {
+      id: 'doc-5',
       name: 'Dr. Marcus Vance, MD',
       email: 'marcus.vance@swasthyaconnect.health',
       role: 'doctor',
-      specialty: 'Neurology & Sleep Medicine',
-      department: 'Brain & Spine Institute (Room 412, 4th Floor)',
-      hospital: 'Metro Health Academic Medical Center',
+      specialty: 'General Physician',
+      department: 'Community Medicine & Wellness',
+      hospital: 'Community Health Centre (CHC)',
+      locationType: 'Community Health Centre',
+      languages: ['English', 'Telugu'],
       rating: 4.85,
       reviewsCount: 98,
       avatar: 'MV',
       availability: 'Mon - Wed (10:00 - 16:00)',
-      bio: 'Neurologist specialized in migraine disorders, neuro-rehabilitation, and circadian sleep disorders.',
+      bio: 'Specialist in primary preventive healthcare, lifestyle disease management, and sleep wellness. (Demo Doctor Profile)',
       stats: {
         totalPatients: 215,
         experienceYears: 9,
@@ -51,18 +121,20 @@ const initialSeedData = {
       }
     },
     {
-      id: 'doc-3',
+      id: 'doc-6',
       name: 'Dr. Elena Rostova, MD',
       email: 'elena.rostova@swasthyaconnect.health',
       role: 'doctor',
-      specialty: 'Endocrinology & Diabetes',
-      department: 'Metabolic Health Clinic (Room 205, 2nd Floor)',
-      hospital: 'Metro Health Academic Medical Center',
+      specialty: 'Cardiologist',
+      department: 'Metabolic & Diabetes Care',
+      hospital: 'District Civil Hospital',
+      locationType: 'District Hospital',
+      languages: ['English', 'Hindi'],
       rating: 4.95,
       reviewsCount: 160,
       avatar: 'ER',
       availability: 'Tue - Fri (08:30 - 15:30)',
-      bio: 'Leading specialist in Type 1 & Type 2 Diabetes management, thyroid disorders, and lifestyle metabolic optimization.',
+      bio: 'Specialist in Type 1 & Type 2 Diabetes management, thyroid disorders, and preventive health. (Demo Doctor Profile)',
       stats: {
         totalPatients: 420,
         experienceYears: 15,
@@ -81,19 +153,19 @@ const initialSeedData = {
       age: 34,
       dob: '1992-04-15',
       bloodType: 'O+',
-      mrn: 'MRN-2026-9082',
-      phone: '+1 (555) 234-8910',
-      address: '742 Evergreen Terrace, Springfield, IL',
+      mrn: 'MRN-2026-9082 (Demo)',
+      phone: '+91 98765 43210',
+      address: 'Rampur Village, Primary Health Block 3 (Demo Patient)',
       emergencyContact: {
         name: 'Emma Johnson',
         relation: 'Spouse',
-        phone: '+1 (555) 987-6543',
-        address: '742 Evergreen Terrace, Springfield, IL'
+        phone: '+91 98765 43211',
+        address: 'Rampur Village, Primary Health Block 3'
       },
       insurance: {
-        provider: 'BlueCross BlueShield Premier',
-        policyNumber: 'BCS-994218-A',
-        groupNumber: 'GRP-7741',
+        provider: 'Ayushman Bharat PM-JAY (Demo Cover)',
+        policyNumber: 'PMJAY-DEMO-994218',
+        groupNumber: 'RURAL-HEALTH-01',
         status: 'Active'
       },
       assignedDoctorId: 'doc-1',
@@ -113,9 +185,9 @@ const initialSeedData = {
         { code: 'ICD-10 S93.4', name: 'Sprain of Calcaneofibular Ligament (Right Ankle)', date: 'Nov 2023', doctor: 'Dr. Marcus Vance, MD', status: 'Resolved' }
       ],
       medicalHistory: [
-        { event: 'Appendectomy (Laparoscopic)', year: '2018', facility: 'Metro Health Hospital', outcome: 'Uncomplicated' },
-        { event: 'Childhood Mild Asthma', year: '2004', facility: 'Springfield Pediatric Center', outcome: 'Resolved in adolescence' },
-        { event: 'Family History: Maternal Hypertension', year: 'N/A', facility: 'Clinical Genetics', outcome: 'Noted for risk profiling' }
+        { event: 'Appendectomy (Laparoscopic)', year: '2018', facility: 'District Hospital', outcome: 'Uncomplicated' },
+        { event: 'Childhood Mild Asthma', year: '2004', facility: 'Primary Health Centre', outcome: 'Resolved in adolescence' },
+        { event: 'Family History: Maternal Hypertension', year: 'N/A', facility: 'Community Health Centre', outcome: 'Noted for risk profiling' }
       ],
       vitals: {
         heartRate: 72,
@@ -146,19 +218,19 @@ const initialSeedData = {
       age: 29,
       dob: '1997-09-22',
       bloodType: 'A+',
-      mrn: 'MRN-2026-4103',
-      phone: '+1 (555) 456-7890',
-      address: '120 Ocean View Blvd, San Diego, CA',
+      mrn: 'MRN-2026-4103 (Demo)',
+      phone: '+91 98765 43212',
+      address: 'Near Gram Panchayat, Rampur (Demo Patient)',
       emergencyContact: {
         name: 'Raj Patel',
         relation: 'Father',
-        phone: '+1 (555) 321-7654',
-        address: '120 Ocean View Blvd, San Diego, CA'
+        phone: '+91 98765 43213',
+        address: 'Near Gram Panchayat, Rampur'
       },
       insurance: {
-        provider: 'Aetna Health Gold',
-        policyNumber: 'AET-887123-B',
-        groupNumber: 'GRP-9901',
+        provider: 'Ayushman Bharat PM-JAY (Demo Cover)',
+        policyNumber: 'PMJAY-DEMO-887123',
+        groupNumber: 'RURAL-HEALTH-02',
         status: 'Active'
       },
       assignedDoctorId: 'doc-1',
@@ -173,7 +245,7 @@ const initialSeedData = {
         { code: 'ICD-10 R00.2', name: 'Palpitations (Post-exertional)', date: 'Aug 2026', doctor: 'Dr. Sarah Lin, MD' }
       ],
       medicalHistory: [
-        { event: 'Tonsillectomy', year: '2012', facility: 'San Diego General', outcome: 'Resolved' }
+        { event: 'Tonsillectomy', year: '2012', facility: 'Community Health Centre', outcome: 'Resolved' }
       ],
       vitals: {
         heartRate: 78,
@@ -200,19 +272,19 @@ const initialSeedData = {
       age: 58,
       dob: '1968-11-03',
       bloodType: 'B+',
-      mrn: 'MRN-2026-1189',
-      phone: '+1 (555) 789-0123',
-      address: '450 Pine Forest Rd, Denver, CO',
+      mrn: 'MRN-2026-1189 (Demo)',
+      phone: '+91 98765 43214',
+      address: 'North Block Village, Rampur (Demo Patient)',
       emergencyContact: {
         name: 'Clara Miller',
         relation: 'Wife',
-        phone: '+1 (555) 654-9870',
-        address: '450 Pine Forest Rd, Denver, CO'
+        phone: '+91 98765 43215',
+        address: 'North Block Village, Rampur'
       },
       insurance: {
-        provider: 'Medicare Plus Advantage',
-        policyNumber: 'MED-541290-X',
-        groupNumber: 'GRP-3310',
+        provider: 'Ayushman Bharat Senior Citizen Cover (Demo)',
+        policyNumber: 'PMJAY-DEMO-541290',
+        groupNumber: 'RURAL-HEALTH-03',
         status: 'Active'
       },
       assignedDoctorId: 'doc-1',
@@ -229,7 +301,7 @@ const initialSeedData = {
         { code: 'ICD-10 E11.9', name: 'Type 2 Diabetes Mellitus without complications', date: 'Feb 2017', doctor: 'Dr. Elena Rostova, MD' }
       ],
       medicalHistory: [
-        { event: 'Coronary Artery Bypass Graft (CABG x 2)', year: '2023', facility: 'Metro Health Cardiology', outcome: 'Successful' }
+        { event: 'Coronary Artery Bypass Graft (CABG x 2)', year: '2023', facility: 'District Hospital Cardiology', outcome: 'Successful' }
       ],
       vitals: {
         heartRate: 84,
@@ -255,8 +327,8 @@ const initialSeedData = {
       patientName: 'Alex Johnson',
       doctorId: 'doc-1',
       doctorName: 'Dr. Sarah Lin, MD',
-      doctorSpecialty: 'Cardiology & Internal Medicine',
-      doctorRoom: 'Room 304, 3rd Floor (Cardiology Wing)',
+      doctorSpecialty: 'Cardiologist',
+      doctorRoom: 'Tele-Consultation Room 1',
       date: '2026-09-04',
       time: '10:30 AM',
       type: 'Telehealth Video',
@@ -270,16 +342,16 @@ const initialSeedData = {
       id: 'apt-102',
       patientId: 'pat-1',
       patientName: 'Alex Johnson',
-      doctorId: 'doc-3',
+      doctorId: 'doc-6',
       doctorName: 'Dr. Elena Rostova, MD',
-      doctorSpecialty: 'Endocrinology & Diabetes',
-      doctorRoom: 'Room 205, 2nd Floor (Metabolic Clinic)',
+      doctorSpecialty: 'Cardiologist',
+      doctorRoom: 'Consultation Room 2',
       date: '2026-09-18',
       time: '02:00 PM',
       type: 'In-Clinic Consultation',
       reason: 'Routine Annual Metabolic Health & Fasting Lipid Profile Review',
       status: 'confirmed',
-      notes: 'Fasting lipid blood test required 2 days prior at Metro Health Diagnostic Lab.',
+      notes: 'Fasting lipid blood test required 2 days prior at Community Diagnostic Lab.',
       created: '2026-09-01'
     },
     {
@@ -288,8 +360,8 @@ const initialSeedData = {
       patientName: 'Alex Johnson',
       doctorId: 'doc-1',
       doctorName: 'Dr. Sarah Lin, MD',
-      doctorSpecialty: 'Cardiology & Internal Medicine',
-      doctorRoom: 'Room 304, 3rd Floor',
+      doctorSpecialty: 'Cardiologist',
+      doctorRoom: 'Tele-Consultation Room 1',
       date: '2026-06-12',
       time: '11:00 AM',
       type: 'Telehealth Video',
@@ -302,16 +374,16 @@ const initialSeedData = {
       id: 'apt-99-prev',
       patientId: 'pat-1',
       patientName: 'Alex Johnson',
-      doctorId: 'doc-2',
+      doctorId: 'doc-5',
       doctorName: 'Dr. Marcus Vance, MD',
-      doctorSpecialty: 'Neurology & Sleep Medicine',
-      doctorRoom: 'Room 412, 4th Floor',
+      doctorSpecialty: 'General Physician',
+      doctorRoom: 'Room 12, Outpatient Block',
       date: '2026-03-20',
       time: '03:30 PM',
       type: 'In-Clinic Consultation',
       reason: 'Evaluation of Tension Headaches & Sleep Hygiene Consultation',
       status: 'completed',
-      notes: 'Advised stress-reduction ergonomics and sleep schedule consistency. Normal neurological exam.',
+      notes: 'Advised stress-reduction ergonomics and sleep schedule consistency. Normal exam.',
       created: '2026-03-10'
     }
   ],
@@ -331,7 +403,7 @@ const initialSeedData = {
       totalPills: 90,
       prescribedDate: '2026-07-15',
       expiryDate: '2027-07-15',
-      pharmacy: 'CVS Pharmacy #4192, Springfield (Tel: 555-0192)',
+      pharmacy: 'Jan Aushadhi Kendra #108, Civil Hospital Road',
       status: 'active'
     },
     {
@@ -349,7 +421,7 @@ const initialSeedData = {
       totalPills: 90,
       prescribedDate: '2026-06-10',
       expiryDate: '2027-06-10',
-      pharmacy: 'CVS Pharmacy #4192, Springfield',
+      pharmacy: 'Jan Aushadhi Kendra #108, Civil Hospital Road',
       status: 'active'
     },
     {
@@ -367,7 +439,7 @@ const initialSeedData = {
       totalPills: 120,
       prescribedDate: '2026-08-01',
       expiryDate: '2027-08-01',
-      pharmacy: 'CVS Pharmacy #4192, Springfield',
+      pharmacy: 'Jan Aushadhi Kendra #108, Civil Hospital Road',
       status: 'active'
     }
   ],
@@ -380,7 +452,7 @@ const initialSeedData = {
       title: 'Comprehensive Metabolic Panel (CMP-14)',
       category: 'Blood Chemistry',
       date: '2026-08-25',
-      facility: 'Quest Diagnostics & Metro Health Central Pathology',
+      facility: 'District Public Health & Diagnostic Laboratory',
       status: 'Normal',
       summary: 'All 14 metabolic biomarkers including eGFR (>90 mL/min), Serum Creatinine (0.9 mg/dL), BUN (14 mg/dL), Sodium (140 mEq/L), Potassium (4.2 mEq/L), and AST/ALT are within optimal physiological reference ranges.',
       results: [
@@ -399,7 +471,7 @@ const initialSeedData = {
       title: 'Advanced Lipid Panel with Atherogenic Ratios',
       category: 'Cardiovascular Lipidology',
       date: '2026-08-20',
-      facility: 'Metro Health Academic Medical Center Laboratory',
+      facility: 'District Public Health Diagnostic Laboratory',
       status: 'Normal',
       summary: 'Total Cholesterol 168 mg/dL, HDL 54 mg/dL, LDL-C 94 mg/dL (target <100), and Triglycerides 110 mg/dL indicate optimal therapeutic response to Atorvastatin therapy.',
       results: [
@@ -912,16 +984,16 @@ const initialSeedData = {
   nearbyCentres: [
     {
       id: 'centre-1',
-      name: 'Metro Health District Civil Hospital & Trauma Centre',
+      name: 'District Civil Hospital & Trauma Centre',
       type: 'Government Hospital',
       category: 'Government Hospitals',
       latOffset: 0.008,
       lngOffset: 0.006,
       distanceKm: 1.2,
       distance: '1.2 km',
-      location: 'Civil Lines, Ring Road, Springfield (Pincode: 500001)',
+      location: 'Civil Lines, District Headquarters (PIN: 500001)',
       services: ['24x7 Emergency Trauma Care', 'PM-JAY Golden Card Desk', 'Free Essential Diagnostics & Pathology', 'Blood Bank (24x7)', 'Dialysis Unit', 'Maternal & Neonatal ICU (NICU)', 'Jan Aushadhi Generic Pharmacy'],
-      phone: '+91 800-792-7841 / Ext. 108',
+      phone: '108 (Ambulance) / 112 (National Emergency)',
       timing: '24x7 Emergency & IPD | OPD: 08:30 AM - 01:30 PM',
       emergencyReady: true,
       pmjayEmpanelled: true,
@@ -931,16 +1003,16 @@ const initialSeedData = {
     },
     {
       id: 'centre-2',
-      name: 'Sector 12 Community Health Centre (CHC)',
+      name: 'Community Health Centre (CHC) - Sector 12',
       type: 'CHC',
       category: 'CHC',
       latOffset: -0.015,
       lngOffset: 0.012,
       distanceKm: 2.8,
       distance: '2.8 km',
-      location: 'Plot 45, Near Main Market, Sector 12, Springfield',
+      location: 'Main Road, Block 12, Rural Health Complex',
       services: ['General OPD (Medicine, Gynecology, Pediatrics)', 'Free Routine Diagnostics & X-Ray', 'Mission Indradhanush Immunization (Wed/Sat)', 'Janani Suraksha Yojana Deliveries', 'DOTS TB Diagnostic Centre (NTEP)', 'eSanjeevani Teleconsultation Hub'],
-      phone: '+91 800-792-3320',
+      phone: '104 (Health Helpline)',
       timing: 'OPD: 08:30 AM - 02:00 PM | Emergency: 24x7',
       emergencyReady: true,
       pmjayEmpanelled: true,
@@ -950,16 +1022,16 @@ const initialSeedData = {
     },
     {
       id: 'centre-3',
-      name: 'Central Urban Primary Health Centre (PHC) - Ward 4',
+      name: 'Primary Health Centre (PHC) - Rampur Block',
       type: 'PHC',
       category: 'PHC',
       latOffset: 0.012,
       lngOffset: -0.018,
       distanceKm: 3.5,
       distance: '3.5 km',
-      location: 'Ward 4 Health Complex, North Springfield Road',
+      location: 'Near Gram Panchayat Bhavan, Rampur Block',
       services: ['Comprehensive Primary Healthcare (CPHC)', 'Free Essential Drugs (EDL)', 'NCD Screening (Hypertension, Diabetes)', 'Antenatal Care (ANC) & Mother Health', 'eSanjeevani Tele-OPD with Specialists'],
-      phone: '+91 800-792-5501',
+      phone: '104 (Tele-Health Advice)',
       timing: '09:00 AM - 04:00 PM (Monday - Saturday)',
       emergencyReady: false,
       pmjayEmpanelled: false,
@@ -976,9 +1048,9 @@ const initialSeedData = {
       lngOffset: -0.009,
       distanceKm: 0.9,
       distance: '0.9 km',
-      location: 'Panchayat Bhavan Road, West Enclave, Springfield',
+      location: 'Village Sub-Centre, West Enclave',
       services: ['12 Packages Comprehensive Primary Healthcare', 'Free Point-of-Care Diagnostics (Sugar, HB, BP)', 'Yoga & Wellness Sessions', 'ASHA & ANM Mother-Child Care', 'Tele-consultation to District Specialists'],
-      phone: '+91 800-792-4419',
+      phone: '1800-180-1104 (National Health Portal)',
       timing: '08:30 AM - 04:30 PM (Daily)',
       emergencyReady: false,
       pmjayEmpanelled: true,
@@ -988,16 +1060,16 @@ const initialSeedData = {
     },
     {
       id: 'centre-5',
-      name: 'Apollo Life Care Specialist Poly-Clinic',
+      name: 'Rural Tele-Clinic & Specialist Poly-Clinic',
       type: 'Clinic',
       category: 'Clinics',
       latOffset: 0.004,
       lngOffset: 0.003,
       distanceKm: 0.6,
       distance: '0.6 km',
-      location: 'Suite 201, Green Glen Commercial Towers, Springfield',
-      services: ['Cardiology & Internal Medicine Consultations', 'Pediatrics & Child Wellness', 'Minor Procedures & Wound Dressing', 'ECG & Digital Vitals Telemetry Sync', 'Digital Health Record Integration'],
-      phone: '+91 800-792-9900',
+      location: 'Panchayat Commercial Hub, Suite 201',
+      services: ['Cardiology & General Medicine Consultations', 'Pediatrics & Child Wellness', 'Minor Procedures & Wound Dressing', 'ECG & Digital Vitals Telemetry Sync', 'Digital Health Record Integration'],
+      phone: '104 (Health Helpline)',
       timing: '08:00 AM - 08:00 PM (Monday - Saturday)',
       emergencyReady: false,
       pmjayEmpanelled: false,
@@ -1007,35 +1079,35 @@ const initialSeedData = {
     },
     {
       id: 'centre-6',
-      name: 'Quest Central Diagnostics & Pathology Laboratory',
+      name: 'District Public Health Diagnostic Laboratory',
       type: 'Diagnostic Centre',
       category: 'Diagnostic Centres',
       latOffset: -0.009,
       lngOffset: 0.008,
       distanceKm: 1.4,
       distance: '1.4 km',
-      location: 'Diagnostic Plaza, 2nd Avenue, Springfield',
-      services: ['Automated Blood Chemistry (CMP, Lipid, CBC)', 'Digital X-Ray & 2D Echo', 'Molecular PCR / TrueNat TB Testing', 'Home Sample Collection Available', 'Real-time Digital Lab Report Sync to App'],
-      phone: '+91 800-792-1144',
+      location: 'Civil Hospital Complex, 2nd Avenue',
+      services: ['Automated Blood Chemistry (CMP, Lipid, CBC)', 'Digital X-Ray & 2D Echo', 'Molecular PCR / TrueNat TB Testing', 'Free Point-of-Care Diagnostic Testing', 'Real-time Digital Lab Report Sync to App'],
+      phone: '1800-180-1104',
       timing: '06:30 AM - 09:00 PM (Open 7 Days)',
       emergencyReady: false,
       pmjayEmpanelled: true,
       beds: 'Diagnostic Testing Centre',
       doctorsCount: 6,
-      directionsUrl: 'https://maps.google.com/?q=Quest+Diagnostics'
+      directionsUrl: 'https://maps.google.com/?q=Diagnostic+Laboratory'
     },
     {
       id: 'centre-7',
-      name: 'PMBJP Pradhan Mantri Jan Aushadhi Kendra #108',
+      name: 'Pradhan Mantri Jan Aushadhi Kendra #108 (PMBJP)',
       type: 'Pharmacy',
       category: 'Pharmacies',
       latOffset: 0.002,
       lngOffset: -0.004,
       distanceKm: 0.4,
       distance: '0.4 km',
-      location: 'Shop 12, Civil Hospital Gate 2, Ring Road, Springfield',
+      location: 'Shop 12, Civil Hospital Gate 2, Ring Road',
       services: ['100% Quality Generic Medicines (50-90% Discount)', 'Chronic Care Meds (Lisinopril, Atorvastatin, Metformin)', 'Surgical Consumables & Blood Glucose Strips', '1-Click Refill Pickup Desk', 'Digital Prescription Dispensing'],
-      phone: '+91 800-792-6622',
+      phone: '1800-200-8701 (Jan Aushadhi Helpline)',
       timing: '08:00 AM - 10:00 PM (Daily)',
       emergencyReady: false,
       pmjayEmpanelled: true,
@@ -1045,16 +1117,16 @@ const initialSeedData = {
     },
     {
       id: 'centre-8',
-      name: 'Metro 24x7 Acute Trauma & Resuscitation Center',
+      name: '24x7 Emergency Trauma & Ambulance Service (108)',
       type: 'Emergency Services',
       category: 'Emergency Services',
       latOffset: 0.010,
       lngOffset: 0.007,
       distanceKm: 1.3,
       distance: '1.3 km',
-      location: 'Emergency Red Gate, Metro Health Campus, Springfield',
-      services: ['Level-1 Emergency Trauma & Cardiac Arrest Resuscitation', '24x7 Advanced Life Support (ALS) Ambulance Dispatch (108)', 'Emergency Catheterization Lab (Cath Lab)', 'Immediate Blood Transfusion & Burn Unit', 'Direct SOS App Dispatch Link'],
-      phone: '+91 800-792-9111 / Toll Free: 108',
+      location: 'District Civil Hospital Emergency Gate',
+      services: ['24x7 National Emergency Ambulance (Dial 108)', 'Level-1 Emergency Trauma & Resuscitation', '24x7 Advanced Life Support (ALS) Dispatch', 'Immediate Blood Bank & Trauma Support', 'Direct Emergency Guidance Link'],
+      phone: '108 (Emergency Ambulance) / 112 (National Helpline)',
       timing: '24x7 Non-Stop Emergency Services',
       emergencyReady: true,
       pmjayEmpanelled: true,
@@ -1067,7 +1139,7 @@ const initialSeedData = {
     {
       id: 'notif-1',
       patientId: 'pat-1',
-      title: 'Upcoming Cardiology Video Visit',
+      title: 'Upcoming Cardiology Tele-Visit',
       message: 'Consultation with Dr. Sarah Lin scheduled for Sep 04 at 10:30 AM (Telehealth WebRTC).',
       category: 'appointment',
       time: '1 hour ago',
@@ -1077,7 +1149,7 @@ const initialSeedData = {
       id: 'notif-2',
       patientId: 'pat-1',
       title: 'Prescription Refill Ready',
-      message: 'Your 90-day refill for Lisinopril 10mg is ready for pickup or courier delivery at CVS Pharmacy #4192.',
+      message: 'Your 90-day refill for Lisinopril 10mg is ready for pickup at Jan Aushadhi Kendra #108.',
       category: 'prescription',
       time: 'Yesterday',
       read: false
@@ -1086,7 +1158,7 @@ const initialSeedData = {
       id: 'notif-3',
       patientId: 'pat-1',
       title: 'New Diagnostic Lab Available',
-      message: 'Comprehensive Metabolic Panel (CMP-14) report uploaded by Metro Health Laboratories.',
+      message: 'Comprehensive Metabolic Panel (CMP-14) report uploaded by District Health Diagnostic Laboratory.',
       category: 'lab',
       time: '3 days ago',
       read: true
@@ -1218,9 +1290,27 @@ class UnifiedStore {
   }
 
   addAppointment(aptData) {
+    if (!aptData.doctorId || !aptData.date || !aptData.time) {
+      throw new Error('Please select a doctor, date, and available time slot.');
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (aptData.date < todayStr) {
+      throw new Error('Appointment date cannot be in the past. Please select today or a future date.');
+    }
+
+    // Prevent duplicate bookings for same doctor, date, and time
+    const existingList = this.data.appointments || [];
+    const isDuplicate = existingList.some(
+      a => a.doctorId === aptData.doctorId && a.date === aptData.date && a.time === aptData.time && a.status !== 'cancelled'
+    );
+    if (isDuplicate) {
+      throw new Error(`This time slot (${aptData.time} on ${aptData.date}) is already booked for this doctor. Please select another time.`);
+    }
+
     const newApt = {
       id: 'apt-' + Date.now(),
-      created: new Date().toISOString().split('T')[0],
+      created: todayStr,
       status: 'confirmed',
       ...aptData
     };
@@ -1230,7 +1320,7 @@ class UnifiedStore {
     this.addNotification({
       patientId: newApt.patientId,
       title: 'Appointment Confirmed',
-      message: `Your ${newApt.type} consultation with ${newApt.doctorName} is confirmed for ${newApt.date} at ${newApt.time}.`,
+      message: `Your ${newApt.type || 'Consultation'} with ${newApt.doctorName} is confirmed for ${newApt.date} at ${newApt.time}.`,
       category: 'appointment'
     });
 
