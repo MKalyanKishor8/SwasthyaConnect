@@ -35,9 +35,23 @@
     </a>
 
     <div class="nav-actions">
+      <!-- Language Switcher (English, Hindi, Telugu) -->
+      <div class="lang-switcher-wrap" title="Change Language / भाषा बदलें / భాషను మార్చండి">
+        <svg class="icon lang-globe-icon" viewBox="0 0 24 24" style="width:16px; height:16px; margin-right:4px;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <select id="nav-lang-select" class="swasthya-lang-dropdown" onchange="SwasthyaI18n.setLanguage(this.value)" aria-label="Select Language">
+          <option value="en">English</option>
+          <option value="hi">हिंदी (Hindi)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+        </select>
+      </div>
+
       <a href="doctor-login.html" class="btn btn-sm btn-outline" style="border-color: var(--primary-600); color: var(--primary-600);">
         <svg class="icon" viewBox="0 0 24 24"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/></svg>
-        <span>Doctor Sign In</span>
+        <span data-i18n="navDoctorSignIn">Doctor Sign In</span>
       </a>
       <button class="btn-icon theme-toggle-btn" aria-label="Toggle Theme" title="Toggle theme">
         <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -204,6 +218,7 @@
 
   <!-- Scripts -->
   <script src="js/store.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/offline-manager.js"></script>
   <script src="js/theme.js"></script>
   <script>

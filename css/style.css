@@ -822,4 +822,42 @@ body[data-saver="true"] .portal-card {
   line-height: 1.4;
 }
 
+/* Multilingual Language Switcher */
+.lang-switcher-wrap {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.lang-switcher-wrap:hover {
+  border-color: var(--hospital-teal-600);
+}
+
+.lang-globe-icon {
+  color: var(--hospital-teal-600);
+  flex-shrink: 0;
+}
+
+.swasthya-lang-dropdown {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  padding: 0.15rem 0.25rem;
+}
+
+.swasthya-lang-dropdown option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+
 

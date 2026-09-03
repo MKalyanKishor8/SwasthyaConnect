@@ -45,54 +45,37 @@
 
       <nav class="sidebar-nav">
         <div class="nav-section-title">Patient Portal Menu</div>
-        <a href="#overview" class="nav-link active" data-tab="overview">
+        <a href="#dashboard" class="nav-link active" data-tab="dashboard">
           <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          <span>Dashboard</span>
-        </a>
-        <a href="#profile" class="nav-link" data-tab="profile">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span>My Profile</span>
-        </a>
-        <a href="#appointments" class="nav-link" data-tab="appointments">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span>Appointments</span>
+          <span data-i18n="navDashboard">Dashboard & Telemetry</span>
         </a>
         <a href="#records" class="nav-link" data-tab="records">
           <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span>Medical Records</span>
+          <span data-i18n="navRecords">Health Records & Rx</span>
         </a>
-        <a href="#prescriptions" class="nav-link" data-tab="prescriptions">
-          <svg class="icon" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
-          <span>Prescriptions</span>
-        </a>
-        <a href="#labs" class="nav-link" data-tab="labs">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>Lab Reports</span>
-        </a>
-        <a href="#telehealth" class="nav-link" data-tab="telehealth">
-          <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-          <span>Telemedicine</span>
-          <span class="nav-badge" style="background:rgba(5, 150, 105, 0.2); color:#059669;">Live</span>
+        <a href="#appointments" class="nav-link" data-tab="appointments">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span data-i18n="navAppointments">Appointments & Tele-OPD</span>
         </a>
         <a href="#schemes" class="nav-link" data-tab="schemes">
           <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          <span>Government Schemes</span>
+          <span data-i18n="navSchemes">Government Health Schemes</span>
           <span class="nav-badge" style="background:rgba(2, 132, 199, 0.2); color:#0284c7;">India</span>
         </a>
         <a href="#nearby" class="nav-link" data-tab="nearby" style="color:var(--hospital-teal-800); font-weight:700;">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>Nearby Healthcare Centres</span>
+          <span data-i18n="navNearby">Nearby Healthcare Centres</span>
           <span class="nav-badge" style="background:rgba(13, 148, 136, 0.2); color:#0d9488;">GPS</span>
         </a>
         <a href="#emergency" class="nav-link" data-tab="emergency" style="color:var(--hospital-cross-red);">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span>Emergency Support</span>
+          <span data-i18n="navEmergency">Emergency Support (108)</span>
         </a>
 
         <div class="nav-section-title" style="margin-top: 1rem;">System Switch</div>
         <a href="doctor.html" class="nav-link" style="color: var(--hospital-teal-600);">
           <svg class="icon" viewBox="0 0 24 24"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/></svg>
-          <span>Switch to Doctor View</span>
+          <span data-i18n="navSwitchDoctor">Switch to Doctor View</span>
         </a>
       </nav>
 
@@ -109,7 +92,7 @@
         </div>
         <button class="btn btn-sm btn-secondary btn-logout" style="width: 100%;">
           <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          <span>Log Out</span>
+          <span data-i18n="navSignOut">Log Out</span>
         </button>
       </div>
     </aside>
@@ -166,6 +149,20 @@
             <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>Book Visit</span>
           </button>
+
+          <!-- Language Switcher (English, Hindi, Telugu) -->
+          <div class="lang-switcher-wrap" title="Change Language / भाषा बदलें / భాషను మార్చండి">
+            <svg class="icon lang-globe-icon" viewBox="0 0 24 24" style="width:16px; height:16px; margin-right:4px;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <select id="topbar-lang-select" class="swasthya-lang-dropdown" onchange="SwasthyaI18n.setLanguage(this.value)" aria-label="Select Language">
+              <option value="en">English</option>
+              <option value="hi">हिंदी (Hindi)</option>
+              <option value="te">తెలుగు (Telugu)</option>
+            </select>
+          </div>
 
           <!-- Theme Toggle -->
           <button class="btn-icon theme-toggle-btn" aria-label="Toggle Theme" title="Toggle theme">
@@ -1204,6 +1201,7 @@
 
   <!-- Scripts -->
   <script src="js/store.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/offline-manager.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/patient.js"></script>

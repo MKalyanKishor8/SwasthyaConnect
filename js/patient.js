@@ -776,6 +776,16 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGovernmentSchemes(currentSchemeCategory);
     refreshNearbyCentresAndMap();
   });
+
+  // Listen to global Language Change (English / Hindi / Telugu)
+  window.addEventListener('swasthyaLanguageChanged', (e) => {
+    renderPatientData();
+    renderAppointments();
+    renderGovernmentSchemes(currentSchemeCategory);
+    if (currentPlacesResults && currentPlacesResults.length > 0) {
+      renderNearbyCards(currentPlacesResults);
+    }
+  });
 });
 
 // ==========================================================================
