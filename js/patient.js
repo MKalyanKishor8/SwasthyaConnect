@@ -1834,18 +1834,21 @@ function renderGovernmentSchemes(category = 'All', search = '') {
   }
 
   container.innerHTML = schemes.map(s => `
-    <div class="portal-card" style="border-top:4px solid ${getCategoryColor(s.category)}; display:flex; flex-direction:column; height:100%;">
-      <div class="portal-card-header" style="background:var(--bg-surface-elevated); align-items:flex-start; gap:0.5rem;">
+    <div class="portal-card" style="border-top:4px solid ${getCategoryColor(s.category)}; display:flex; flex-direction:column; height:100%; transition:transform 0.2s ease, box-shadow 0.2s ease;">
+      <div class="portal-card-header" style="background:var(--bg-surface-elevated); align-items:flex-start; gap:0.6rem;">
+        <div style="display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:10px; background:var(--primary-gradient); color:#ffffff; font-size:1.3rem; flex-shrink:0;">
+          ${s.icon || '🏛️'}
+        </div>
         <div style="flex:1;">
           <span class="badge ${getCategoryBadgeClass(s.category)}" style="margin-bottom:0.35rem;">${s.category}</span>
-          <h3 style="font-size:1.15rem; font-weight:700; line-height:1.3; color:var(--text-primary);">${s.name}</h3>
-          ${s.hindiName ? `<p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${s.hindiName}</p>` : ''}
+          <h3 style="font-size:1.15rem; font-weight:700; line-height:1.3; color:var(--text-primary); margin:0;">${s.name}</h3>
+          ${s.hindiName ? `<p style="font-size:0.775rem; color:var(--text-muted); margin:3px 0 0 0;">${s.hindiName}</p>` : ''}
         </div>
-        <span class="badge badge-emerald" style="white-space:nowrap;">${s.badge}</span>
+        <span class="badge badge-emerald" style="white-space:nowrap; font-size:0.7rem;">${s.badge}</span>
       </div>
 
-      <div class="portal-card-body" style="display:flex; flex-direction:column; gap:1rem; flex:1;">
-        <p style="font-size:0.875rem; line-height:1.5; color:var(--text-secondary);">${s.shortDesc}</p>
+      <div class="portal-card-body" style="display:flex; flex-direction:column; gap:0.9rem; flex:1;">
+        <p style="font-size:0.875rem; line-height:1.5; color:var(--text-secondary); margin:0;">${s.shortDesc}</p>
 
         <div style="font-size:0.775rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
           <svg class="icon" style="width:14px; height:14px; flex-shrink:0; color:var(--hospital-teal-600);" viewBox="0 0 24 24"><path d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7M4 4h16a1 1 0 0 1 1 1v2H3V5a1 1 0 0 1 1-1z"/></svg>
@@ -1853,29 +1856,41 @@ function renderGovernmentSchemes(category = 'All', search = '') {
         </div>
 
         <div style="background:var(--bg-input); padding:0.85rem; border-radius:var(--radius-sm); font-size:0.825rem;">
-          <strong style="color:var(--text-primary); display:block; margin-bottom:0.35rem;">Key Benefits:</strong>
-          <ul style="padding-left:1.15rem; margin:0; color:var(--text-secondary); line-height:1.45;">
-            ${s.benefits.slice(0, 2).map(b => `<li style="margin-bottom:3px;">${b}</li>`).join('')}
+          <strong style="color:var(--text-primary); display:block; margin-bottom:0.4rem;">Key Benefits & Areas:</strong>
+          <ul style="padding:0; margin:0; list-style:none; color:var(--text-secondary); line-height:1.45;">
+            ${(s.keyAreas || s.benefits || []).slice(0, 3).map(b => `
+              <li style="margin-bottom:4px; display:flex; align-items:flex-start; gap:6px;">
+                <span style="color:#10b981; font-weight:700;">✓</span>
+                <span>${b}</span>
+              </li>
+            `).join('')}
           </ul>
         </div>
 
-        <div style="font-size:0.8rem; color:var(--text-muted);">
-          <strong>Eligibility:</strong> ${s.eligibility[0]}
-        </div>
-
-        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; flex-direction:column; gap:0.5rem;">
-          <div style="display:flex; gap:0.5rem;">
+        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; flex-direction:column; gap:0.45rem;">
+          <div style="display:flex; gap:0.45rem;">
             <button class="btn btn-sm btn-primary" style="flex:1;" onclick="openSchemeDetailsModal('${s.id}')">
-              <span>View Full Details</span>
+              <span>Learn More →</span>
             </button>
             <button class="btn btn-sm btn-secondary" style="flex:1;" onclick="openSchemeEligibilityFor('${s.id}')">
               <span>Check Eligibility</span>
             </button>
           </div>
-          <a href="${s.officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="text-align:center;">
-            <span>Official Portal</span>
-            <svg class="icon" style="width:12px; height:12px;" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
+
+          ${s.id === 'ayushman-bharat' ? `
+            <div style="display:flex; gap:0.45rem;">
+              <a href="https://pmjay.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center; font-size:0.75rem;">
+                <span>PM-JAY ↗</span>
+              </a>
+              <a href="https://aam.mohfw.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center; font-size:0.75rem;">
+                <span>Ayushman Arogya Mandir ↗</span>
+              </a>
+            </div>
+          ` : `
+            <a href="${s.officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="text-align:center;">
+              <span>${s.officialBtnLabel || 'Official Website'} ↗</span>
+            </a>
+          `}
         </div>
       </div>
     </div>
@@ -1886,9 +1901,9 @@ function getCategoryColor(cat) {
   if (cat.includes('Tribal')) return '#f59e0b';
   if (cat.includes('Infrastructure')) return 'var(--hospital-blue)';
   if (cat.includes('Rural')) return 'var(--hospital-healing-green)';
-  if (cat.includes('Insurance')) return 'var(--hospital-teal-600)';
+  if (cat.includes('Universal Health') || cat.includes('Insurance')) return 'var(--hospital-teal-600)';
   if (cat.includes('Telemedicine')) return 'var(--hospital-blue)';
-  if (cat.includes('Vaccination')) return 'var(--hospital-healing-green)';
+  if (cat.includes('Vaccination') || cat.includes('Immunization')) return 'var(--hospital-healing-green)';
   if (cat.includes('Maternal')) return '#d946ef';
   if (cat.includes('Disease')) return 'var(--hospital-cross-red)';
   return 'var(--hospital-teal-700)';
@@ -1898,9 +1913,9 @@ function getCategoryBadgeClass(cat) {
   if (cat.includes('Tribal')) return 'badge-amber';
   if (cat.includes('Infrastructure')) return 'badge-primary';
   if (cat.includes('Rural')) return 'badge-emerald';
-  if (cat.includes('Insurance')) return 'badge-primary';
+  if (cat.includes('Universal Health') || cat.includes('Insurance')) return 'badge-primary';
   if (cat.includes('Telemedicine')) return 'badge-purple';
-  if (cat.includes('Vaccination')) return 'badge-emerald';
+  if (cat.includes('Vaccination') || cat.includes('Immunization')) return 'badge-emerald';
   if (cat.includes('Maternal')) return 'badge-purple';
   if (cat.includes('Disease')) return 'badge-danger';
   return 'badge-primary';
@@ -1932,27 +1947,41 @@ window.openSchemeDetailsModal = function(schemeId) {
   const modalBody = document.getElementById('scheme-modal-body');
 
   if (modalDept) modalDept.textContent = scheme.department;
-  if (modalTitle) modalTitle.textContent = scheme.name;
+  if (modalTitle) modalTitle.innerHTML = `<span style="margin-right:6px;">${scheme.icon || '🏛️'}</span> ${escapeHTML(scheme.name)}`;
 
   modalBody.innerHTML = `
-    <div class="welcome-banner" style="padding:1.25rem; margin-bottom:1.5rem; background:linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(2, 132, 199, 0.12) 100%);">
+    <!-- Header Banner / About -->
+    <div class="welcome-banner" style="padding:1.25rem; margin-bottom:1.25rem; background:linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(2, 132, 199, 0.12) 100%);">
       <div class="welcome-text">
-        <span class="badge badge-emerald" style="margin-bottom:0.25rem;">${scheme.badge}</span>
-        <h4 style="font-size:1.15rem; margin-bottom:0.2rem;">${scheme.shortName} Purpose</h4>
-        <p style="font-size:0.875rem; color:var(--text-secondary);">${scheme.purpose}</p>
+        <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.25rem; flex-wrap:wrap;">
+          <span class="badge badge-emerald">${scheme.badge}</span>
+          <span class="badge badge-primary">${scheme.category}</span>
+        </div>
+        <h4 style="font-size:1.15rem; margin-bottom:0.25rem;">About the Scheme</h4>
+        <p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5;">${scheme.shortDesc}</p>
       </div>
     </div>
 
-    <div style="background:rgba(2, 132, 199, 0.08); border-left:4px solid var(--hospital-blue); padding:0.85rem 1rem; border-radius:var(--radius-xs); margin-bottom:1.5rem; font-size:0.85rem;">
-      <strong style="color:var(--hospital-blue);">📌 Beneficiary Status:</strong>
-      <span>You are <strong>Potentially Eligible</strong> for this scheme based on public health entitlements. Final verification is conducted on official government portals.</span>
+    <!-- Objectives -->
+    <div style="background:var(--bg-surface); border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:1rem; margin-bottom:1.25rem;">
+      <h4 style="font-size:0.95rem; margin-bottom:0.35rem; color:var(--hospital-teal-700);">🎯 Scheme Objectives</h4>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin:0; line-height:1.5;">${scheme.purpose}</p>
     </div>
 
-    <div style="margin-bottom:1.5rem;">
-      <h4 style="font-size:1.05rem; margin-bottom:0.6rem; color:var(--hospital-teal-700);">Key Benefits</h4>
-      <div style="display:flex; flex-direction:column; gap:0.5rem;">
-        ${scheme.benefits.map(b => `
-          <div style="display:flex; align-items:flex-start; gap:0.5rem; font-size:0.875rem; background:var(--bg-input); padding:0.65rem 0.85rem; border-radius:var(--radius-xs);">
+    <!-- Who it is intended to support -->
+    ${scheme.intendedSupport ? `
+      <div style="background:var(--bg-surface); border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:1rem; margin-bottom:1.25rem;">
+        <h4 style="font-size:0.95rem; margin-bottom:0.35rem; color:var(--hospital-teal-700);">👥 Who it is Intended to Support</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0; line-height:1.5;">${scheme.intendedSupport}</p>
+      </div>
+    ` : ''}
+
+    <!-- Key Services & Benefits -->
+    <div style="margin-bottom:1.25rem;">
+      <h4 style="font-size:1rem; margin-bottom:0.5rem; color:var(--hospital-teal-700);">Key Services & Benefits</h4>
+      <div style="display:flex; flex-direction:column; gap:0.45rem;">
+        ${(scheme.benefits || scheme.keyAreas || []).map(b => `
+          <div style="display:flex; align-items:flex-start; gap:0.5rem; font-size:0.85rem; background:var(--bg-input); padding:0.6rem 0.8rem; border-radius:var(--radius-xs);">
             <svg class="icon" style="color:var(--hospital-healing-green); width:16px; height:16px; margin-top:2px; flex-shrink:0;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
             <span>${b}</span>
           </div>
@@ -1960,53 +1989,58 @@ window.openSchemeDetailsModal = function(schemeId) {
       </div>
     </div>
 
-    <div class="dashboard-grid-2" style="margin-bottom:1.5rem;">
-      <div class="glass-panel" style="padding:1.15rem;">
-        <h4 style="font-size:0.95rem; margin-bottom:0.5rem;">Eligibility Criteria</h4>
-        <ul style="padding-left:1.15rem; font-size:0.825rem; color:var(--text-secondary); line-height:1.5;">
-          ${scheme.eligibility.map(e => `<li style="margin-bottom:4px;">${e}</li>`).join('')}
+    <!-- Eligibility & Documents Grid -->
+    <div class="dashboard-grid-2" style="margin-bottom:1.25rem;">
+      <div class="glass-panel" style="padding:1rem;">
+        <h4 style="font-size:0.925rem; margin-bottom:0.4rem; color:var(--text-primary);">Eligibility Criteria</h4>
+        <ul style="padding-left:1.15rem; font-size:0.825rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+          ${(scheme.eligibility || []).map(e => `<li style="margin-bottom:4px;">${e}</li>`).join('')}
         </ul>
       </div>
 
-      <div class="glass-panel" style="padding:1.15rem;">
-        <h4 style="font-size:0.95rem; margin-bottom:0.5rem;">Required Documents</h4>
-        <ul style="padding-left:1.15rem; font-size:0.825rem; color:var(--text-secondary); line-height:1.5;">
-          ${scheme.documents.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('')}
+      <div class="glass-panel" style="padding:1rem;">
+        <h4 style="font-size:0.925rem; margin-bottom:0.4rem; color:var(--text-primary);">Required Documents</h4>
+        <ul style="padding-left:1.15rem; font-size:0.825rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+          ${(scheme.documents || []).map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('')}
         </ul>
       </div>
     </div>
 
-    <div style="margin-bottom:1.5rem;">
-      <h4 style="font-size:1.05rem; margin-bottom:0.6rem; color:var(--hospital-teal-700);">How to Apply</h4>
-      <div style="display:flex; flex-direction:column; gap:0.5rem;">
-        ${scheme.howToApply.map((step, idx) => `
-          <div style="display:flex; align-items:flex-start; gap:0.75rem; font-size:0.875rem;">
-            <span style="width:24px; height:24px; border-radius:50%; background:var(--primary-gradient); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0;">${idx + 1}</span>
-            <p style="margin:0; font-size:0.85rem; color:var(--text-secondary);">${step}</p>
+    <!-- How to Get More Information & Apply -->
+    <div style="margin-bottom:1.25rem;">
+      <h4 style="font-size:1rem; margin-bottom:0.5rem; color:var(--hospital-teal-700);">How to Get More Information & Apply</h4>
+      <div style="display:flex; flex-direction:column; gap:0.45rem;">
+        ${(scheme.howToApply || []).map((step, idx) => `
+          <div style="display:flex; align-items:flex-start; gap:0.65rem; font-size:0.85rem; background:var(--bg-surface); border:1px solid var(--border-light); padding:0.6rem 0.8rem; border-radius:var(--radius-xs);">
+            <span style="width:22px; height:22px; border-radius:50%; background:var(--primary-gradient); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0;">${idx + 1}</span>
+            <p style="margin:0; font-size:0.825rem; color:var(--text-secondary); line-height:1.4;">${step}</p>
           </div>
         `).join('')}
       </div>
     </div>
 
-    ${scheme.faqs && scheme.faqs.length ? `
-      <div style="margin-bottom:1.5rem;">
-        <h4 style="font-size:1.05rem; margin-bottom:0.6rem; color:var(--hospital-teal-700);">Frequently Asked Questions</h4>
-        <div style="display:flex; flex-direction:column; gap:0.5rem;">
-          ${scheme.faqs.map(f => `
-            <div style="background:var(--bg-input); padding:0.75rem 1rem; border-radius:var(--radius-xs);">
-              <strong style="font-size:0.85rem; color:var(--text-primary); display:block; margin-bottom:2px;">Q: ${f.q}</strong>
-              <p style="font-size:0.825rem; color:var(--text-secondary); margin:0;">${f.a}</p>
-            </div>
-          `).join('')}
-        </div>
+    <!-- Standard Disclaimer Box -->
+    <div style="background:rgba(2, 132, 199, 0.08); border-left:4px solid var(--hospital-blue); padding:0.85rem 1rem; border-radius:var(--radius-xs); margin-bottom:1.25rem; font-size:0.825rem; color:var(--text-secondary); line-height:1.45;">
+      <strong style="color:var(--hospital-blue); display:block; margin-bottom:2px;">📌 Important Guidance Notice:</strong>
+      <span>${scheme.disclaimer || 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'}</span>
+      <div style="margin-top:4px; font-size:0.75rem; color:var(--text-muted);">
+        📅 Last Verified Date: <strong>${scheme.lastVerified || 'September 2026'}</strong>
       </div>
-    ` : ''}
+    </div>
 
+    <!-- Action Buttons with Official Links -->
     <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1px solid var(--border-light); flex-wrap:wrap; gap:0.75rem;">
-      <a href="${scheme.portalUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-emerald">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        <span>Open Official Portal</span>
-      </a>
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <a href="${scheme.officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-emerald">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span>${scheme.officialBtnLabel || 'Official Government Website'} ↗</span>
+        </a>
+        ${scheme.secondaryUrl ? `
+          <a href="${scheme.secondaryUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+            <span>${scheme.secondaryBtnLabel || 'Secondary Portal'} ↗</span>
+          </a>
+        ` : ''}
+      </div>
       <button class="btn btn-primary" data-close-modal="scheme-details-modal">Close</button>
     </div>
   `;
@@ -2039,31 +2073,31 @@ function initEligibilityChecker() {
         resultsContainer.innerHTML = `
           <div style="border-top:2px solid var(--hospital-teal-600); padding-top:1.25rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-              <h4 style="font-size:1.15rem; color:var(--text-primary);">🎯 Scheme Eligibility Results</h4>
+              <h4 style="font-size:1.15rem; color:var(--text-primary);">🎯 Scheme Eligibility Guidance Report</h4>
               <span class="badge badge-emerald">Evaluated</span>
             </div>
 
             <div style="background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.4); border-radius:var(--radius-xs); padding:0.85rem 1rem; margin-bottom:1.25rem; font-size:0.825rem; color:var(--text-primary);">
-              <strong>⚠️ Guidance Disclaimer:</strong> Eligibility information shown here is for guidance only. Please verify eligibility through the official government portal.
+              <strong>⚠️ Guidance Notice:</strong> Information provided by SwasthyaConnect is for guidance and awareness only. Eligibility, benefits and application decisions are determined by the relevant Government authority. Verify through the official portal.
             </div>
 
             <div style="display:flex; flex-direction:column; gap:0.75rem;">
               ${results.map(r => `
                 <div class="glass-panel" style="padding:1rem; border-left:4px solid ${getEligibilityStatusColor(r.status)};">
                   <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.25rem; flex-wrap:wrap; gap:0.4rem;">
-                    <div>
+                    <div style="display:flex; align-items:center; gap:0.4rem;">
+                      <span>${r.icon || '🏛️'}</span>
                       <strong style="font-size:0.95rem; color:var(--text-primary);">${r.schemeName}</strong>
-                      <span class="badge ${getCategoryBadgeClass(r.category)}" style="margin-left:6px; font-size:0.65rem;">${r.category}</span>
+                      <span class="badge ${getCategoryBadgeClass(r.category)}" style="margin-left:4px; font-size:0.65rem;">${r.category}</span>
                     </div>
                     ${getEligibilityBadgeHTML(r.status)}
                   </div>
-                  <p style="font-size:0.825rem; color:var(--text-secondary); margin:0.35rem 0 0.5rem;">
+                  <p style="font-size:0.825rem; color:var(--text-secondary); margin:0.35rem 0 0.5rem; line-height:1.4;">
                     ${r.reason}
                   </p>
                   <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
-                    <a href="${r.portalUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size:0.75rem; padding:0.25rem 0.6rem;">
-                      <span>Verify Officially</span>
-                      <svg class="icon" style="width:10px; height:10px;" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    <a href="${r.portalUrl || r.officialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size:0.75rem; padding:0.25rem 0.6rem;">
+                      <span>Verify on Official Portal ↗</span>
                     </a>
                   </div>
                 </div>
@@ -2079,18 +2113,18 @@ function initEligibilityChecker() {
 }
 
 function getEligibilityStatusColor(status) {
-  if (status === 'Eligible') return 'var(--hospital-healing-green)';
-  if (status === 'Verify') return 'var(--hospital-blue)';
-  return 'var(--text-muted)';
+  if (status === 'Potentially Eligible' || status === 'Eligible') return 'var(--hospital-healing-green)';
+  if (status === 'More Information Required' || status === 'Verify') return '#f59e0b';
+  return 'var(--hospital-blue)';
 }
 
 function getEligibilityBadgeHTML(status) {
-  if (status === 'Eligible') {
+  if (status === 'Potentially Eligible' || status === 'Eligible') {
     return `<span class="badge badge-emerald">🟢 Potentially Eligible</span>`;
-  } else if (status === 'Verify') {
-    return `<span class="badge badge-purple">🟡 Please Verify Officially</span>`;
+  } else if (status === 'More Information Required') {
+    return `<span class="badge badge-amber">🟡 More Information Required</span>`;
   } else {
-    return `<span class="badge" style="background:rgba(100, 116, 139, 0.2); color:#64748b;">⚪ May Not Be Eligible</span>`;
+    return `<span class="badge badge-primary">🔵 Check Official Eligibility</span>`;
   }
 }
 

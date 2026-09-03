@@ -454,64 +454,292 @@ const initialSeedData = {
   ],
   governmentSchemes: [
     {
-      id: 'pmjay',
-      name: 'Ayushman Bharat – PM-JAY (Pradhan Mantri Jan Arogya Yojana)',
-      hindiName: 'आयुष्मान भारत - प्रधानमंत्री जन आरोग्य योजना',
-      shortName: 'PM-JAY',
-      category: 'Insurance/Financial Assistance',
-      department: 'National Health Authority (NHA), Ministry of Health & Family Welfare',
-      badge: '₹5 Lakhs Annual Cover',
-      shortDesc: 'World’s largest government-funded health assurance scheme providing ₹5,00,000 cashless hospitalization cover per eligible family per year across 28,000+ empanelled hospitals.',
-      purpose: 'To provide financial protection against catastrophic health expenditures and ensure universal access to secondary and tertiary medical care across India.',
-      benefits: [
-        '₹5,00,000 annual health cover per family on a floater basis with no restrictions on family size, age, or gender.',
-        'Cashless and paperless treatment at all empanelled public hospitals and private healthcare facilities nationwide.',
-        'Comprehensive coverage of 1,949+ medical procedures including oncology, cardiology, neurosurgery, and intensive care.',
-        'Pre-hospitalization expenses (up to 3 days) and post-hospitalization care (up to 15 days) including diagnostics and medicines.',
-        'All pre-existing diseases are covered from the very first day of scheme enrollment.'
+      id: 'nhm',
+      name: 'National Health Mission (NHM)',
+      fullName: 'National Health Mission (NRHM & NUHM)',
+      hindiName: 'राष्ट्रीय स्वास्थ्य मिशन (NHM)',
+      shortName: 'NHM',
+      category: 'Rural & Public Healthcare',
+      department: 'Ministry of Health & Family Welfare (MoHFW), Government of India',
+      badge: 'Rural & Public Healthcare',
+      icon: '🏥',
+      shortDesc: 'NHM is a major Government of India health mission focused on improving access to equitable, affordable and quality healthcare. It includes the National Rural Health Mission (NRHM) and National Urban Health Mission (NUHM).',
+      purpose: 'To achieve universal access to equitable, affordable, and quality healthcare services that are accountable and responsive to people’s needs across rural and urban India.',
+      keyAreas: [
+        'Primary and secondary healthcare',
+        'Maternal and child health',
+        'Communicable disease control',
+        'Non-communicable disease services',
+        'Mobile Medical Units',
+        'Telemedicine and rural healthcare access'
       ],
+      benefits: [
+        'Free Essential Drugs & Diagnostics: 100% free quality generic medicines and 50+ diagnostic tests at PHCs/CHCs/District Hospitals.',
+        'Mobile Medical Units (MMUs): Fleet of equipped mobile clinic vans delivering doorstep diagnostic and clinical care in remote rural villages.',
+        'Reproductive, Maternal, Newborn, Child, and Adolescent Health (RMNCAH+A) integrated interventions.',
+        'Nationwide Non-Communicable Disease (NCD) screening for Cancer, Diabetes, and Hypertension.',
+        'Telemedicine and rural digital healthcare connectivity across thousands of rural wellness centres.'
+      ],
+      intendedSupport: 'All citizens seeking public healthcare, with dedicated emphasis on rural populations, women, children, and vulnerable communities.',
       eligibility: [
-        'Households identified under Socio-Economic Caste Census (SECC 2011) rural deprivation criteria (D1 to D7) or 11 urban occupational worker categories.',
-        'Active beneficiaries of National Food Security Act (NFSA) / Ration Card programs in participating States.',
-        'All Senior Citizens aged 70 years and above (under PM-JAY Vistrit Coverage) irrespective of socio-economic status.'
+        'Universal public healthcare access at all Government Sub-Centres, Primary Health Centres (PHCs), Community Health Centres (CHCs), and District Hospitals.',
+        'No income restriction for general OPD consultations and essential medicines at public facilities.'
       ],
       documents: [
-        'Aadhaar Card of all family members',
-        'Ration Card / NFSA Family ID / State Beneficiary Card',
-        'Active Mobile Number linked with Aadhaar (for OTP e-KYC)',
-        'PMJAY Beneficiary Letter / Family ID (if received)'
+        'No mandatory documents required for general OPD consultations and free generic medicines.',
+        'Aadhaar / Government Photo ID beneficial for Ayushman Bharat Health Account (ABHA) creation.'
       ],
       howToApply: [
-        'Visit the official NHA portal (beneficiary.nha.gov.in) or download the Ayushman App.',
-        'Login using your active mobile number and enter the received OTP.',
-        'Search beneficiary list using State, Scheme (PMJAY), Ration Card Number, or Aadhaar Number.',
-        'Complete online e-KYC via Aadhaar OTP or Face Authentication and download your Ayushman Card instantly.',
-        'Alternatively, visit any nearby Empanelled Hospital (Ayushman Mitra Helpdesk) or Common Service Centre (CSC) with your documents.'
+        'Walk into your nearest Government Primary Health Centre (PHC), Community Health Centre (CHC), or District Civil Hospital.',
+        'Consult with the medical officer on duty and receive prescribed generic medicines and diagnostic tests on-site free of charge.',
+        'Connect with local community ASHA or ANM healthcare workers for maternal, infant, or immunization assistance.'
       ],
       faqs: [
-        { q: 'Is there any registration fee for PM-JAY?', a: 'No, PM-JAY registration and the Ayushman Card generation are 100% free of cost at all government hospitals and online portals.' },
-        { q: 'Can I use the Ayushman Card in another state?', a: 'Yes, PM-JAY offers nationwide portability. An Ayushman card issued in one state is fully valid at any empanelled hospital across India.' },
-        { q: 'Are OPD consultations covered?', a: 'PM-JAY primarily covers in-patient secondary and tertiary hospitalizations (IPD). Free OPD consultations and primary medicines are provided under Ayushman Arogya Mandirs.' }
+        { q: 'What is the National Health Mission (NHM)?', a: 'NHM is India’s flagship health mission comprising the National Rural Health Mission (NRHM) and National Urban Health Mission (NUHM).' },
+        { q: 'Are medicines provided free under NHM?', a: 'Yes, all essential generic drugs on the National Essential Drugs List are provided free of charge at government public health facilities.' }
+      ],
+      officialUrl: 'https://nhm.gov.in/',
+      portalUrl: 'https://nhm.gov.in/',
+      officialBtnLabel: 'Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
+    },
+    {
+      id: 'ayushman-bharat',
+      name: 'Ayushman Bharat',
+      fullName: 'Ayushman Bharat (PM-JAY & Ayushman Arogya Mandir)',
+      hindiName: 'आयुष्मान भारत (पीएम-जय एवं आयुष्मान आरोग्य मंदिर)',
+      shortName: 'Ayushman Bharat',
+      category: 'Universal Health Coverage',
+      department: 'National Health Authority (NHA) & Ministry of Health and Family Welfare (MoHFW)',
+      badge: 'Universal Health Coverage',
+      icon: '🛡️',
+      shortDesc: 'Ayushman Bharat is a major Government of India healthcare initiative with two complementary components: Ayushman Arogya Mandirs for comprehensive primary healthcare and Pradhan Mantri Jan Arogya Yojana (PM-JAY) for financial protection for eligible beneficiaries.',
+      purpose: 'To provide a continuum of care spanning preventive and promotive primary healthcare at the grassroots level to secondary and tertiary cashless hospitalization financial protection.',
+      keyAreas: [
+        'Comprehensive primary healthcare',
+        'Preventive and promotive healthcare',
+        'Maternal and child healthcare',
+        'Non-communicable disease care',
+        'Secondary and tertiary hospitalization coverage under PM-JAY',
+        'Healthcare closer to communities'
+      ],
+      benefits: [
+        '₹5,00,000 annual health assurance cover per eligible family for secondary and tertiary cashless hospitalization under PM-JAY.',
+        '1,60,000+ Ayushman Arogya Mandirs delivering comprehensive primary healthcare closer to homes.',
+        'Preventive, promotive, maternal, child, and non-communicable disease (NCD) screening and management.',
+        'Free essential drugs, diagnostic tests, and teleconsultations via eSanjeevani.',
+        'Universal Senior Citizen (70+) coverage under expanded PM-JAY provisions.'
+      ],
+      intendedSupport: 'Economically vulnerable rural and urban families identified under government beneficiary records, senior citizens aged 70+, and general citizens accessing primary healthcare.',
+      eligibility: [
+        'Primary healthcare services at Ayushman Arogya Mandirs are available to all citizens universally.',
+        'PM-JAY secondary & tertiary cashless hospitalization is based on SECC 2011 deprivation criteria, active NFSA/Ration Card rosters, or senior citizens aged 70+.',
+        'Eligibility and benefits may depend on the applicable government rules and beneficiary records. Verify through the official portal.'
+      ],
+      documents: [
+        'Aadhaar Card of family members (for e-KYC authentication)',
+        'Ration Card / NFSA Family ID / State Health Assurance Card',
+        'Active mobile number linked with Aadhaar for OTP verification'
+      ],
+      howToApply: [
+        'Visit the official PM-JAY beneficiary portal (beneficiary.nha.gov.in) or download the Ayushman App.',
+        'Login using your mobile number and verify via Aadhaar OTP or Face Authentication.',
+        'Search beneficiary records using your Ration Card or Aadhaar Number.',
+        'Download your Ayushman Card or visit an Ayushman Mitra helpdesk at any empanelled hospital.'
+      ],
+      faqs: [
+        { q: 'What are the two pillars of Ayushman Bharat?', a: 'The two pillars are Ayushman Arogya Mandirs (for comprehensive primary healthcare) and Pradhan Mantri Jan Arogya Yojana / PM-JAY (for ₹5 Lakh cashless hospitalization).' },
+        { q: 'Is there any fee to generate an Ayushman Card?', a: 'No, creating or downloading an Ayushman Card is 100% free of charge at all government portals and empanelled hospital helpdesks.' }
       ],
       officialUrl: 'https://pmjay.gov.in/',
-      portalUrl: 'https://beneficiary.nha.gov.in/'
+      portalUrl: 'https://pmjay.gov.in/',
+      officialBtnLabel: 'PM-JAY',
+      secondaryUrl: 'https://aam.mohfw.gov.in/',
+      secondaryBtnLabel: 'Ayushman Arogya Mandir',
+      lastVerified: 'September 2026',
+      disclaimer: 'Eligibility and benefits may depend on the applicable government rules and beneficiary records. Verify through the official portal.'
+    },
+    {
+      id: 'pm-janman',
+      name: 'PM-JANMAN',
+      fullName: 'Pradhan Mantri Janjati Adivasi Nyaya Maha Abhiyan',
+      hindiName: 'प्रधानमंत्री जनजाति आदिवासी न्याय महा अभियान (PM-JANMAN)',
+      shortName: 'PM-JANMAN',
+      category: 'Tribal & Underserved Communities',
+      department: 'Ministry of Tribal Affairs & Ministry of Health & Family Welfare',
+      badge: 'PVTG Tribal Mission',
+      icon: '👥',
+      shortDesc: 'PM-JANMAN is a Government of India mission focused on improving socio-economic conditions and access to essential services for Particularly Vulnerable Tribal Groups (PVTGs).',
+      purpose: 'To saturate 75 Particularly Vulnerable Tribal Groups (PVTGs) habitations with essential healthcare, nutrition, clean drinking water, safe housing, education, and livelihood connectivity.',
+      keyAreas: [
+        'Improved access to healthcare',
+        'Health and nutrition',
+        'Safe housing',
+        'Drinking water',
+        'Education',
+        'Connectivity',
+        'Livelihood support'
+      ],
+      benefits: [
+        'Dedicated Mobile Medical Units (MMUs) operating directly inside remote tribal habitations and forest settlements.',
+        '100% saturation of Ayushman Bharat PM-JAY cards for all eligible PVTG households.',
+        'Universal Sickle Cell Disease & Trait screening, counseling, and free medication supply.',
+        'Establishment of Multi-Purpose Community Centres with dedicated healthcare facilities.',
+        'Doorstep maternal-child healthcare and nutrition support through tribal health volunteers.'
+      ],
+      intendedSupport: 'Members of 75 notified Particularly Vulnerable Tribal Groups (PVTGs) residing across 18 States and Union Territory of Andaman & Nicobar Islands.',
+      eligibility: [
+        'This mission specifically targets eligible PVTG tribal communities and notified habitations.',
+        'Beneficiaries must belong to recognized Particularly Vulnerable Tribal Groups (PVTGs).'
+      ],
+      documents: [
+        'Tribal Community / PVTG Habitation Verification',
+        'Aadhaar Card (assisted on-site enrollment camps organized in habitations)',
+        'Ration Card / PM-JAY ID'
+      ],
+      howToApply: [
+        'Visit the PM-JANMAN Mobile Health Unit camp visiting your tribal habitation.',
+        'Approach the local Anganwadi, ASHA worker, or Multi-Purpose Centre coordinator.',
+        'Enroll for on-the-spot Ayushman Card generation and Sickle Cell screening.'
+      ],
+      faqs: [
+        { q: 'Who is eligible for PM-JANMAN?', a: 'PM-JANMAN specifically targets 75 Particularly Vulnerable Tribal Groups (PVTGs) in notified habitations across 18 States and UTs.' },
+        { q: 'What healthcare services are delivered under PM-JANMAN?', a: 'Doorstep Mobile Medical Units, free Sickle Cell screening and management, 100% Ayushman Card saturation, and nutrition support.' }
+      ],
+      officialUrl: 'https://tribal.nic.in/PM-JANMAN.aspx',
+      portalUrl: 'https://tribal.nic.in/PM-JANMAN.aspx',
+      officialBtnLabel: 'Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
+    },
+    {
+      id: 'pmssy',
+      name: 'Pradhan Mantri Swasthya Suraksha Yojana (PMSSY)',
+      fullName: 'Pradhan Mantri Swasthya Suraksha Yojana (PMSSY)',
+      hindiName: 'प्रधानमंत्री स्वास्थ्य सुरक्षा योजना (PMSSY)',
+      shortName: 'PMSSY',
+      category: 'Healthcare Infrastructure',
+      department: 'Ministry of Health & Family Welfare (MoHFW), Government of India',
+      badge: 'New AIIMS & Tertiary Care',
+      icon: '🏢',
+      shortDesc: 'PMSSY aims to address regional imbalances in the availability of quality tertiary healthcare and medical education infrastructure.',
+      purpose: 'To establish apex tertiary healthcare institutions on the lines of AIIMS and upgrade existing Government Medical Colleges across underserved regions.',
+      keyAreas: [
+        'Strengthening tertiary healthcare',
+        'Expansion of medical education capacity',
+        'Development of new medical institutions',
+        'Improving specialist healthcare availability',
+        'Addressing regional healthcare disparities'
+      ],
+      benefits: [
+        'Establishment of 22 new All India Institutes of Medical Sciences (AIIMS) offering world-class super-specialty treatment.',
+        'Upgradation of 75+ Government Medical Colleges with modern super-specialty blocks, ICUs, and trauma wards.',
+        'Setting up new medical colleges attached to existing District Civil Hospitals to train specialist doctors.',
+        'Substantial increase in affordable tertiary beds, oncology units, catheterization labs, and organ transplant services.',
+        'Cashless treatment for eligible patients through integration with Ayushman Bharat PM-JAY.'
+      ],
+      intendedSupport: 'All Indian citizens seeking advanced super-specialty consultations, tertiary surgeries, and specialized clinical care at apex government institutions.',
+      eligibility: [
+        'Open to all citizens across India seeking outpatient (OPD) and inpatient (IPD) super-specialty medical care.',
+        'Referrals from District Hospitals or direct appointment booking via the Online Registration System (ORS).'
+      ],
+      documents: [
+        'Patient Photo ID (Aadhaar / Voter ID / Passport)',
+        'Medical referral slip or previous clinical reports (if applicable)',
+        'Ayushman Card / State Beneficiary ID (for cashless treatment under PM-JAY)'
+      ],
+      howToApply: [
+        'Book an online OPD appointment via the national Online Registration System portal (ors.gov.in) for any AIIMS or apex hospital.',
+        'Or walk into the OPD registration counter of any new AIIMS institution in your region.',
+        'Consult with specialist faculty doctors and receive subsidized or PM-JAY covered tertiary treatment.'
+      ],
+      faqs: [
+        { q: 'What is the main objective of PMSSY?', a: 'PMSSY aims to correct regional imbalances in tertiary healthcare availability and augment medical education capacity by setting up AIIMS institutes and upgrading medical colleges.' },
+        { q: 'Can poor patients receive free surgery at AIIMS under PMSSY?', a: 'Yes, all new AIIMS hospitals are fully empanelled under Ayushman Bharat PM-JAY, providing 100% cashless treatment up to ₹5 Lakhs for eligible beneficiaries.' }
+      ],
+      officialUrl: 'https://pmssy.mohfw.gov.in/',
+      portalUrl: 'https://pmssy.mohfw.gov.in/',
+      officialBtnLabel: 'Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
+    },
+    {
+      id: 'nacp',
+      name: 'National AIDS Control Programme (NACP)',
+      fullName: 'National AIDS Control Programme (NACP Phase-V)',
+      hindiName: 'राष्ट्रीय एड्स नियंत्रण कार्यक्रम (NACP)',
+      shortName: 'NACP',
+      category: 'Disease Prevention & Public Health',
+      department: 'National AIDS Control Organisation (NACO), MoHFW',
+      badge: 'Confidential & Free Care',
+      icon: '🎗️',
+      shortDesc: 'The National AIDS Control Programme is India\'s national programme for prevention and control of HIV/AIDS, implemented through the National AIDS Control Organisation (NACO).',
+      purpose: 'To achieve universal access to comprehensive HIV/AIDS and STI prevention, diagnostic testing, treatment, and care with active community link workers and zero stigma.',
+      keyAreas: [
+        'HIV prevention',
+        'HIV testing and counselling',
+        'Treatment and care',
+        'Awareness and education',
+        'Outreach services',
+        'Support for vulnerable and affected communities'
+      ],
+      benefits: [
+        '100% Free, confidential, and anonymous HIV/STI testing and counseling across 5,000+ Integrated Counseling and Testing Centres (ICTCs).',
+        'Free lifelong first-line, second-line, and third-line Anti-Retroviral Therapy (ART) at 600+ government ART centers.',
+        'Prevention of Parent-to-Child Transmission (PPTCT) with free prophylactic medications for pregnant mothers.',
+        'Rural Link Worker Scheme: Dedicated village volunteers conducting stigma reduction, education, and healthcare linkage.',
+        'Free viral load monitoring, opportunistic infection management, and nutritional support linkage.'
+      ],
+      intendedSupport: 'All individuals seeking confidential counseling, testing, preventive information, or comprehensive ongoing clinical management without stigma or discrimination.',
+      eligibility: [
+        'Universal and open to all individuals across rural and urban India.',
+        'Confidential, respectful, and non-stigmatizing service delivery without discrimination.'
+      ],
+      documents: [
+        'No mandatory documents required for confidential testing or counseling.',
+        'Identity card is optional and kept strictly confidential for ART center registry maintenance.'
+      ],
+      howToApply: [
+        'Visit any nearest Government District Hospital, CHC, or Sub-District Hospital ICTC center.',
+        'Receive free, confidential pre-test counseling and rapid diagnostic screening.',
+        'Enrolled patients receive free lifelong medication blister packs and regular clinical monitoring.'
+      ],
+      faqs: [
+        { q: 'What is NACO?', a: 'The National AIDS Control Organisation (NACO) is a division of the Ministry of Health and Family Welfare that provides leadership for HIV/AIDS control in India.' },
+        { q: 'Are HIV tests and ART medications free?', a: 'Yes, 100% of HIV testing, counseling, and Anti-Retroviral Therapy (ART) medications are provided free of cost at government ICTC and ART centers.' }
+      ],
+      officialUrl: 'https://naco.gov.in/',
+      portalUrl: 'https://naco.gov.in/',
+      officialBtnLabel: 'NACO Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
     },
     {
       id: 'esanjeevani',
       name: 'eSanjeevani (National Teleconsultation Service)',
+      fullName: 'eSanjeevani National Telemedicine Service',
       hindiName: 'ई-संजीवनी राष्ट्रीय टेली-परामर्श सेवा',
       shortName: 'eSanjeevani',
       category: 'Telemedicine',
       department: 'Ministry of Health & Family Welfare (MoHFW) & C-DAC Mohali',
       badge: 'Free Specialist Video Consult',
+      icon: '💻',
       shortDesc: 'Official national doctor-to-patient (eSanjeevaniOPD) and doctor-to-doctor (eSanjeevani HWC) telemedicine platform providing free medical consultations from home.',
       purpose: 'To democratize access to specialist doctors, eliminate geographical barriers, and offer free digital clinical consultations across all States and UTs.',
+      keyAreas: [
+        'Doctor-to-Patient Teleconsultations',
+        'Specialist and Super-specialist OPDs',
+        'Digital e-Prescriptions',
+        'Rural Wellness Centre Connectivity'
+      ],
       benefits: [
         '100% Free video and audio consultations with verified government medical officers, MD specialists, and AIIMS faculty.',
         'Legally recognized, digitally signed e-Prescriptions generated instantly after the consultation.',
         'Dedicated specialty OPDs: Cardiology, Endocrinology, Pediatrics, Gynecology, Dermatology, and Psychiatry.',
         'Completely contact-free with zero travel time and zero hospital queue waiting.'
       ],
+      intendedSupport: 'All Indian citizens and residents seeking convenient and free consultations with government doctors and specialists.',
       eligibility: [
         'Open to all Indian citizens and residents across all States and Union Territories.',
         'No income ceiling, age limitation, or geographic restrictions.'
@@ -529,174 +757,38 @@ const initialSeedData = {
       ],
       faqs: [
         { q: 'What are the operating hours for eSanjeevani?', a: 'General OPDs are active Monday through Saturday (09:00 AM to 05:00 PM), while specialized super-specialty clinics operate according to state-wise timetables.' },
-        { q: 'Is the eSanjeevani prescription accepted at local pharmacies?', a: 'Yes, eSanjeevani digital prescriptions are signed by registered medical practitioners and are legally valid under the Telemedicine Practice Guidelines issued by the National Medical Commission (NMC).' }
+        { q: 'Is the eSanjeevani prescription accepted at local pharmacies?', a: 'Yes, eSanjeevani digital prescriptions are signed by registered medical practitioners and are legally valid under NMC Telemedicine Guidelines.' }
       ],
       officialUrl: 'https://esanjeevani.mohfw.gov.in/',
-      portalUrl: 'https://esanjeevani.mohfw.gov.in/#/patient/signin'
-    },
-    {
-      id: 'nhm',
-      name: 'National Health Mission (NHM)',
-      hindiName: 'राष्ट्रीय स्वास्थ्य मिशन',
-      shortName: 'NHM (NRHM & NUHM)',
-      category: 'Rural Healthcare',
-      department: 'Ministry of Health & Family Welfare (MoHFW)',
-      badge: 'Flagship Umbrella (₹39,390 Cr Outlay)',
-      shortDesc: 'India’s flagship umbrella health scheme comprising NRHM & NUHM (allocated 37% of 2026-27 Health Budget) strengthening primary, secondary, and rural healthcare delivery.',
-      purpose: 'To achieve universal, equitable, affordable, and high-quality public healthcare through decentralized infrastructure, communicable & NCD disease control, and dedicated rural outreach.',
-      benefits: [
-        'Free Essential Drugs & Diagnostics: 100% free quality generic medicines and 50+ diagnostic tests at PHCs/CHCs/District Hospitals.',
-        'Mobile Medical Units (MMUs): Fleet of equipped mobile clinic vans delivering regular diagnostic and clinical care in remote rural villages.',
-        'RMNCAH+A Services: Reproductive, Maternal, Newborn, Child, and Adolescent Health integrated interventions.',
-        'NPCDCS Programme: Free screening and treatment for Cancer, Diabetes, Cardiovascular Diseases, and Stroke.',
-        '1,60,000+ Ayushman Arogya Mandirs providing comprehensive primary healthcare and teleconsultation hubs.'
-      ],
-      eligibility: [
-        'Universal public access for all citizens visiting any government primary health center (PHC), community health center (CHC), or district hospital.',
-        'Special focus on rural villages, tribal communities, urban slums, and economically vulnerable households.'
-      ],
-      documents: [
-        'No mandatory documents required for basic OPD consultation and free medicines.',
-        'Aadhaar / Government ID beneficial for Ayushman Bharat Health Account (ABHA) digital record creation.'
-      ],
-      howToApply: [
-        'Walk into any nearest Government Sub-Centre, PHC, CHC, or District Civil Hospital.',
-        'Consult the medical officer on duty and receive prescribed generic medicines and diagnostic tests on-site free of cost.',
-        'Connect with local community ASHA or ANM workers for maternal, infant, and NCD screening support.'
-      ],
-      faqs: [
-        { q: 'What is the 2026-27 budget allocation for NHM?', a: 'NHM commands 37% of the Union Health Ministry budget with an outlay of ₹39,390 Crore, an increase of 6% over revised estimates.' },
-        { q: 'What are Mobile Medical Units (MMUs)?', a: 'MMUs are mobile healthcare vehicles equipped with basic diagnostic equipment, essential drugs, and medical staff deployed to deliver doorstep care in hard-to-reach rural hamlets.' }
-      ],
-      officialUrl: 'https://nhm.gov.in/',
-      portalUrl: 'https://nhm.gov.in/'
-    },
-    {
-      id: 'pmjanman',
-      name: 'PM-JANMAN (Pradhan Mantri Janjati Adivasi Nyaya Maha Abhiyan)',
-      hindiName: 'प्रधानमंत्री जनजाति आदिवासी न्याय महा अभियान (स्वास्थ्य घटक)',
-      shortName: 'PM-JANMAN',
-      category: 'Tribal & Underserved Health',
-      department: 'Ministry of Tribal Affairs & Ministry of Health & Family Welfare',
-      badge: 'Targeted Tribal Health (₹46.23 Cr)',
-      shortDesc: 'Dedicated national public health initiative targeting Particularly Vulnerable Tribal Groups (PVTGs) across 75 tribal communities with Mobile Health Units and Sickle Cell screening.',
-      purpose: 'To bridge chronic healthcare disparities in remote tribal habitations through doorstep mobile medical units, Ayushman Bharat saturation, and multi-purpose health centres.',
-      benefits: [
-        'Dedicated Mobile Medical Units (MMUs) operating exclusively in remote tribal settlements and forest villages.',
-        '100% saturation of Ayushman Bharat PM-JAY Golden Cards for all eligible PVTG households.',
-        'Sickle Cell Trait and Disease universal screening, genetic counseling, and free management drugs.',
-        'Establishment of Multi-Purpose Health Centres (MPCs) and emergency ambulance transit connectivity.',
-        'Free nutritional supplements and maternal-infant care kits distributed via local tribal health volunteers.'
-      ],
-      eligibility: [
-        'Members of Particularly Vulnerable Tribal Groups (PVTGs) across 18 States and Union Territory of Andaman & Nicobar Islands.',
-        'Tribal residents in notified habitations and forest villages.'
-      ],
-      documents: [
-        'Tribal / Community Certificate (or PVTG village habitation verification)',
-        'Aadhaar Card (assisted on-site enrollment available)',
-        'Ration Card / PM-JAY Beneficiary ID'
-      ],
-      howToApply: [
-        'Visit the PM-JANMAN Mobile Health Unit camp visiting your tribal habitation.',
-        'Or approach the local ASHA, Anganwadi, or Community Health Worker at the Village Multi-Purpose Centre.',
-        'Enroll for Ayushman Card and Sickle Cell screening on-the-spot without complex paperwork.'
-      ],
-      faqs: [
-        { q: 'Which groups are covered under PM-JANMAN?', a: 'The scheme covers 75 Particularly Vulnerable Tribal Groups (PVTGs) residing in over 22,000 remote villages across 18 States and UTs.' },
-        { q: 'Is Sickle Cell screening provided free?', a: 'Yes, comprehensive point-of-care Sickle Cell screening and counseling are provided 100% free under the National Sickle Cell Anaemia Elimination Mission component.' }
-      ],
-      officialUrl: 'https://tribal.nic.in/PM-JANMAN.aspx',
-      portalUrl: 'https://tribal.nic.in/PM-JANMAN.aspx'
-    },
-    {
-      id: 'pmssy',
-      name: 'PMSSY (Pradhan Mantri Swasthya Suraksha Yojana) & Medical Expansion',
-      hindiName: 'प्रधानमंत्री स्वास्थ्य सुरक्षा योजना एवं चिकित्सा शिक्षा विस्तार',
-      shortName: 'PMSSY',
-      category: 'Infrastructure & Tertiary Care',
-      department: 'Ministry of Health & Family Welfare (MoHFW)',
-      badge: 'New AIIMS & ₹1,725 Cr College Fund',
-      shortDesc: 'Flagship infrastructure expansion program establishing 22 new AIIMS apex institutions and setting up new government medical colleges attached to district hospitals (₹1,725 Cr outlay).',
-      purpose: 'To correct regional imbalances in tertiary healthcare availability and augment quality medical education and specialist physician workforce in underserved districts.',
-      benefits: [
-        'World-class, affordable tertiary and super-specialty hospital care across 22 new All India Institutes of Medical Sciences (AIIMS).',
-        'Upgradation of 75 existing Government Medical Colleges with modern super-specialty blocks, ICUs, and oncology suites.',
-        'Establishment of new medical colleges attached to existing District Civil Hospitals (₹1,725 Crore outlay in 2026-27).',
-        'Substantially increases MBBS and MD/MS specialist seats to eliminate physician shortages in rural and backward districts.',
-        'Cashless coverage for tertiary procedures through full integration with Ayushman Bharat PM-JAY.'
-      ],
-      eligibility: [
-        'Open to all citizens seeking super-specialty consultations, complex surgeries, and advanced tertiary inpatient care at any AIIMS or upgraded Medical College Hospital.'
-      ],
-      documents: [
-        'Patient ID (Aadhaar / Passport / Voter ID)',
-        'Referral slip from District Hospital / CHC (optional, for priority OPD)',
-        'Ayushman Bharat PM-JAY Card (for cashless hospitalization)'
-      ],
-      howToApply: [
-        'Register for OPD consultations directly at any new AIIMS (e.g. AIIMS Bibinagar, AIIMS Mangalagiri, AIIMS Rishikesh) or online via the ORS Portal (ors.gov.in).',
-        'Obtain digital OPD card and consult with faculty super-specialists.',
-        'Avail subsidized or free cashless surgeries and diagnostics under PM-JAY.'
-      ],
-      faqs: [
-        { q: 'What is the budget for setting up medical colleges attached to district hospitals?', a: '₹1,725 Crore has been allocated in 2026-27 to establish new medical colleges attached to district hospitals to boost specialist doctor capacity.' },
-        { q: 'Can poor patients receive free surgery at AIIMS under PMSSY?', a: 'Yes, all new AIIMS hospitals are fully empanelled under Ayushman Bharat PM-JAY, providing 100% cashless treatment up to ₹5 Lakhs.' }
-      ],
-      officialUrl: 'https://pmssy.mohfw.gov.in/',
-      portalUrl: 'https://ors.gov.in/'
-    },
-    {
-      id: 'nacp',
-      name: 'National AIDS Control Programme (NACP Phase-V) & Link Worker Scheme',
-      hindiName: 'राष्ट्रीय एड्स नियंत्रण कार्यक्रम (चरण-5) एवं लिंक वर्कर योजना',
-      shortName: 'NACP Phase-V',
-      category: 'Disease Prevention',
-      department: 'National AIDS Control Organisation (NACO), MoHFW',
-      badge: 'Free ART & Rural Link Outreach',
-      shortDesc: 'Strategic national program providing free HIV/AIDS testing (ICTC), lifelong Anti-Retroviral Therapy (ART), and specialized rural outreach via the Link Worker Scheme.',
-      purpose: 'To achieve universal access to comprehensive HIV/AIDS and STI prevention, diagnostic testing, treatment, and care with active community link workers in rural areas.',
-      benefits: [
-        '100% Free and confidential HIV/STI diagnostic testing at 5,000+ Integrated Counseling and Testing Centres (ICTCs).',
-        'Free lifelong first-line, second-line, and third-line Anti-Retroviral Therapy (ART) medicines across 600+ ART Centers.',
-        'Rural Link Worker Scheme: Dedicated village link volunteers conducting doorstep awareness, stigma reduction, and healthcare linkage in high-vulnerability rural districts.',
-        'Prevention of Parent-to-Child Transmission (PPTCT) with free medication for pregnant mothers and newborns.',
-        'Comprehensive psychosocial counseling, viral load monitoring, and nutritional linkage.'
-      ],
-      eligibility: [
-        'Open to all individuals across rural and urban India requiring confidential counseling, testing, or ongoing treatment.'
-      ],
-      documents: [
-        'No documents mandatory; anonymous and confidential counseling provided at all ICTC centers.',
-        'Aadhaar / ID optional for ART center record maintenance.'
-      ],
-      howToApply: [
-        'Walk into any Government District Hospital, CHC, or Sub-District Hospital ICTC center.',
-        'Receive free, confidential pre-test counseling and rapid diagnostic screening.',
-        'If positive, immediately receive enrollment into the nearest ART Center for free lifelong medication blister packs.'
-      ],
-      faqs: [
-        { q: 'What is the Rural Link Worker Scheme under NACP?', a: 'The Link Worker Scheme is a rural outreach intervention targeting youth and vulnerable populations in rural areas with counseling, STI treatment linkage, and condom promotion.' },
-        { q: 'Are ART medications completely free?', a: 'Yes, all Anti-Retroviral Therapy (ART) medicines and regular CD4/Viral Load laboratory tests are 100% free of cost at government ART centers.' }
-      ],
-      officialUrl: 'https://naco.gov.in/',
-      portalUrl: 'https://naco.gov.in/'
+      portalUrl: 'https://esanjeevani.mohfw.gov.in/#/patient/signin',
+      officialBtnLabel: 'Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
     },
     {
       id: 'indradhanush',
-      name: 'Mission Indradhanush (Universal Immunization Programme - UIP)',
+      name: 'Mission Indradhanush (Universal Immunization Programme)',
+      fullName: 'Mission Indradhanush (Universal Immunization Programme - UIP)',
       hindiName: 'मिशन इन्द्रधनुष - सार्वभौमिक टीकाकरण कार्यक्रम',
       shortName: 'Mission Indradhanush',
-      category: 'Vaccination',
+      category: 'Universal Immunization',
       department: 'Ministry of Health & Family Welfare (MoHFW)',
       badge: '100% Free Vaccination',
+      icon: '💉',
       shortDesc: 'Intensive national immunization campaign providing free vaccines against 12 life-threatening diseases to all infants, children under 5 years, and pregnant mothers.',
       purpose: 'To achieve over 90% full immunization coverage across all districts and eliminate vaccine-preventable childhood and maternal mortality.',
+      keyAreas: [
+        'Universal Childhood Vaccination',
+        'Maternal Tetanus & Diphtheria Protection',
+        'U-WIN Digital Tracking & Certificates',
+        'Doorstep Outreach Camps'
+      ],
       benefits: [
         '100% Free immunization against 12 diseases: Tuberculosis, Diphtheria, Pertussis, Tetanus, Polio, Measles, Rubella, Hepatitis B, Rotavirus, Hib Meningitis, Pneumococcal Pneumonia (PCV), and Japanese Encephalitis.',
         'Digital vaccine tracking and verifiable digital immunization certificates powered by the national U-WIN platform.',
         'Doorstep community vaccination camps organized at Anganwadi centers, primary schools, and urban slums.'
       ],
+      intendedSupport: 'All infants and children up to 5 years of age, and all pregnant women requiring routine immunization.',
       eligibility: [
         'All children from birth up to 5 years of age who have missed routine vaccine doses.',
         'All pregnant women requiring Tetanus and adult Diphtheria (Td) immunization.'
@@ -714,24 +806,36 @@ const initialSeedData = {
         { q: 'Are vaccines provided under Mission Indradhanush free?', a: 'Yes, all vaccines under Mission Indradhanush and the Universal Immunization Programme are 100% free of charge at all public facilities.' }
       ],
       officialUrl: 'https://www.mohfw.gov.in/',
-      portalUrl: 'https://uwin.mohfw.gov.in/'
+      portalUrl: 'https://uwin.mohfw.gov.in/',
+      officialBtnLabel: 'Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
     },
     {
       id: 'jsy',
       name: 'Janani Suraksha Yojana (JSY)',
-      hindiName: 'जननी सुरक्षा योजना',
+      fullName: 'Janani Suraksha Yojana (JSY) & JSSK',
+      hindiName: 'जननी सुरक्षा योजना (JSY)',
       shortName: 'JSY',
       category: 'Maternal & Child Health',
       department: 'National Health Mission, Ministry of Health & Family Welfare',
       badge: 'Direct Cash Assistance',
+      icon: '🤱',
       shortDesc: 'Safe motherhood intervention under NHM promoting institutional delivery among pregnant women through direct benefit transfer (DBT) cash assistance and free delivery care.',
       purpose: 'To reduce maternal and neonatal mortality by encouraging institutional deliveries in accredited government and private health facilities.',
+      keyAreas: [
+        'Institutional Delivery Promotion',
+        'Direct Cash Assistance (DBT)',
+        'Free Normal & C-Section Delivery (JSSK)',
+        'ASHA Community Health Worker Support'
+      ],
       benefits: [
         'Cash Assistance (Low Performing States): ₹1,400 for rural mothers and ₹1,000 for urban mothers delivering in institutional healthcare centers.',
         'Cash Assistance (High Performing States): ₹700 for rural BPL/SC/ST mothers and ₹600 for urban BPL mothers.',
         'Combined with JSSK (Janani Shishu Suraksha Karyakram): 100% free normal delivery & C-section, free diagnostics, free hospital diet, and free ambulance transport.',
         'Incentives for ASHA health workers who motivate and accompany pregnant women to health facilities.'
       ],
+      intendedSupport: 'Pregnant women delivering in government health facilities and accredited private hospitals.',
       eligibility: [
         'All pregnant women delivering in government health centers in Low Performing States (UP, Bihar, MP, Rajasthan, Odisha, Jharkhand, Chhattisgarh, Uttarakhand, Assam, J&K).',
         'BPL / SC / ST pregnant women aged 19 years and above in High Performing States.'
@@ -748,27 +852,39 @@ const initialSeedData = {
         'The JSY financial assistance is directly credited to the mother’s bank account via DBT.'
       ],
       faqs: [
-        { q: 'Are Cesarean deliveries covered?', a: 'Yes, both normal deliveries and Cesarean sections (C-sections) are completely free of charge, including anesthesia, blood transfusion, and hospital stay.' }
+        { q: 'Are Cesarean deliveries covered?', a: 'Yes, both normal deliveries and Cesarean sections (C-sections) are completely free of charge under JSSK.' }
       ],
       officialUrl: 'https://nhm.gov.in/',
-      portalUrl: 'https://nhm.gov.in/index1.php?lang=1&level=3&sublinkid=841&lid=309'
+      portalUrl: 'https://nhm.gov.in/',
+      officialBtnLabel: 'Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
     },
     {
       id: 'ntep',
       name: 'National TB Elimination Programme (NTEP) & Ni-kshay',
-      hindiName: 'राष्ट्रीय क्षय रोग उन्मूलन कार्यक्रम एवं निक्षయ్',
+      fullName: 'National Tuberculosis Elimination Programme (NTEP)',
+      hindiName: 'राष्ट्रीय क्षय रोग उन्मूलन कार्यक्रम एवं निक्षय',
       shortName: 'NTEP / Ni-kshay',
-      category: 'Disease Prevention',
+      category: 'Disease Prevention & Public Health',
       department: 'Central TB Division, Ministry of Health & Family Welfare',
       badge: 'Free Treatment + ₹500/mo DBT',
+      icon: '🫁',
       shortDesc: 'National public health initiative to eliminate Tuberculosis with free high-precision diagnostics (CB-NAAT/TrueNat), free daily anti-TB drug regimens, and ₹500/month nutritional financial grant.',
       purpose: 'To eliminate Tuberculosis in India through universal access to rapid diagnostics, free quality treatment, and community nutritional support.',
+      keyAreas: [
+        'Free Rapid Molecular Diagnostics',
+        'Daily DOTS Drug Regimens',
+        'Ni-kshay Poshan Yojana (₹500/mo DBT)',
+        'Ni-kshay Mitra Community Food Baskets'
+      ],
       benefits: [
         '100% Free rapid molecular testing (CB-NAAT / GeneXpert / TrueNat) and digital chest radiography.',
         'Free, quality-assured Fixed-Dose Combination (FDC) anti-TB medicine courses for 6+ months under daily DOTS protocol.',
-        'Ni-kshay Poshan Yojana: ₹500 per month direct benefit transfer (DBT) directly into the patient’s bank account throughout the treatment period.',
+        'Ni-kshay Poshan Yojana: ₹500 per month direct benefit transfer (DBT) directly into the patient’s bank account throughout treatment.',
         'Ni-kshay Mitra community nutritional support (food baskets, diagnostic assistance, and vocational training).'
       ],
+      intendedSupport: 'All individuals diagnosed with or undergoing testing for Tuberculosis across India.',
       eligibility: [
         'All individuals diagnosed with Drug-Sensitive (DS-TB) or Drug-Resistant (DR-TB) Tuberculosis across public and private healthcare sectors.'
       ],
@@ -784,10 +900,13 @@ const initialSeedData = {
         'Receive free medicine blister packs and register bank details for the monthly ₹500 nutritional support.'
       ],
       faqs: [
-        { q: 'What is Ni-kshay Poshan Yojana?', a: 'It is a Centrally Sponsored Scheme providing financial incentive of ₹500/month to each notified TB patient for the entire duration of their anti-TB treatment.' }
+        { q: 'What is Ni-kshay Poshan Yojana?', a: 'It is a Centrally Sponsored Scheme providing financial incentive of ₹500/month to each notified TB patient for the duration of their anti-TB treatment.' }
       ],
       officialUrl: 'https://tbcindia.gov.in/',
-      portalUrl: 'https://nikshay.in/'
+      portalUrl: 'https://nikshay.in/',
+      officialBtnLabel: 'Official Website',
+      lastVerified: 'September 2026',
+      disclaimer: 'Information provided by SwasthyaConnect is for awareness and guidance. Eligibility, benefits and application decisions are determined by the relevant Government authority.'
     }
   ],
   nearbyCentres: [
@@ -1229,17 +1348,36 @@ class UnifiedStore {
   // Government Healthcare Schemes
   getGovernmentSchemes(category = null, search = '') {
     let list = this.data.governmentSchemes || [];
-    if (category && category !== 'All') {
-      list = list.filter(s => s.category.toLowerCase() === category.toLowerCase() || (category === 'Maternal & Child Health' && (s.category.includes('Maternal') || s.category.includes('Vaccination'))));
+    if (category && category !== 'All' && category !== 'all') {
+      const catLower = category.toLowerCase();
+      list = list.filter(s => {
+        const sCat = s.category.toLowerCase();
+        if (sCat === catLower) return true;
+        if (catLower.includes('rural') && (sCat.includes('rural') || s.id === 'nhm')) return true;
+        if (catLower.includes('universal health') && (sCat.includes('universal health') || s.id === 'ayushman-bharat')) return true;
+        if (catLower.includes('tribal') && (sCat.includes('tribal') || s.id === 'pm-janman')) return true;
+        if (catLower.includes('infrastructure') && (sCat.includes('infrastructure') || s.id === 'pmssy')) return true;
+        if (catLower.includes('disease') && (sCat.includes('disease') || s.id === 'nacp' || s.id === 'ntep')) return true;
+        if (catLower.includes('telemedicine') && (sCat.includes('telemedicine') || s.id === 'esanjeevani')) return true;
+        if (catLower.includes('maternal') && (sCat.includes('maternal') || s.id === 'jsy' || s.id === 'indradhanush')) return true;
+        if (catLower.includes('vaccin') || catLower.includes('immuniz')) {
+          return sCat.includes('vaccin') || sCat.includes('immuniz') || s.id === 'indradhanush';
+        }
+        return false;
+      });
     }
     if (search && search.trim() !== '') {
       const q = search.toLowerCase().trim();
       list = list.filter(s => 
         s.name.toLowerCase().includes(q) || 
+        (s.fullName && s.fullName.toLowerCase().includes(q)) || 
         (s.hindiName && s.hindiName.toLowerCase().includes(q)) || 
         s.shortName.toLowerCase().includes(q) || 
         s.shortDesc.toLowerCase().includes(q) || 
-        s.category.toLowerCase().includes(q)
+        s.purpose.toLowerCase().includes(q) || 
+        s.category.toLowerCase().includes(q) ||
+        (s.keyAreas && s.keyAreas.some(k => k.toLowerCase().includes(q))) ||
+        (s.benefits && s.benefits.some(b => b.toLowerCase().includes(q)))
       );
     }
     return list;
@@ -1329,72 +1467,62 @@ class UnifiedStore {
     const schemes = this.getGovernmentSchemes();
 
     schemes.forEach(scheme => {
-      let status = 'Verify'; // 'Eligible', 'Verify', 'Ineligible'
+      let status = 'Check Official Eligibility'; // 'Potentially Eligible', 'More Information Required', 'Check Official Eligibility'
       let reason = '';
 
-      if (scheme.id === 'pmjay') {
+      if (scheme.id === 'ayushman-bharat' || scheme.id === 'pmjay') {
         if (ageGroup === 'senior') {
-          status = 'Eligible';
-          reason = 'Eligible under PM-JAY Vistrit Senior Citizen (70+) universal coverage.';
+          status = 'Potentially Eligible';
+          reason = 'Potentially eligible under PM-JAY expanded Senior Citizen (70+) universal coverage guidelines.';
         } else if (incomeCategory === 'bpl' || incomeCategory === 'secc') {
-          status = 'Eligible';
-          reason = 'Meets PM-JAY socio-economic deprivation and NFSA/Ration Card criteria.';
+          status = 'Potentially Eligible';
+          reason = 'Meets socio-economic criteria. Eligibility and benefits depend on beneficiary records; verify through the official portal.';
         } else if (incomeCategory === 'low') {
-          status = 'Verify';
-          reason = 'May qualify subject to State-specific expanded ration card rosters.';
+          status = 'More Information Required';
+          reason = 'May qualify subject to State-specific expanded ration card rosters. Verify on the official portal.';
         } else {
-          status = 'Ineligible';
-          reason = 'General income category is typically not covered unless holding valid SECC/NFSA ration card.';
+          status = 'Check Official Eligibility';
+          reason = 'Universal primary care available at Ayushman Arogya Mandirs. Secondary/tertiary cover requires beneficiary verification.';
         }
-      } else if (scheme.id === 'esanjeevani') {
-        status = 'Eligible';
-        reason = 'Universal access for all Indian citizens across all States & UTs.';
       } else if (scheme.id === 'nhm') {
-        status = 'Eligible';
-        reason = 'Free public healthcare, diagnostics, and generic medicines available at all government health centers.';
+        status = 'Potentially Eligible';
+        reason = 'Public health consultations, essential generic medicines, and diagnostics are universally accessible at public facilities.';
+      } else if (scheme.id === 'pm-janman') {
+        if (specialStatus === 'tribal' || location === 'rural') {
+          status = 'Potentially Eligible';
+          reason = 'Targets eligible Particularly Vulnerable Tribal Groups (PVTGs) and notified habitations with Mobile Medical Units and nutrition support.';
+        } else {
+          status = 'More Information Required';
+          reason = 'Specifically targets Particularly Vulnerable Tribal Groups (PVTGs). Verify if your community or habitation is notified.';
+        }
+      } else if (scheme.id === 'pmssy') {
+        status = 'Potentially Eligible';
+        reason = 'Universal citizen access to super-specialty consultations and tertiary care across 22 AIIMS and upgraded medical colleges.';
+      } else if (scheme.id === 'nacp') {
+        status = 'Potentially Eligible';
+        reason = 'Universal, 100% free and confidential HIV/STI counseling, testing, and lifelong treatment provided without discrimination.';
+      } else if (scheme.id === 'esanjeevani') {
+        status = 'Potentially Eligible';
+        reason = 'Universal access to free doctor-to-patient video consultations across all Indian States and Union Territories.';
       } else if (scheme.id === 'indradhanush') {
         if (ageGroup === 'infant' || specialStatus === 'child' || specialStatus === 'pregnant') {
-          status = 'Eligible';
+          status = 'Potentially Eligible';
           reason = 'Target beneficiary group for universal vaccination (children 0-5 yrs and pregnant mothers).';
         } else {
-          status = 'Verify';
-          reason = 'Routine vaccination primarily focuses on infants, children, and pregnant women.';
+          status = 'More Information Required';
+          reason = 'Routine vaccination primarily focuses on infants, children under 5, and pregnant women.';
         }
       } else if (scheme.id === 'jsy') {
         if (specialStatus === 'pregnant') {
-          if (incomeCategory === 'bpl' || location === 'rural') {
-            status = 'Eligible';
-            reason = 'Meets institutional delivery cash assistance and JSSK free transport criteria.';
-          } else {
-            status = 'Verify';
-            reason = 'Eligible for JSSK free hospital care; verify direct cash DBT rules for state.';
-          }
+          status = 'Potentially Eligible';
+          reason = 'Potentially eligible for institutional delivery support and JSSK free hospital care; verify DBT terms for state.';
         } else {
-          status = 'Ineligible';
-          reason = 'Scheme specifically covers pregnant women for institutional child deliveries.';
+          status = 'More Information Required';
+          reason = 'Scheme specifically assists pregnant women opting for institutional childbirth.';
         }
       } else if (scheme.id === 'ntep') {
-        if (specialStatus === 'tb') {
-          status = 'Eligible';
-          reason = 'Full entitlement to 100% free molecular diagnostics, DOTS medicines, and ₹500/month Ni-kshay nutritional grant.';
-        } else {
-          status = 'Eligible';
-          reason = 'Universal free diagnostic testing available for any individual with respiratory or fever symptoms.';
-        }
-      } else if (scheme.id === 'pmjanman') {
-        if (location === 'rural' || incomeCategory === 'bpl' || incomeCategory === 'secc') {
-          status = 'Eligible';
-          reason = 'Eligible for Mobile Medical Unit doorstep healthcare, Sickle Cell testing, and saturation Ayushman Card coverage under PM-JANMAN.';
-        } else {
-          status = 'Verify';
-          reason = 'Targeted specifically at Particularly Vulnerable Tribal Groups (PVTGs) and remote tribal habitations.';
-        }
-      } else if (scheme.id === 'pmssy') {
-        status = 'Eligible';
-        reason = 'Universal access to tertiary consultations and surgeries across all 22 AIIMS and upgraded government medical colleges.';
-      } else if (scheme.id === 'nacp') {
-        status = 'Eligible';
-        reason = 'Universal 100% free and confidential HIV/STI counseling, diagnostic testing (ICTC), and lifelong ART therapy.';
+        status = 'Potentially Eligible';
+        reason = 'Free rapid molecular TB diagnostics and DOTS treatment available for all citizens presenting with respiratory symptoms.';
       }
 
       results.push({
@@ -1402,10 +1530,11 @@ class UnifiedStore {
         schemeName: scheme.name,
         category: scheme.category,
         badge: scheme.badge,
-        status, // 'Eligible', 'Verify', 'Ineligible'
+        icon: scheme.icon || '🏛️',
+        status,
         reason,
         officialUrl: scheme.officialUrl,
-        portalUrl: scheme.portalUrl
+        portalUrl: scheme.portalUrl || scheme.officialUrl
       });
     });
 

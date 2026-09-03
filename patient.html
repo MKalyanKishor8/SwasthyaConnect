@@ -628,7 +628,7 @@
           <div class="glass-panel" style="padding:1.25rem; margin-bottom:2rem;">
             <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem;">
               <div style="flex:1; min-width:260px; position:relative;">
-                <input type="text" id="scheme-search-input" class="form-control" placeholder="Search schemes by name, benefits, keywords (e.g. Ayushman, TB, Delivery, Vaccination)..." style="padding-left:2.5rem;">
+                <input type="text" id="scheme-search-input" class="form-control" placeholder="Search government schemes..." style="padding-left:2.5rem;">
                 <svg class="icon" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               </div>
               <button class="btn btn-outline btn-sm" onclick="document.getElementById('scheme-search-input').value=''; filterSchemes('All');">
@@ -638,15 +638,14 @@
 
             <!-- Category Filter Pills -->
             <div class="assistant-chips" id="scheme-category-pills">
-              <button class="chip-btn active" data-cat="All" onclick="filterSchemes('All')">All Schemes (8)</button>
-              <button class="chip-btn" data-cat="Rural Healthcare" onclick="filterSchemes('Rural Healthcare')">Rural Healthcare (NHM)</button>
-              <button class="chip-btn" data-cat="Tribal & Underserved Health" onclick="filterSchemes('Tribal & Underserved Health')">Tribal Health (PM-JANMAN)</button>
-              <button class="chip-btn" data-cat="Infrastructure & Tertiary Care" onclick="filterSchemes('Infrastructure & Tertiary Care')">Infrastructure (PMSSY & AIIMS)</button>
-              <button class="chip-btn" data-cat="Insurance/Financial Assistance" onclick="filterSchemes('Insurance/Financial Assistance')">Insurance (PM-JAY)</button>
-              <button class="chip-btn" data-cat="Telemedicine" onclick="filterSchemes('Telemedicine')">Telemedicine (eSanjeevani)</button>
-              <button class="chip-btn" data-cat="Vaccination" onclick="filterSchemes('Vaccination')">Vaccination (Indradhanush)</button>
-              <button class="chip-btn" data-cat="Maternal & Child Health" onclick="filterSchemes('Maternal & Child Health')">Maternal Health (JSY)</button>
-              <button class="chip-btn" data-cat="Disease Prevention" onclick="filterSchemes('Disease Prevention')">Disease Prevention (NTEP & NACP)</button>
+              <button class="chip-btn active" data-cat="All" onclick="filterSchemes('All')">All</button>
+              <button class="chip-btn" data-cat="Rural Healthcare" onclick="filterSchemes('Rural Healthcare')">Rural Healthcare</button>
+              <button class="chip-btn" data-cat="Universal Health Coverage" onclick="filterSchemes('Universal Health Coverage')">Universal Health Coverage</button>
+              <button class="chip-btn" data-cat="Tribal & Underserved" onclick="filterSchemes('Tribal & Underserved')">Tribal & Underserved</button>
+              <button class="chip-btn" data-cat="Healthcare Infrastructure" onclick="filterSchemes('Healthcare Infrastructure')">Healthcare Infrastructure</button>
+              <button class="chip-btn" data-cat="Disease Prevention" onclick="filterSchemes('Disease Prevention')">Disease Prevention</button>
+              <button class="chip-btn" data-cat="Telemedicine" onclick="filterSchemes('Telemedicine')">Telemedicine</button>
+              <button class="chip-btn" data-cat="Maternal & Child Health" onclick="filterSchemes('Maternal & Child Health')">Maternal & Child Health</button>
             </div>
           </div>
 

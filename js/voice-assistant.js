@@ -105,19 +105,37 @@
       appointmentsTitle: (count) => `📅 <strong>Upcoming Appointments (${count})</strong>:`,
       prescriptionsSpeech: (count) => `You have ${count} active digital prescription${count === 1 ? '' : 's'}. Details are on your screen.`,
       prescriptionsTitle: '💊 <strong>Active Prescriptions & Medical Records</strong>:',
-      schemesSpeech: 'Ayushman Bharat PM-JAY provides up to 5 lakh rupees per family per year for cashless hospitalization at 27,000+ empanelled hospitals.',
-      schemesTitle: '🏛️ <strong>Ayushman Bharat PM-JAY</strong>',
-      schemesDesc: 'Provides ₹5,00,000 per family per year for cashless treatment across empanelled government and private hospitals.',
+      schemesSpeech: 'Government health initiatives in India include the National Health Mission, Ayushman Bharat PM-JAY, PM-JANMAN, PMSSY, and NACP. Details are on your screen.',
+      schemesTitle: '🏛️ Government Healthcare Schemes',
+      schemesDesc: 'Official Indian public health missions, free hospitalization covers, telemedicine, and health infrastructure initiatives.',
+      nhmSpeech: 'The National Health Mission (NHM) is a major Government of India health mission focused on improving access to equitable, affordable and quality healthcare. It includes NRHM, NUHM, and Mobile Medical Units.',
+      nhmTitle: '🏥 National Health Mission (NHM)',
+      nhmDesc: 'Major Government of India mission focused on improving equitable, affordable and quality healthcare across rural and urban India.',
+      ayushmanSpeech: 'Ayushman Bharat provides comprehensive primary healthcare through Ayushman Arogya Mandirs and up to 5 lakh rupees annual cashless hospitalization per eligible family under PM-JAY.',
+      ayushmanTitle: '🛡️ Ayushman Bharat (PM-JAY & AAM)',
+      ayushmanDesc: 'Two complementary components: Ayushman Arogya Mandirs for primary healthcare and PM-JAY for financial protection.',
+      pmjanmanSpeech: 'PM-JANMAN (Pradhan Mantri Janjati Adivasi Nyaya Maha Abhiyan) improves healthcare, nutrition, housing, drinking water, and essential services for Particularly Vulnerable Tribal Groups.',
+      pmjanmanTitle: '👥 PM-JANMAN (Tribal Health Mission)',
+      pmjanmanDesc: 'Focused on improving socio-economic conditions and essential healthcare services for Particularly Vulnerable Tribal Groups (PVTGs).',
+      pmssySpeech: 'Pradhan Mantri Swasthya Suraksha Yojana (PMSSY) addresses regional imbalances in tertiary healthcare by establishing 22 new AIIMS apex institutions and upgrading medical colleges across India.',
+      pmssyTitle: '🏢 PMSSY (Healthcare Infrastructure)',
+      pmssyDesc: 'Aims to correct regional imbalances in tertiary healthcare availability and augment medical education infrastructure.',
+      nacpSpeech: 'The National AIDS Control Programme implemented through NACO provides 100% free, confidential HIV testing, counseling, awareness, and lifelong Anti-Retroviral Treatment across India.',
+      nacpTitle: '🎗️ National AIDS Control Programme (NACP)',
+      nacpDesc: 'India\'s national programme for prevention and control of HIV/AIDS, implemented through the National AIDS Control Organisation (NACO).',
+      ruralSchemesSpeech: 'Schemes supporting rural healthcare include the National Health Mission (NHM), Ayushman Arogya Mandirs, PM-JANMAN mobile medical units, and eSanjeevani teleconsultation.',
+      ruralSchemesTitle: '🌾 Rural Healthcare Schemes',
+      ruralSchemesDesc: 'Major rural health initiatives: NHM (NRHM), Ayushman Arogya Mandirs, PM-JANMAN, and eSanjeevani.',
       quickPrompts: [
         'Find hospitals near me',
         'Find government hospitals near me',
-        'Find the nearest hospital',
-        'Find PHC near me',
-        'Find pharmacies near me',
-        'Find emergency hospitals near me',
-        'Find hospitals within 5 km',
-        'Show the nearest one',
-        'Send nearest hospital to WhatsApp'
+        'Show government health schemes',
+        'Tell me about NHM',
+        'What is Ayushman Bharat?',
+        'Tell me about PM-JANMAN',
+        'Tell me about PMSSY',
+        'Tell me about the National AIDS Control Programme',
+        'Which schemes support rural healthcare?'
       ]
     },
     'te-IN': {
@@ -160,19 +178,37 @@
       appointmentsTitle: (count) => `📅 <strong>రాబోయే అపాయింట్‌మెంట్లు (${count})</strong>:`,
       prescriptionsSpeech: (count) => `మీకు ${count} క్రియాశీల డిజిటల్ ప్రిస్క్రిప్షన్లు ఉన్నాయి. వివరాలు స్క్రీన్‌పై ఉన్నాయి.`,
       prescriptionsTitle: '💊 <strong>క్రియాశీల ప్రిస్క్రిప్షన్లు & మెడికల్ రికార్డులు</strong>:',
-      schemesSpeech: 'ఆయుష్మాన్ భారత్ పీఎం-జేవై పథకం ద్వారా ప్రతి కుటుంబానికి సంవత్సరానికి ₹5 లక్షల ఉచిత నగదు రహిత వైద్యం లభిస్తుంది.',
-      schemesTitle: '🏛️ <strong>ఆయుష్మాన్ భారత్ పీఎం-జేవై & ఆరోగ్యశ్రీ</strong>',
-      schemesDesc: 'నెట్‌వర్క్ ఆసుపత్రులలో ప్రతి కుటుంబానికి సంవత్సరానికి ₹5,00,000 ఉచిత నగదు రహిత వైద్య చికిత్స అందిస్తుంది.',
+      schemesSpeech: 'భారత ప్రభుత్వ ఆరోగ్య పథకాలైన నేషనల్ హెల్త్ మిషన్ (NHM), ఆయుష్మాన్ భారత్, పీఎం-జన్-మన్, పీఎంఎస్‌ఎస్‌వై మరియు నాకో వివరాలను స్క్రీన్‌పై చూపించాను.',
+      schemesTitle: '🏛️ ప్రభుత్వ ఆరోగ్య పథకాలు',
+      schemesDesc: 'భారత ప్రభుత్వ ఉచిత చికిత్స, ప్రాథమిక వైద్యం, మాతా-శిశు సంరక్షణ మరియు ఆరోగ్య పథకాలు.',
+      nhmSpeech: 'జాతీయ ఆరోగ్య మిషన్ (NHM) గ్రామీణ మరియు పట్టణ ప్రజలకు నాణ్యమైన, ఉచిత ఆరోగ్య సేవలు, ప్రాథమిక చికిత్స, మాతా-శిశు సంరక్షణ మరియు మొబైల్ మెడికల్ యూనిట్లను అందిస్తుంది.',
+      nhmTitle: '🏥 నేషనల్ హెల్త్ మిషన్ (NHM)',
+      nhmDesc: 'గ్రామీణ మరియు పట్టణ ప్రజలకు ఉచిత ప్రాథమిక మరియు ద్వితీయ ఆరోగ్య సేవలను అందించే భారత ప్రభుత్వ ప్రధాన పథకం.',
+      ayushmanSpeech: 'ఆయుష్మాన్ భారత్ పథకం ఆయుష్మాన్ ఆరోగ్య మందిరాల ద్వారా ప్రాథమిక చికిత్స మరియు పీఎం-జేవై క్రింద అర్హత కలిగిన కుటుంబాలకు సంవత్సరానికి ₹5 లక్షల ఉచిత నగదు రహిత చికిత్సను అందిస్తుంది.',
+      ayushmanTitle: '🛡️ ఆయుష్మాన్ భారత్ (PM-JAY & AAM)',
+      ayushmanDesc: 'ఆయుష్మాన్ ఆరోగ్య మందిరాలు మరియు పీఎం-జేవై ద్వారా ₹5 లక్షల ఉచిత నగదు రహిత ఆసుపత్రి చికిత్స.',
+      pmjanmanSpeech: 'పీఎం-జన్-మన్ పథకం ప్రత్యేకంగా గుర్తించబడిన ఆదివాసీ గిరిజన సమూహాలకు (PVTGs) మెరుగైన వైద్య సేవలు, పోషకాహారం, తాగునీరు మరియు సంచార వైద్య యూనిట్లను అందిస్తుంది.',
+      pmjanmanTitle: '👥 పీఎం-జన్-మన్ (గిరిజన ఆరోగ్య మిషన్)',
+      pmjanmanDesc: 'ప్రత్యేకంగా వెనుకబడిన ఆదివాసీ గిరిజన సమూహాల (PVTGs) సంక్షేమం మరియు ఉచిత వైద్య సేవలు.',
+      pmssySpeech: 'పీఎంఎస్‌ఎస్‌వై (PMSSY) పథకం దేశవ్యాప్తంగా 22 కొత్త ఎయిమ్స్ (AIIMS) ఆసుపత్రుల స్థాపన మరియు ప్రభుత్వ మెడికల్ కాలేజీలను ఆధునీకరించి సూపర్ స్పెషాలిటీ వైద్య సేవలను విస్తరిస్తుంది.',
+      pmssyTitle: '🏢 పీఎంఎస్‌ఎస్‌వై (PMSSY - సూపర్ స్పెషాలిటీ)',
+      pmssyDesc: '22 కొత్త ఎయిమ్స్ ఆసుపత్రులు మరియు ప్రభుత్వ మెడికల్ కాలేజీల ఆధునీకరణ ద్వారా సూపర్ స్పెషాలిటీ వైద్య సేవలు.',
+      nacpSpeech: 'జాతీయ ఎయిడ్స్ నియంత్రణ కార్యక్రమం (NACP) నాకో (NACO) ద్వారా ఉచిత, గోప్యమైన హెచ్ఐవి పరీక్షలు, కౌన్సెలింగ్ మరియు జీవితాంతం ఉచిత ఏఆర్‌టి చికిత్సను అందిస్తుంది.',
+      nacpTitle: '🎗️ జాతీయ ఎయిడ్స్ నియంత్రణ కార్యక్రమం (NACP)',
+      nacpDesc: 'నాకో (NACO) ద్వారా ఉచిత, గోప్యమైన హెచ్ఐవి/ఎయిడ్స్ పరీక్షలు, కౌన్సెలింగ్ మరియు ఉచిత ఏఆర్‌టి మందులు.',
+      ruralSchemesSpeech: 'గ్రామీణ ఆరోగ్య రక్షణకు నేషనల్ హెల్త్ మిషన్ (NHM), ఆయుష్మాన్ ఆరోగ్య మందిరాలు, పీఎం-జన్-మన్ మరియు ఈ-సంజీవని టెలీమెడిసిన్ సేవలు అందుబాటులో ఉన్నాయి.',
+      ruralSchemesTitle: '🌾 గ్రామీణ ఆరోగ్య పథకాలు',
+      ruralSchemesDesc: 'గ్రామీణ ప్రాంతాల కోసం NHM, ఆయుష్మాన్ ఆరోగ్య మందిరాలు మరియు పీఎం-జన్-మన్ పథకాలు.',
       quickPrompts: [
         'నా దగ్గరలో ఆసుపత్రులను కనుగొను',
         'దగ్గరలో ఉన్న ఆసుపత్రులను చూపించు',
-        'నా దగ్గరలో ప్రభుత్వ ఆసుపత్రి కావాలి',
-        'దగ్గరలో PHC ఉందా?',
-        'నా దగ్గరలో ఫార్మసీ కనుగొను',
-        'దగ్గరలో ఉన్నదాన్ని చూపించు',
-        'ప్రభుత్వ ఆసుపత్రులు మాత్రమే చూపించు',
-        '5 కిలోమీటర్లలో ఉన్నవి చూపించు',
-        'ఆసుపత్రి వివరాలు వాట్సాప్‌కి పంపు'
+        'ప్రభుత్వ ఆరోగ్య పథకాలు చూపించు',
+        'NHM గురించి చెప్పు',
+        'ఆయుష్మాన్ భారత్ అంటే ఏమిటి?',
+        'PM-JANMAN పథకం ఏమిటి?',
+        'PMSSY పథకం గురించి చెప్పు',
+        'NACP గురించి చెప్పు',
+        'గ్రామీణ ఆరోగ్య పథకాలు ఏమిటి?'
       ]
     },
     'hi-IN': {
@@ -215,19 +251,37 @@
       appointmentsTitle: (count) => `📅 <strong>आगामी अपॉइंटमेंट (${count})</strong>:`,
       prescriptionsSpeech: (count) => `आपके पास ${count} सक्रिय डिजिटल पर्चे उपलब्ध हैं।`,
       prescriptionsTitle: '💊 <strong>सक्रिय पर्चे एवं मेडिकल रिकॉर्ड</strong>:',
-      schemesSpeech: 'आयुष्मान भारत योजना के तहत प्रति वर्ष प्रति परिवार ₹5 लाख तक का मुफ्त इलाज मिलता है।',
-      schemesTitle: '🏛️ <strong>आयुष्मान भारत पीएम-जय (PM-JAY)</strong>',
-      schemesDesc: 'सूचीबद्ध अस्पतालों में प्रति परिवार प्रति वर्ष ₹5,00,000 का मुफ्त कैशलेस इलाज प्रदान करती है।',
+      schemesSpeech: 'भारत सरकार की प्रमुख स्वास्थ्य योजनाओं जैसे राष्ट्रीय स्वास्थ्य मिशन (NHM), आयुष्मान भारत, पीएम-जनमन, और पीएमएसएसवाई का विवरण स्क्रीन पर उपलब्ध है।',
+      schemesTitle: '🏛️ सरकारी स्वास्थ्य योजनाएं',
+      schemesDesc: 'भारत सरकार के प्रमुख स्वास्थ्य मिशन, मुफ्त अस्पताल उपचार, और सार्वजनिक स्वास्थ्य योजनाएं।',
+      nhmSpeech: 'राष्ट्रीय स्वास्थ्य मिशन (NHM) भारत सरकार का प्रमुख मिशन है जो ग्रामीण एवं शहरी क्षेत्रों में प्राथमिक स्वास्थ्य, मातृ एवं शिशु स्वास्थ्य, और मोबाइल मेडिकल यूनिट्स के माध्यम से किफायती स्वास्थ्य सेवाएं प्रदान करता है।',
+      nhmTitle: '🏥 राष्ट्रीय स्वास्थ्य मिशन (NHM)',
+      nhmDesc: 'ग्रामीण एवं शहरी क्षेत्रों में गुणवत्तापूर्ण एवं किफायती स्वास्थ्य सेवा प्रदान करने वाला भारत सरकार का प्रमुख मिशन।',
+      ayushmanSpeech: 'आयुष्मान भारत योजना आयुष्मान आरोग्य मंदिरों के माध्यम से व्यापक प्राथमिक स्वास्थ्य सेवा और पीएम-जय के तहत प्रति वर्ष प्रति परिवार ₹5 लाख तक का कैशलेस इलाज प्रदान करती है।',
+      ayushmanTitle: '🛡️ आयुष्मान भारत (PM-JAY एवं आरोग्य मंदिर)',
+      ayushmanDesc: 'आयुष्मान आरोग्य मंदिर और पीएम-जय के तहत प्रति परिवार ₹5,00,000 का मुफ्त कैशलेस इलाज।',
+      pmjanmanSpeech: 'पीएम-जनमन योजना विशेष रूप से कमज़ोर जनजातीय समूहों (PVTGs) के लिए बेहतर स्वास्थ्य सेवा, पोषण, स्वच्छ पेयजल, आवास और मोबाइल मेडिकल यूनिट्स सुनिश्चित करती है।',
+      pmjanmanTitle: '👥 पीएम-जनमन (जनजातीय स्वास्थ्य मिशन)',
+      pmjanmanDesc: 'विशेष रूप से कमज़ोर जनजातीय समूहों (PVTGs) के सामाजिक-आर्थिक उत्थान एवं स्वास्थ्य सुरक्षा हेतु मिशन।',
+      pmssySpeech: 'प्रधानमंत्री स्वास्थ्य सुरक्षा योजना (PMSSY) देश भर में 22 नए एम्स (AIIMS) संस्थानों की स्थापना और मेडिकल कॉलेजों को अपग्रेड करके तृतीयक स्वास्थ्य सुविधाओं का विस्तार करती है।',
+      pmssyTitle: '🏢 पीएमएसएसवाई (PMSSY - एम्स एवं मेडिकल विस्तार)',
+      pmssyDesc: '22 नए एम्स की स्थापना एवं मेडिकल कॉलेजों के उन्नयन द्वारा सुपर-स्पेशियलिटी स्वास्थ्य सेवा का विस्तार।',
+      nacpSpeech: 'राष्ट्रीय एड्स नियंत्रण कार्यक्रम (NACP) नाको के माध्यम से 100% मुफ्त, गोपनीय एचआईवी जांच, परामर्श, जागरूकता और जीवन भर मुफ्त एआरटी दवाएं प्रदान करता है।',
+      nacpTitle: '🎗️ राष्ट्रीय एड्स नियंत्रण कार्यक्रम (NACP)',
+      nacpDesc: 'नाको (NACO) के माध्यम से 100% मुफ्त, गोपनीय एचआईवी/एड्स जांच, परामर्श एवं जीवन पर्यंत मुफ्त एआरटी उपचार।',
+      ruralSchemesSpeech: 'ग्रामीण स्वास्थ्य के लिए राष्ट्रीय स्वास्थ्य मिशन (NHM), आयुष्मान आरोग्य मंदिर, पीएम-जनमन मोबाइल यूनिट्स और ई-संजीवनी टेलीमेडिसिन प्रमुख योजनाएं हैं।',
+      ruralSchemesTitle: '🌾 ग्रामीण स्वास्थ्य योजनाएं',
+      ruralSchemesDesc: 'ग्रामीण भारत हेतु NHM, आयुष्मान आरोग्य मंदिर, पीएम-जनमन और ई-संजीवनी योजनाएं।',
       quickPrompts: [
         'मेरे पास अस्पताल खोजो',
         'पास के अस्पताल दिखाओ',
-        'मेरे पास सरकारी अस्पताल खोजो',
-        'सबसे नज़दीकी अस्पताल दिखाओ',
-        'मेरे पास PHC खोजो',
-        'पास में फार्मेसी खोजो',
-        'सिर्फ सरकारी अस्पताल दिखाओ',
-        '5 किलोमीटर के अंदर अस्पताल दिखाओ',
-        'अस्पताल व्हाट्सएप पर भेजो'
+        'सरकारी स्वास्थ्य योजनाएं दिखाओ',
+        'NHM के बारे में बताओ',
+        'आयुष्मान भारत क्या है?',
+        'पीएम-जनमन योजना क्या है?',
+        'पीएमएसएसवाई क्या है?',
+        'राष्ट्रीय एड्स नियंत्रण कार्यक्रम क्या है?',
+        'ग्रामीण स्वास्थ्य योजनाएं कौन सी हैं?'
       ]
     }
   };
@@ -730,11 +784,196 @@
       return;
     }
 
-    // 7. GOVERNMENT HEALTH SCHEMES
+    // 7. GOVERNMENT HEALTH SCHEMES (NHM, Ayushman Bharat, PM-JANMAN, PMSSY, NACP, Rural Health, General)
+    // 7A. National Health Mission (NHM)
     if (
-      lower.includes('scheme') || lower.includes('ayushman') || lower.includes('pmjay') || lower.includes('pm-jay') ||
-      lower.includes('పథకం') || lower.includes('యोजना') || lower.includes('योजना') || lower.includes('aarogyasri') ||
-      lower.includes('ఆరోగ్యశ్రీ') || lower.includes('aushadhi') || lower.includes('భారత్') || lower.includes('आयुष्मान')
+      lower.includes('nhm') || lower.includes('nrhm') || lower.includes('nuhm') ||
+      lower.includes('national health mission') || lower.includes('జాతీయ ఆరోగ్య మిషన్') || lower.includes('राष्ट्रीय स्वास्थ्य मिशन')
+    ) {
+      isProcessing = false;
+      const html = `
+        <div class="va-scheme-card" style="padding:0.75rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+          <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem;">
+            <span style="font-size:1.3rem;">🏥</span>
+            <strong style="color:var(--hospital-teal-800, #115e59); font-size:0.95rem;">${cfg.nhmTitle}</strong>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0; line-height:1.4;">
+            ${cfg.nhmDesc}
+          </p>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" style="flex:1;" onclick="if(typeof openSchemeDetailsModal === 'function') openSchemeDetailsModal('nhm'); else if(typeof PulseCareUI !== 'undefined') PulseCareUI.switchTab('schemes');">
+              Learn More →
+            </button>
+            <a href="https://nhm.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center;">
+              Official Website ↗
+            </a>
+          </div>
+        </div>
+      `;
+      appendMessage('bot', html);
+      speakResponse(cfg.nhmSpeech, selectedLanguage);
+      return;
+    }
+
+    // 7B. Ayushman Bharat (PM-JAY & AAM)
+    if (
+      lower.includes('ayushman') || lower.includes('pmjay') || lower.includes('pm-jay') || lower.includes('jan arogya') ||
+      lower.includes('arogya mandir') || lower.includes('ఆయుష్మాన్') || lower.includes('आयुष्मान') || lower.includes('जन आरोग्य')
+    ) {
+      isProcessing = false;
+      const html = `
+        <div class="va-scheme-card" style="padding:0.75rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+          <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem;">
+            <span style="font-size:1.3rem;">🛡️</span>
+            <strong style="color:var(--hospital-teal-800, #115e59); font-size:0.95rem;">${cfg.ayushmanTitle}</strong>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0; line-height:1.4;">
+            ${cfg.ayushmanDesc}
+          </p>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" style="width:100%; margin-bottom:0.3rem;" onclick="if(typeof openSchemeDetailsModal === 'function') openSchemeDetailsModal('ayushman-bharat'); else if(typeof PulseCareUI !== 'undefined') PulseCareUI.switchTab('schemes');">
+              Learn More →
+            </button>
+            <a href="https://pmjay.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center;">
+              PM-JAY ↗
+            </a>
+            <a href="https://aam.mohfw.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center;">
+              Arogya Mandir ↗
+            </a>
+          </div>
+        </div>
+      `;
+      appendMessage('bot', html);
+      speakResponse(cfg.ayushmanSpeech, selectedLanguage);
+      return;
+    }
+
+    // 7C. PM-JANMAN (Tribal Health Mission)
+    if (
+      lower.includes('janman') || lower.includes('jan-man') || lower.includes('janjati') || lower.includes('pvtg') ||
+      lower.includes('జన్-మన్') || lower.includes('గిరిజన') || lower.includes('जनमन') || lower.includes('जनजाति') || lower.includes('आदिवासी')
+    ) {
+      isProcessing = false;
+      const html = `
+        <div class="va-scheme-card" style="padding:0.75rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+          <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem;">
+            <span style="font-size:1.3rem;">👥</span>
+            <strong style="color:var(--hospital-teal-800, #115e59); font-size:0.95rem;">${cfg.pmjanmanTitle}</strong>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0; line-height:1.4;">
+            ${cfg.pmjanmanDesc}
+          </p>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" style="flex:1;" onclick="if(typeof openSchemeDetailsModal === 'function') openSchemeDetailsModal('pm-janman'); else if(typeof PulseCareUI !== 'undefined') PulseCareUI.switchTab('schemes');">
+              Learn More →
+            </button>
+            <a href="https://tribal.nic.in/PM-JANMAN.aspx" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center;">
+              Official Website ↗
+            </a>
+          </div>
+        </div>
+      `;
+      appendMessage('bot', html);
+      speakResponse(cfg.pmjanmanSpeech, selectedLanguage);
+      return;
+    }
+
+    // 7D. PMSSY (Pradhan Mantri Swasthya Suraksha Yojana)
+    if (
+      lower.includes('pmssy') || lower.includes('swasthya suraksha') || lower.includes('aiims') ||
+      lower.includes('ఎయిమ్స్') || lower.includes('పీఎంఎస్‌ఎస్‌వై') || lower.includes('एम्स') || lower.includes('स्वास्थ्य सुरक्षा योजना')
+    ) {
+      isProcessing = false;
+      const html = `
+        <div class="va-scheme-card" style="padding:0.75rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+          <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem;">
+            <span style="font-size:1.3rem;">🏢</span>
+            <strong style="color:var(--hospital-teal-800, #115e59); font-size:0.95rem;">${cfg.pmssyTitle}</strong>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0; line-height:1.4;">
+            ${cfg.pmssyDesc}
+          </p>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" style="flex:1;" onclick="if(typeof openSchemeDetailsModal === 'function') openSchemeDetailsModal('pmssy'); else if(typeof PulseCareUI !== 'undefined') PulseCareUI.switchTab('schemes');">
+              Learn More →
+            </button>
+            <a href="https://pmssy.mohfw.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center;">
+              Official Website ↗
+            </a>
+          </div>
+        </div>
+      `;
+      appendMessage('bot', html);
+      speakResponse(cfg.pmssySpeech, selectedLanguage);
+      return;
+    }
+
+    // 7E. National AIDS Control Programme (NACP)
+    if (
+      lower.includes('nacp') || lower.includes('naco') || lower.includes('aids') || lower.includes('hiv') ||
+      lower.includes('నాకో') || lower.includes('ఎయిడ్స్') || lower.includes('नाको') || lower.includes('एड्स')
+    ) {
+      isProcessing = false;
+      const html = `
+        <div class="va-scheme-card" style="padding:0.75rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+          <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem;">
+            <span style="font-size:1.3rem;">🎗️</span>
+            <strong style="color:var(--hospital-teal-800, #115e59); font-size:0.95rem;">${cfg.nacpTitle}</strong>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0; line-height:1.4;">
+            ${cfg.nacpDesc}
+          </p>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" style="flex:1;" onclick="if(typeof openSchemeDetailsModal === 'function') openSchemeDetailsModal('nacp'); else if(typeof PulseCareUI !== 'undefined') PulseCareUI.switchTab('schemes');">
+              Learn More →
+            </button>
+            <a href="https://naco.gov.in/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center;">
+              NACO Official ↗
+            </a>
+          </div>
+        </div>
+      `;
+      appendMessage('bot', html);
+      speakResponse(cfg.nacpSpeech, selectedLanguage);
+      return;
+    }
+
+    // 7F. Rural Healthcare Inquiry ("Which schemes support rural healthcare?")
+    if (
+      lower.includes('rural health') || lower.includes('support rural') ||
+      lower.includes('గ్రామీణ ఆరోగ్య') || lower.includes('గ్రామీణ పథకాలు') ||
+      lower.includes('ग्रामीण स्वास्थ्य') || lower.includes('गांव के लिए')
+    ) {
+      isProcessing = false;
+      const html = `
+        <div class="va-scheme-card" style="padding:0.75rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+          <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem;">
+            <span style="font-size:1.3rem;">🌾</span>
+            <strong style="color:var(--hospital-teal-800, #115e59); font-size:0.95rem;">${cfg.ruralSchemesTitle}</strong>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0; line-height:1.4;">
+            ${cfg.ruralSchemesDesc}
+          </p>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" style="flex:1;" onclick="if(typeof filterSchemes === 'function') { PulseCareUI.switchTab('schemes'); filterSchemes('Rural Healthcare'); }">
+              View Rural Schemes
+            </button>
+            <button class="btn btn-sm btn-outline" style="flex:1;" onclick="if(typeof PulseCareUI !== 'undefined') PulseCareUI.switchTab('schemes');">
+              All Schemes ↗
+            </button>
+          </div>
+        </div>
+      `;
+      appendMessage('bot', html);
+      speakResponse(cfg.ruralSchemesSpeech, selectedLanguage);
+      return;
+    }
+
+    // 7G. General Government Health Schemes
+    if (
+      lower.includes('scheme') || lower.includes('government health') || lower.includes('public health') ||
+      lower.includes('పథకం') || lower.includes('పథకాలు') || lower.includes('యొక్క పథకాలు') ||
+      lower.includes('योजना') || lower.includes('योजनाएं')
     ) {
       isProcessing = false;
       const html = `
@@ -743,16 +982,16 @@
             <span style="font-size:1.3rem;">🏛️</span>
             <strong style="color:var(--hospital-teal-800, #115e59); font-size:0.95rem;">${cfg.schemesTitle}</strong>
           </div>
-          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0;">
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0; line-height:1.4;">
             ${cfg.schemesDesc}
           </p>
           <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
             <button class="btn btn-sm btn-primary" style="flex:1;" onclick="if(typeof PulseCareUI !== 'undefined') PulseCareUI.switchTab('schemes');">
+              Explore All Schemes
+            </button>
+            <button class="btn btn-sm btn-secondary" style="flex:1;" onclick="if(typeof PulseCareUI !== 'undefined') PulseCareUI.openModal('eligibility-modal');">
               Check Eligibility
             </button>
-            <a href="https://pmjay.gov.in" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="flex:1; text-align:center;">
-              Official Portal ↗
-            </a>
           </div>
         </div>
       `;
