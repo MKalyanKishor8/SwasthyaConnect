@@ -197,8 +197,8 @@
       <!-- Main Body Container -->
       <div class="portal-body">
 
-        <!-- ================= TAB: OVERVIEW (Dashboard) ================= -->
-        <section class="tab-panel active" id="tab-overview">
+        <!-- ================= TAB: DASHBOARD & TELEMETRY ================= -->
+        <section class="tab-panel active" id="tab-dashboard">
           
           <!-- Welcome Hero Banner -->
           <div class="welcome-banner">
@@ -245,13 +245,25 @@
             </div>
           </div>
 
-          <!-- Latest Vital Signs Grid -->
-          <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="font-size:1.2rem;">Latest Vital Signs Telemetry</h3>
-            <span style="font-size:0.8rem; color:var(--text-muted);"><span class="pulse-dot" style="background:var(--hospital-healing-green);"></span> Bluetooth Sensor Connected</span>
+          <!-- Live Biometric Telemetry Header & Device Sync Bar -->
+          <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h3 style="font-size:1.25rem; font-weight:700; margin:0 0 0.2rem 0; color:var(--text-primary);">📡 Latest Vital Signs Telemetry</h3>
+              <p style="font-size:0.825rem; color:var(--text-secondary); margin:0;">Continuous remote patient monitoring & connected biometric sensors</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:0.8rem; color:var(--text-muted); background:var(--bg-surface-elevated); padding:0.3rem 0.65rem; border-radius:var(--radius-xs); border:1px solid var(--border-light);">
+                <span class="pulse-dot" style="background:var(--hospital-healing-green);"></span> <span id="ov-last-synced">Today at 08:30 AM</span>
+              </span>
+              <button class="btn btn-sm btn-outline" onclick="syncDeviceTelemetry()" id="btn-sync-telemetry" title="Sync Bluetooth / RPM Sensors">
+                <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Sync Devices</span>
+              </button>
+            </div>
           </div>
 
-          <div class="metrics-grid">
+          <!-- 6-Metric Vitals Telemetry Grid -->
+          <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1.5rem;">
             <!-- Blood Pressure -->
             <div class="metric-card">
               <div class="metric-header">
@@ -284,25 +296,7 @@
               </div>
               <div class="metric-footer">
                 <span class="badge badge-emerald">Normal Sinus Rhythm</span>
-                <span>Resting Average</span>
-              </div>
-            </div>
-
-            <!-- Temperature -->
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-label">Body Temperature</span>
-                <div class="metric-icon-wrap purple">
-                  <svg class="icon" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
-                </div>
-              </div>
-              <div class="metric-value-wrap">
-                <span class="metric-value" id="ov-temp">98.6</span>
-                <span class="metric-unit">°F</span>
-              </div>
-              <div class="metric-footer">
-                <span class="badge badge-emerald">Afebrile (Normal)</span>
-                <span>Digital Tympanic</span>
+                <span>Resting Pulse</span>
               </div>
             </div>
 
@@ -321,6 +315,83 @@
               <div class="metric-footer">
                 <span class="badge badge-emerald">Optimal Oxygenation</span>
                 <span>Pulse Oximeter</span>
+              </div>
+            </div>
+
+            <!-- Temperature -->
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Body Temperature</span>
+                <div class="metric-icon-wrap purple">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                </div>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="ov-temp">98.6</span>
+                <span class="metric-unit">°F</span>
+              </div>
+              <div class="metric-footer">
+                <span class="badge badge-emerald">Afebrile (Normal)</span>
+                <span>Tympanic Sensor</span>
+              </div>
+            </div>
+
+            <!-- Fasting Blood Glucose -->
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Fasting Glucose</span>
+                <div class="metric-icon-wrap amber">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="ov-glucose">94</span>
+                <span class="metric-unit">mg/dL</span>
+              </div>
+              <div class="metric-footer">
+                <span class="badge badge-emerald">Normal Glycemic</span>
+                <span>Glucometer Sync</span>
+              </div>
+            </div>
+
+            <!-- Respiratory Rate -->
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Respiratory Rate</span>
+                <div class="metric-icon-wrap teal">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+                </div>
+              </div>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="ov-resp-rate">16</span>
+                <span class="metric-unit">bpm</span>
+              </div>
+              <div class="metric-footer">
+                <span class="badge badge-emerald">Eupnea (Normal)</span>
+                <span>Chest Respiration</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7-Day Biometric Telemetry Trend Graph Card -->
+          <div class="portal-card" style="margin-bottom: 1.5rem;">
+            <div class="portal-card-header" style="justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+              <div>
+                <h3 class="portal-card-title">
+                  <svg class="icon" style="color:var(--hospital-teal-600);" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  <span>7-Day Biometric Telemetry & Vitals Trend</span>
+                </h3>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin:2px 0 0 0;">Daily resting vitals recorded via automated home monitoring</p>
+              </div>
+              <div style="display:flex; gap:0.75rem; font-size:0.775rem; align-items:center; flex-wrap:wrap;">
+                <span style="display:inline-flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; background:#0d9488; border-radius:50%;"></span> Pulse (BPM)</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; background:#0284c7; border-radius:50%;"></span> Systolic BP</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; background:#e11d48; border-radius:50%;"></span> SpO2 (%)</span>
+              </div>
+            </div>
+            <div class="portal-card-body">
+              <div id="ov-telemetry-chart-container" style="width:100%; min-height:180px; overflow-x:auto;">
+                <!-- Dynamically populated SVG chart by JS -->
               </div>
             </div>
           </div>

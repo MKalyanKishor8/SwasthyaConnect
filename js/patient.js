@@ -568,13 +568,14 @@ function initNavigation() {
 }
 
 function switchTab(tabId) {
+  const normTab = (tabId === 'overview' || tabId === 'dashboard') ? 'dashboard' : tabId;
   const navLinks = document.querySelectorAll('.sidebar-nav .nav-link[data-tab]');
   const tabPanels = document.querySelectorAll('.tab-panel');
   const pageTitle = document.getElementById('current-page-title');
 
   const titles = {
-    overview: 'Patient Health Dashboard',
-    dashboard: 'Patient Health Dashboard',
+    overview: 'Patient Health Dashboard & Telemetry',
+    dashboard: 'Patient Health Dashboard & Telemetry',
     profile: 'My Patient Profile & Demographics',
     appointments: 'Scheduled Consultations & Appointments',
     doctors: 'Find a Doctor & Rural Specialist',
@@ -588,7 +589,8 @@ function switchTab(tabId) {
   };
 
   navLinks.forEach(l => {
-    if (l.getAttribute('data-tab') === tabId) {
+    const lTab = l.getAttribute('data-tab');
+    if (lTab === normTab || ((normTab === 'dashboard') && (lTab === 'dashboard' || lTab === 'overview'))) {
       l.classList.add('active');
     } else {
       l.classList.remove('active');
@@ -596,19 +598,19 @@ function switchTab(tabId) {
   });
 
   tabPanels.forEach(p => {
-    if (p.id === `tab-${tabId}`) {
+    if (p.id === `tab-${normTab}` || (normTab === 'dashboard' && (p.id === 'tab-dashboard' || p.id === 'tab-overview'))) {
       p.classList.add('active');
     } else {
       p.classList.remove('active');
     }
   });
 
-  if (pageTitle && titles[tabId]) {
-    pageTitle.textContent = titles[tabId];
+  if (pageTitle && titles[normTab]) {
+    pageTitle.textContent = titles[normTab];
   }
 
-  window.location.hash = tabId;  // Invalidate and re-render Leaflet Map if switching to nearby tab
-  if (tabId === 'nearby') {
+  window.location.hash = normTab;
+  if (normTab === 'nearby') {
     setTimeout(() => {
       onOpenNearbyHospitalsTab();
     }, 150);
@@ -1398,7 +1400,128 @@ function renderPatientData() {
 
   const o2El = document.getElementById('ov-spo2');
   if (o2El) o2El.textContent = vit.spO2 || 99;
+
+  const glucEl = document.getElementById('ov-glucose');
+  if (glucEl) glucEl.textContent = vit.glucose ? vit.glucose.split(' ')[0] : '94';
+
+  const respEl = document.getElementById('ov-resp-rate');
+  if (respEl) respEl.textContent = vit.respiratoryRate ? vit.respiratoryRate.split(' ')[0] : '16';
+
+  const lastSyncEl = document.getElementById('ov-last-synced');
+  if (lastSyncEl) lastSyncEl.textContent = vit.lastUpdated || 'Today at 08:30 AM';
+
+  renderTelemetryChart();
 }
+
+function renderTelemetryChart() {
+  const container = document.getElementById('ov-telemetry-chart-container');
+  if (!container) return;
+
+  const history = (currentPatient && currentPatient.vitalsHistory && currentPatient.vitalsHistory.length > 0)
+    ? currentPatient.vitalsHistory
+    : [
+        { date: 'Aug 28', hr: 75, bpSys: 122, bpDia: 80, o2: 98 },
+        { date: 'Aug 29', hr: 71, bpSys: 120, bpDia: 78, o2: 99 },
+        { date: 'Aug 30', hr: 74, bpSys: 119, bpDia: 79, o2: 99 },
+        { date: 'Aug 31', hr: 70, bpSys: 117, bpDia: 77, o2: 98 },
+        { date: 'Sep 01', hr: 73, bpSys: 118, bpDia: 78, o2: 99 },
+        { date: 'Sep 02', hr: 72, bpSys: 118, bpDia: 78, o2: 99 },
+        { date: 'Today', hr: 72, bpSys: 118, bpDia: 78, o2: 99 }
+      ];
+
+  const svgWidth = 650;
+  const svgHeight = 160;
+  const paddingX = 45;
+  const paddingY = 25;
+  const plotWidth = svgWidth - paddingX * 2;
+  const plotHeight = svgHeight - paddingY * 2;
+
+  const count = history.length;
+  const getX = (i) => paddingX + (i * plotWidth) / Math.max(1, count - 1);
+
+  // Pulse (BPM): min 55, max 95
+  const getYPulse = (val) => paddingY + plotHeight - (((val || 72) - 55) / 40) * plotHeight;
+  // Systolic BP: min 100, max 140
+  const getYSys = (val) => paddingY + plotHeight - (((val || 120) - 100) / 40) * plotHeight;
+  // SpO2: min 94, max 100
+  const getYSpO2 = (val) => paddingY + plotHeight - (((val || 99) - 94) / 6) * plotHeight;
+
+  const pulsePoints = history.map((d, i) => `${getX(i).toFixed(1)},${getYPulse(d.hr).toFixed(1)}`).join(' ');
+  const sysPoints = history.map((d, i) => `${getX(i).toFixed(1)},${getYSys(d.bpSys).toFixed(1)}`).join(' ');
+  const spo2Points = history.map((d, i) => `${getX(i).toFixed(1)},${getYSpO2(d.o2).toFixed(1)}`).join(' ');
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width:100%; height:auto; overflow:visible;" aria-label="7-Day Telemetry Chart">
+      <defs>
+        <linearGradient id="telemetryPulseGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0d9488" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#0d9488" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Grid lines -->
+      <line x1="${paddingX}" y1="${paddingY}" x2="${svgWidth - paddingX}" y2="${paddingY}" stroke="rgba(148, 163, 184, 0.2)" stroke-dasharray="3 3"/>
+      <line x1="${paddingX}" y1="${paddingY + plotHeight / 2}" x2="${svgWidth - paddingX}" y2="${paddingY + plotHeight / 2}" stroke="rgba(148, 163, 184, 0.2)" stroke-dasharray="3 3"/>
+      <line x1="${paddingX}" y1="${paddingY + plotHeight}" x2="${svgWidth - paddingX}" y2="${paddingY + plotHeight}" stroke="rgba(148, 163, 184, 0.3)"/>
+
+      <!-- Pulse Area Fill -->
+      <polygon points="${getX(0).toFixed(1)},${paddingY + plotHeight} ${pulsePoints} ${getX(count - 1).toFixed(1)},${paddingY + plotHeight}" fill="url(#telemetryPulseGrad)"/>
+
+      <!-- Polylines -->
+      <polyline points="${sysPoints}" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="${pulsePoints}" fill="none" stroke="#0d9488" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="${spo2Points}" fill="none" stroke="#e11d48" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- Data Dots & Day Labels -->
+      ${history.map((d, i) => `
+        <g>
+          <line x1="${getX(i).toFixed(1)}" y1="${paddingY}" x2="${getX(i).toFixed(1)}" y2="${paddingY + plotHeight}" stroke="rgba(148, 163, 184, 0.15)" stroke-width="1"/>
+          <circle cx="${getX(i).toFixed(1)}" cy="${getYPulse(d.hr).toFixed(1)}" r="4.5" fill="#0d9488" stroke="#ffffff" stroke-width="2">
+            <title>${d.date}: Pulse ${d.hr} BPM</title>
+          </circle>
+          <circle cx="${getX(i).toFixed(1)}" cy="${getYSys(d.bpSys).toFixed(1)}" r="4.5" fill="#0284c7" stroke="#ffffff" stroke-width="2">
+            <title>${d.date}: BP ${d.bpSys}/${d.bpDia} mmHg</title>
+          </circle>
+          <text x="${getX(i).toFixed(1)}" y="${paddingY + plotHeight + 16}" font-size="10.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${d.date}</text>
+        </g>
+      `).join('')}
+    </svg>
+  `;
+}
+
+window.syncDeviceTelemetry = function() {
+  const syncBtn = document.getElementById('btn-sync-telemetry');
+
+  if (syncBtn) {
+    syncBtn.disabled = true;
+    syncBtn.innerHTML = `
+      <div style="display:inline-block; width:12px; height:12px; border:2px solid var(--hospital-teal-600); border-top-color:transparent; border-radius:50%; animation:spin 0.6s linear infinite; margin-right:4px;"></div>
+      <span>Syncing...</span>
+    `;
+  }
+
+  PulseCareUI.showToast('Telemetry Sync', 'Connecting to Bluetooth BP cuff & Pulse Oximeter...', 'info');
+
+  setTimeout(() => {
+    if (currentPatient && currentPatient.vitals) {
+      currentPatient.vitals.heartRate = Math.floor(70 + Math.random() * 5);
+      currentPatient.vitals.spO2 = Math.min(100, Math.floor(98 + Math.random() * 2));
+      currentPatient.vitals.lastUpdated = `Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    renderPatientData();
+
+    if (syncBtn) {
+      syncBtn.disabled = false;
+      syncBtn.innerHTML = `
+        <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        <span>Sync Devices</span>
+      `;
+    }
+
+    PulseCareUI.showToast('Telemetry Updated', 'Live vitals synchronized successfully from home monitoring sensors.', 'success');
+  }, 900);
+};
 
 function renderAppointments() {
   const allApts = PulseCareStore.getAppointments(currentPatient.id);
