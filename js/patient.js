@@ -785,6 +785,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentPlacesResults && currentPlacesResults.length > 0) {
       renderNearbyCards(currentPlacesResults);
     }
+    if (typeof SwasthyaI18n !== 'undefined' && typeof SwasthyaI18n.translateEntireDOM === 'function') {
+      setTimeout(() => SwasthyaI18n.translateEntireDOM(), 30);
+    }
   });
 });
 

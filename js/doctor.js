@@ -35,6 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPatientQueue(doctor.id);
     renderPatientDirectory();
   });
+
+  // Language switch listener
+  window.addEventListener('swasthyaLanguageChanged', () => {
+    if (typeof SwasthyaI18n !== 'undefined' && typeof SwasthyaI18n.translateEntireDOM === 'function') {
+      setTimeout(() => SwasthyaI18n.translateEntireDOM(), 30);
+    }
+  });
 });
 
 // Update Doctor header & sidebar info
