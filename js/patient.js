@@ -556,10 +556,11 @@ out center tags 60;`;
   },
 
   // Main Fetcher with Auto-Radius Expansion (1km -> 5km -> 10km -> 25km) & Cache
-  async fetchNearbyFacilities(lat, lng, radiusKm = 5, category = 'All', searchQuery = '') {
-    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusKm}`;
+  async fetchNearbyFacilities(lat, lng, radiusKm = 5, category = 'All', searchQuery = '', allowSynthetic = false) {
+    const effectiveRadius = Math.max(1, radiusKm || 5);
+    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${effectiveRadius}`;
     let allFacilities = [];
-    const radiusMeters = radiusKm * 1000;
+    const radiusMeters = effectiveRadius * 1000;
 
     // Check if offline
     if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
@@ -587,11 +588,9 @@ out center tags 60;`;
         if (locEl) locEl.textContent = `${areaContext.displayName} (Detected Location)`;
       }
 
-      const radiusMeters = (radiusKm || 5) * 1000;
-
       // Query Bounded Nominatim POI search + Overpass Mirrors in parallel
       const [nomFacilities, osmElements] = await Promise.all([
-        this.queryNominatimHealthcare(lat, lng, radiusKm, areaContext),
+        this.queryNominatimHealthcare(lat, lng, effectiveRadius, areaContext),
         this.queryOverpass(lat, lng, radiusMeters)
       ]);
 
@@ -602,8 +601,8 @@ out center tags 60;`;
 
       let merged = [...nomFacilities, ...osmFacilities];
 
-      // If Overpass & Nominatim returned few facilities in remote zones, synthesize rural network
-      if (merged.length < 3) {
+      // Only synthesize if explicitly allowed (e.g. demo mode) - NEVER in real search
+      if (allowSynthetic && merged.length < 3) {
         const ruralNetwork = this.generateRuralHealthcareNetwork(lat, lng, areaContext);
         merged = [...merged, ...ruralNetwork];
       }
@@ -641,13 +640,8 @@ out center tags 60;`;
       c.directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}`;
     });
 
-    // Filter by Active Radius
-    let filtered = allFacilities.filter(c => c.distanceKm <= (nearbyDistanceFilter || 25));
-
-    // If active radius filter left 0 results, expand gracefully
-    if (filtered.length === 0 && allFacilities.length > 0) {
-      filtered = allFacilities;
-    }
+    // Filter strictly by requested radius
+    let filtered = allFacilities.filter(c => c.distanceKm <= effectiveRadius);
 
     // Filter by Facility Type / Category
     if (category && category !== 'All') {
@@ -697,18 +691,15 @@ out center tags 60;`;
       );
     }
 
-    // Sort by Nearest Distance first, prioritizing Government Facilities
-    filtered.sort((a, b) => {
-      const aIsGovt = a.category.includes('Government') || a.category.includes('PHC') || a.category.includes('CHC') || a.category.includes('Arogya');
-      const bIsGovt = b.category.includes('Government') || b.category.includes('PHC') || b.category.includes('CHC') || b.category.includes('Arogya');
-      
-      // If within 0.8 km of each other, prioritize government healthcare facilities
-      if (aIsGovt && !bIsGovt && Math.abs(a.distanceKm - b.distanceKm) < 0.8) return -1;
-      if (!aIsGovt && bIsGovt && Math.abs(a.distanceKm - b.distanceKm) < 0.8) return 1;
-      return a.distanceKm - b.distanceKm;
-    });
+    // Sort strictly by nearest distance first (ascending)
+    filtered.sort((a, b) => a.distanceKm - b.distanceKm);
 
     return filtered;
+  },
+
+  // Get currently loaded / saved facilities
+  getSavedFacilities() {
+    return currentPlacesResults || [];
   },
 
   // Helper to sync distance pill buttons

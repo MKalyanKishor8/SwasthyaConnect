@@ -479,7 +479,11 @@
     }
 
     // Dispatch global custom event for dynamic components to re-render
-    window.dispatchEvent(new CustomEvent('swasthyaLanguageChanged', { detail: { lang: normalized } }));
+    if (typeof window.dispatchEvent === 'function' && typeof CustomEvent !== 'undefined') {
+      try {
+        window.dispatchEvent(new CustomEvent('swasthyaLanguageChanged', { detail: { lang: normalized } }));
+      } catch (e) {}
+    }
   }
 
   // Public API
