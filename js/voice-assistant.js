@@ -468,6 +468,8 @@
     initSpeechRecognition();
 
     if (recognition) {
+      isListening = true;
+      updateUIState('listening');
       try {
         recognition.start();
       } catch (err) {
@@ -475,12 +477,15 @@
           recognition.abort();
           setTimeout(() => {
             if (recognition && voiceAssistantOpen) {
+              isListening = true;
+              updateUIState('listening');
               recognition.start();
             }
           }, 150);
         } catch (e) {}
       }
     }
+    updateDebugInfo();
   }
 
   // Stop Voice Listening and release microphone
@@ -1470,10 +1475,8 @@
       win.style.display = 'flex';
       renderQuickPrompts();
       updateDebugInfo();
-      // Start fresh voice recognition session only after panel is opened
-      if (!isListening && !isSpeaking) {
-        startListening();
-      }
+      // Activate voice assistant immediately when opened
+      startListening();
     } else {
       win.style.display = 'none';
       // Immediately stop speech recognition, microphone listening, speaking, and reset state
