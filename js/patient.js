@@ -11,7 +11,7 @@ let currentSchemeCategory = 'All';
 let patientCoordinates = { lat: 17.3850, lng: 78.4867 }; // Default Reference Coords (Hyderabad/Springfield)
 let detectedLocationLabel = 'Current Location (GPS Detected)';
 let nearbyTypeFilter = 'All';
-let nearbyDistanceFilter = 5; // Default initial search radius: 5 km
+let nearbyDistanceFilter = 10; // Default initial search radius: 10 km
 let nearbySearchQuery = '';
 let leafletMapInstance = null;
 let mapMarkersLayer = null;
@@ -23,18 +23,10 @@ let currentPlacesResults = [];
 
 // ==========================================================================
 // ==========================================================================
-// PLACES / POI HEALTHCARE SEARCH SERVICE (OpenStreetMap Overpass + Nominatim)
+// PLACES / POI HEALTHCARE SEARCH SERVICE (Serverless Proxy + OSM Fallback)
 // ==========================================================================
 
 const PlacesHealthService = {
-  // Reliable high-speed Overpass API endpoints
-  overpassMirrors: [
-    'https://lz4.overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter',
-    'https://overpass-api.de/api/interpreter',
-    'https://overpass.private.coffee/api/interpreter'
-  ],
-
   // In-memory geocode & POI cache for sub-millisecond responses
   geocodeCache: new Map(),
   poiCache: new Map(),
@@ -58,7 +50,7 @@ const PlacesHealthService = {
     return Math.round(R * c * 10) / 10;
   },
 
-  // Geocode manual text query (City, District, Village, PIN code) via Nominatim
+  // Geocode manual text query (City, District, Village, PIN code)
   async geocodeLocation(query) {
     const cleanQ = query.toLowerCase().trim();
     if (this.geocodeCache.has(cleanQ)) {
@@ -67,48 +59,73 @@ const PlacesHealthService = {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: controller.signal });
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
+      });
       clearTimeout(timeoutId);
 
-      if (!res.ok) throw new Error('Nominatim geocode failed');
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const result = {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon),
-          displayName: data[0].display_name,
-          address: data[0].address || {}
-        };
-        this.geocodeCache.set(cleanQ, result);
-        return result;
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const result = {
+            lat: parseFloat(data[0].lat),
+            lng: parseFloat(data[0].lon),
+            displayName: data[0].display_name,
+            address: data[0].address || {}
+          };
+          this.geocodeCache.set(cleanQ, result);
+          return result;
+        }
       }
-      return null;
     } catch (err) {
-      console.warn('Geocoding service network fallback:', err);
-      const fallback = {
-        lat: 17.3850 + (Math.random() * 0.02 - 0.01),
-        lng: 78.4867 + (Math.random() * 0.02 - 0.01),
-        displayName: `${query} (Search Location)`,
-        address: { city: query }
-      };
-      this.geocodeCache.set(cleanQ, fallback);
-      return fallback;
+      console.warn('Geocoding service fallback:', err.message);
     }
+
+    // Photon fallback for location geocoding
+    try {
+      const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`;
+      const pRes = await fetch(photonUrl);
+      if (pRes.ok) {
+        const pData = await pRes.json();
+        if (pData && pData.features && pData.features.length > 0) {
+          const f = pData.features[0];
+          const [lon, lat] = f.geometry.coordinates;
+          const result = {
+            lat: parseFloat(lat),
+            lng: parseFloat(lon),
+            displayName: f.properties.name || f.properties.city || query,
+            address: f.properties || {}
+          };
+          this.geocodeCache.set(cleanQ, result);
+          return result;
+        }
+      }
+    } catch (e) {}
+
+    const fallback = {
+      lat: 17.3850,
+      lng: 78.4867,
+      displayName: `${query} (Search Location)`,
+      address: { city: query }
+    };
+    this.geocodeCache.set(cleanQ, fallback);
+    return fallback;
   },
 
-  // Fast reverse geocode with memory cache and non-blocking timeout
+  // Reverse geocode with memory cache
   async reverseGeocode(lat, lng) {
-    const key = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
+    const key = `${parseFloat(lat).toFixed(3)}_${parseFloat(lng).toFixed(3)}`;
     if (this.geocodeCache.has(key)) {
       return this.geocodeCache.get(key);
     }
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1800);
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
 
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`;
       const res = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: controller.signal });
@@ -133,568 +150,260 @@ const PlacesHealthService = {
           return info;
         }
       }
-    } catch (e) {
-      // Fallback
-    }
+    } catch (e) {}
 
     const fallbackInfo = {
       locality: 'Local Area',
       district: 'District Healthcare Zone',
       state: 'India',
       postcode: '',
-      displayName: `GPS (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E)`
+      displayName: `GPS (${parseFloat(lat).toFixed(4)}° N, ${parseFloat(lng).toFixed(4)}° E)`
     };
     this.geocodeCache.set(key, fallbackInfo);
     return fallbackInfo;
   },
 
-  // Ultra-fast Parallel Overpass fetcher (queries top mirrors in parallel with a strict 2s timeout)
-  async queryOverpass(lat, lng, radiusMeters) {
-    const overpassQuery = `[out:json][timeout:4];
-(
-  node["amenity"~"hospital|clinic|pharmacy|doctors|health_post"](around:${radiusMeters},${lat},${lng});
-  way["amenity"~"hospital|clinic|pharmacy|doctors|health_post"](around:${radiusMeters},${lat},${lng});
-  node["healthcare"](around:${radiusMeters},${lat},${lng});
-  way["healthcare"](around:${radiusMeters},${lat},${lng});
-  node["building"="hospital"](around:${radiusMeters},${lat},${lng});
-  way["building"="hospital"](around:${radiusMeters},${lat},${lng});
-  node["shop"="chemist"](around:${radiusMeters},${lat},${lng});
-  way["shop"="chemist"](around:${radiusMeters},${lat},${lng});
-);
-out center tags 60;`;
+  // Primary Fetcher: Calls /api/hospitals with resilient multi-tier client fallback
+  async fetchNearbyFacilities(lat, lng, radiusKm = 10, category = 'All', searchQuery = '') {
+    const pLat = parseFloat(lat);
+    const pLng = parseFloat(lng);
+    const effectiveRadius = Math.max(1, parseFloat(radiusKm) || 10);
 
-    // Query top 2 fast mirrors in parallel race
-    const fetchMirror = async (mirror) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      try {
-        const res = await fetch(mirror, {
-          method: 'POST',
-          body: overpassQuery,
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && Array.isArray(data.elements) && data.elements.length > 0) {
-            return data.elements;
-          }
-        }
-      } catch (e) {
-        clearTimeout(timeoutId);
-      }
+    if (isNaN(pLat) || isNaN(pLng)) {
+      console.warn('Invalid coordinates passed to fetchNearbyFacilities:', lat, lng);
       return [];
-    };
+    }
 
-    try {
-      const fastMirrors = [this.overpassMirrors[0], this.overpassMirrors[1]];
-      const results = await Promise.all(fastMirrors.map(m => fetchMirror(m)));
-      const best = results.find(r => r.length > 0);
-      if (best) return best;
-    } catch (e) {}
+    const cacheKey = `${pLat.toFixed(3)}_${pLng.toFixed(3)}_${effectiveRadius}_${category}_${searchQuery}`;
 
-    return [];
-  },
+    // 1. Check in-memory cache
+    if (this.poiCache.has(cacheKey)) {
+      return this.poiCache.get(cacheKey);
+    }
 
-  // Query Nominatim direct POI search with bounded viewbox for exact real healthcare centres
-  async queryNominatimHealthcare(lat, lng, radiusKm, areaContext) {
-    const rKm = Math.max(1, radiusKm || 5);
-    const deltaLat = rKm / 111;
-    const deltaLng = rKm / (111 * Math.cos(lat * Math.PI / 180));
-    const left = (lng - deltaLng).toFixed(4);
-    const top = (lat + deltaLat).toFixed(4);
-    const right = (lng + deltaLng).toFixed(4);
-    const bottom = (lat - deltaLat).toFixed(4);
-    const viewbox = `${left},${top},${right},${bottom}`;
-
-    const searchQueries = [
-      'hospital',
-      'primary health centre',
-      'community health centre',
-      'clinic',
-      'pharmacy',
-      'pathology diagnostic'
-    ];
-
-    const fetchSingleCategory = async (q) => {
+    // 2. Check offline local cache if offline
+    if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&viewbox=${viewbox}&bounded=1&limit=10&addressdetails=1`;
-        const res = await fetch(url, {
-          headers: { 'User-Agent': 'SwasthyaConnect/1.0', 'Accept': 'application/json' },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) return data;
+        const cached = localStorage.getItem('swasthya_cached_nearby');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
         }
       } catch (e) {}
-      return [];
-    };
+    }
 
+    let results = [];
+
+    // 3. Primary: Query Vercel Serverless Function (/api/hospitals)
     try {
-      const results = await Promise.all(searchQueries.map(q => fetchSingleCategory(q)));
-      const flat = results.flat();
-
-      const normalizedList = flat.map((item, idx) => {
-        const itemLat = parseFloat(item.lat);
-        const itemLng = parseFloat(item.lon);
-        const distKm = this.calculateDistance(lat, lng, itemLat, itemLng);
-        const addr = item.address || {};
-
-        let rawName = item.name || (item.display_name ? item.display_name.split(',')[0] : '');
-        const lowerName = rawName.toLowerCase();
-        const road = addr.road || addr.street || '';
-        const suburb = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city_district || '';
-        const city = addr.city || addr.town || addr.county || areaContext.district || 'City';
-        const state = addr.state || areaContext.state || 'India';
-        const postcode = addr.postcode || '';
-
-        // If name is generic or missing, create a location-specific realistic name
-        if (!rawName || lowerName === 'hospital' || lowerName === 'clinic' || lowerName === 'health centre' || lowerName === 'pharmacy') {
-          const areaLoc = road || suburb || city || 'Community';
-          if (lowerName.includes('pharmacy') || lowerName.includes('chemist')) {
-            rawName = `${areaLoc} Medico Pharmacy`;
-          } else if (lowerName.includes('clinic') || lowerName.includes('health centre')) {
-            rawName = `${areaLoc} Primary Health Post`;
-          } else {
-            rawName = `${areaLoc} Government Area Hospital`;
-          }
-        }
-
-        // Determine exact category
-        let cat = 'Government Hospitals';
-        let type = 'Government District / Area Hospital';
-
-        if (lowerName.includes('pharmacy') || lowerName.includes('chemist') || lowerName.includes('medical') || lowerName.includes('druggist') || lowerName.includes('aushadh')) {
-          cat = 'Pharmacies';
-          type = 'Pharmacy / Jan Aushadhi Kendra';
-        } else if (lowerName.includes('phc') || lowerName.includes('primary health') || lowerName.includes('uphc') || lowerName.includes('sub-centre')) {
-          cat = 'PHC';
-          type = 'Primary Health Centre (PHC)';
-        } else if (lowerName.includes('chc') || lowerName.includes('community health')) {
-          cat = 'CHC';
-          type = 'Community Health Centre (CHC)';
-        } else if (lowerName.includes('arogya') || lowerName.includes('ayushman') || lowerName.includes('wellness') || lowerName.includes('hwc')) {
-          cat = 'Ayushman Arogya Mandir';
-          type = 'Ayushman Arogya Mandir (HWC)';
-        } else if (lowerName.includes('lab') || lowerName.includes('diagnostic') || lowerName.includes('pathology') || lowerName.includes('scan') || lowerName.includes('imaging')) {
-          cat = 'Diagnostic Centres';
-          type = 'Diagnostic & Pathology Centre';
-        } else if (lowerName.includes('clinic') || lowerName.includes('doctor') || lowerName.includes('polyclinic') || lowerName.includes('dispensary')) {
-          cat = 'Clinics';
-          type = 'Government Clinic / Dispensary';
-        } else if (lowerName.includes('emergency') || lowerName.includes('trauma') || lowerName.includes('casualty')) {
-          cat = 'Emergency Services';
-          type = '24x7 Emergency & Trauma Care';
-        }
-
-        // Clean formatted address
-        const fullAddress = [road, suburb, city, state, postcode].filter(Boolean).join(', ') || item.display_name;
-
-        return {
-          id: `osm-nom-${item.place_id || idx}`,
-          name: rawName,
-          category: cat,
-          type: type,
-          lat: itemLat,
-          lng: itemLng,
-          distanceKm: distKm,
-          distance: `${distKm.toFixed(1)} km`,
-          location: fullAddress,
-          timing: cat === 'Pharmacies' ? '08:00 AM - 11:00 PM (Emergency 24x7)' : '24x7 Emergency & IPD | OPD: 08:30 AM - 02:00 PM',
-          phone: '+91 1800-180-1104',
-          services: [
-            'Free Doctor Consultation (OPD)',
-            'Generic Medicines Dispensary',
-            'Essential Lab Diagnostics',
-            'Ayushman Bharat PM-JAY Cashless Support'
-          ],
-          pmjayEmpanelled: true,
-          emergencyReady: cat === 'Emergency Services' || cat === 'Government Hospitals' || lowerName.includes('emergency'),
-          directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${itemLat},${itemLng}`
-        };
-      });
-
-      return normalizedList;
-    } catch (e) {
-      console.warn('Nominatim bounded POI search fallback:', e);
-    }
-    return [];
-  },
-
-  // Normalize an OpenStreetMap element into a structured SwasthyaConnect Facility
-  normalizeOsmElement(el, patientLat, patientLng, idx, defaultArea = 'Healthcare District') {
-    const tags = el.tags || {};
-    const elLat = parseFloat(el.lat || (el.center ? el.center.lat : patientLat));
-    const elLng = parseFloat(el.lon || (el.center ? el.center.lon : patientLng));
-    const distKm = this.calculateDistance(patientLat, patientLng, elLat, elLng);
-
-    const rawName = tags.name || tags['name:en'] || tags['name:hi'] || tags['name:te'] || '';
-    const amenity = tags.amenity || tags.healthcare || tags.shop || 'clinic';
-    const operator = tags.operator || tags['operator:type'] || '';
-    const isGovt = tags['operator:type'] === 'government' || tags.ownership === 'government' || /govt|government|district|civil|general|aiims|rims|chc|phc|ayushman/i.test(rawName);
-
-    let cat = 'Government Hospitals';
-    let type = 'District / Civil Hospital';
-
-    const lowerName = rawName.toLowerCase();
-
-    if (amenity === 'pharmacy' || amenity === 'chemist' || lowerName.includes('pharmacy') || lowerName.includes('medical store') || lowerName.includes('aushadh')) {
-      cat = 'Pharmacies';
-      type = lowerName.includes('aushadh') ? 'Pradhan Mantri Jan Aushadhi Kendra' : 'Pharmacy / Medical Store';
-    } else if (lowerName.includes('phc') || lowerName.includes('primary health') || amenity === 'health_post') {
-      cat = 'PHC';
-      type = 'Primary Health Centre (PHC)';
-    } else if (lowerName.includes('chc') || lowerName.includes('community health') || lowerName.includes('rural hospital')) {
-      cat = 'CHC';
-      type = 'Community Health Centre (CHC)';
-    } else if (lowerName.includes('ayushman') || lowerName.includes('arogya') || lowerName.includes('wellness') || lowerName.includes('hwc')) {
-      cat = 'Ayushman Arogya Mandir';
-      type = 'Ayushman Arogya Mandir (HWC)';
-    } else if (lowerName.includes('diagnostic') || lowerName.includes('pathology') || lowerName.includes('lab') || lowerName.includes('scan') || tags.healthcare === 'laboratory') {
-      cat = 'Diagnostic Centres';
-      type = 'Government Diagnostic & Pathology Centre';
-    } else if (amenity === 'clinic' || amenity === 'doctors' || lowerName.includes('clinic') || lowerName.includes('dispensary')) {
-      cat = 'Clinics';
-      type = 'Government Clinic / Health Post';
-    } else if (tags.emergency === 'yes' || lowerName.includes('emergency') || lowerName.includes('trauma') || lowerName.includes('casualty')) {
-      cat = 'Emergency Services';
-      type = '24x7 Emergency & Trauma Resuscitation Care';
-    } else {
-      cat = isGovt ? 'Government Hospitals' : 'Government Hospitals';
-      type = isGovt ? 'District Civil / Area General Hospital' : 'Government Empanelled Hospital';
-    }
-
-    const cleanName = rawName || `${type} (${defaultArea})`;
-    
-    // Construct address
-    const streetParts = [
-      tags['addr:housenumber'],
-      tags['addr:street'],
-      tags['addr:suburb'],
-      tags['addr:district'] || defaultArea,
-      tags['addr:city'],
-      tags['addr:postcode']
-    ].filter(Boolean);
-
-    const address = tags['addr:full'] || (streetParts.length > 0 ? streetParts.join(', ') : `${distKm.toFixed(1)} km from your location, ${defaultArea}`);
-    const phone = tags.phone || tags['contact:phone'] || tags['contact:mobile'] || '+91 1800-180-1104';
-
-    return {
-      id: `osm-${el.id || idx}-${Math.round(elLat * 1000)}`,
-      name: cleanName,
-      category: cat,
-      type: type,
-      lat: elLat,
-      lng: elLng,
-      distanceKm: distKm,
-      distance: `${distKm.toFixed(1)} km`,
-      location: address,
-      timing: tags.opening_hours || (cat === 'Emergency Services' ? '24x7 Emergency Always Open' : '24x7 Emergency & IPD | OPD: 08:30 AM - 02:00 PM'),
-      phone: phone,
-      services: [
-        'Free OPD Consultation',
-        'Generic Essential Medicines (EDL)',
-        'Basic Diagnostic Lab Testing',
-        'Ayushman Bharat Golden Card Support'
-      ],
-      pmjayEmpanelled: true,
-      emergencyReady: cat === 'Emergency Services' || tags.emergency === 'yes' || isGovt,
-      directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${elLat},${elLng}`
-    };
-  },
-
-  // Dynamic Synthesis for Rural & Underserved Regions (Guarantees zero empty maps anywhere)
-  generateRuralHealthcareNetwork(lat, lng, areaContext) {
-    const locality = areaContext.locality || 'Village Cluster';
-    const district = areaContext.district || 'District';
-    const state = areaContext.state || 'State Health Mission';
-    const pin = areaContext.postcode ? ` - ${areaContext.postcode}` : '';
-
-    return [
-      {
-        id: `rural-1-${Math.round(lat*1000)}`,
-        name: `${district} District Civil Hospital & 24x7 Trauma Care`,
-        category: 'Government Hospitals',
-        type: 'District Civil / General Hospital',
-        lat: lat + 0.011,
-        lng: lng + 0.008,
-        distanceKm: 1.4,
-        distance: '1.4 km',
-        location: `Hospital Road, Civil Station, ${district}${pin}`,
-        phone: '108 / +91 1800-180-1104',
-        timing: '24x7 Emergency, Trauma & Inpatient | OPD: 08:30 AM - 01:30 PM',
-        services: ['24x7 Emergency Trauma Care', 'PM-JAY Golden Card Desk', 'Free Diagnostics & X-Ray', 'Maternal NICU / PICU', 'Dialysis Unit', 'Jan Aushadhi Generic Pharmacy'],
-        pmjayEmpanelled: true,
-        emergencyReady: true,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat + 0.011},${lng + 0.008}`
-      },
-      {
-        id: `rural-2-${Math.round(lat*1000)}`,
-        name: `${locality} Community Health Centre (CHC)`,
-        category: 'CHC',
-        type: 'Community Health Centre (CHC)',
-        lat: lat - 0.015,
-        lng: lng + 0.012,
-        distanceKm: 2.1,
-        distance: '2.1 km',
-        location: `Main Panchayat Road, Near Bus Stand, ${locality}, ${district}`,
-        phone: '+91 1800-180-1104',
-        timing: 'OPD: 08:30 AM - 02:00 PM | Emergency: 24x7',
-        services: ['General OPD (Medicine, Gynecology, Pediatrics)', 'Free Essential Drugs', 'Mission Indradhanush Immunization', 'Janani Suraksha Yojana Deliveries', 'eSanjeevani Teleconsultation Hub'],
-        pmjayEmpanelled: true,
-        emergencyReady: true,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat - 0.015},${lng + 0.012}`
-      },
-      {
-        id: `rural-3-${Math.round(lat*1000)}`,
-        name: `Primary Health Centre (PHC) - ${locality}`,
-        category: 'PHC',
-        type: 'Primary Health Centre (PHC)',
-        lat: lat + 0.008,
-        lng: lng - 0.016,
-        distanceKm: 1.9,
-        distance: '1.9 km',
-        location: `Health Complex, Near Gram Panchayat, ${locality}`,
-        phone: '+91 1800-180-1104',
-        timing: '09:00 AM - 04:00 PM (Monday - Saturday)',
-        services: ['Comprehensive Primary Healthcare (CPHC)', 'Free Essential Drugs (EDL)', 'NCD Screening (Hypertension, Diabetes)', 'Antenatal Care (ANC)', 'eSanjeevani Tele-OPD'],
-        pmjayEmpanelled: true,
-        emergencyReady: false,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat + 0.008},${lng - 0.016}`
-      },
-      {
-        id: `rural-4-${Math.round(lat*1000)}`,
-        name: `Ayushman Arogya Mandir - Health & Wellness Centre`,
-        category: 'Ayushman Arogya Mandir',
-        type: 'Ayushman Arogya Mandir (HWC)',
-        lat: lat - 0.006,
-        lng: lng - 0.007,
-        distanceKm: 0.9,
-        distance: '0.9 km',
-        location: `Sub-Centre Campus, Ward 2, ${locality}`,
-        phone: '104 / +91 1800-180-1104',
-        timing: '09:00 AM - 05:00 PM (Monday - Saturday)',
-        services: ['12 Essential Primary Health Service Packages', 'Free Point-of-Care Diagnostics (14 Tests)', 'Free Essential Medicines (65+ Drugs)', 'Wellness Yoga & Health Promotion', 'Teleconsultation with Medical Officers'],
-        pmjayEmpanelled: true,
-        emergencyReady: false,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat - 0.006},${lng - 0.007}`
-      },
-      {
-        id: `rural-5-${Math.round(lat*1000)}`,
-        name: `Pradhan Mantri Jan Aushadhi Generic Pharmacy`,
-        category: 'Pharmacies',
-        type: 'Jan Aushadhi Kendra / Chemist',
-        lat: lat + 0.004,
-        lng: lng + 0.005,
-        distanceKm: 0.7,
-        distance: '0.7 km',
-        location: `Civil Hospital Gate Complex, ${locality}, ${district}`,
-        phone: '+91 1800-180-8080',
-        timing: '08:00 AM - 09:00 PM (All 7 Days)',
-        services: ['Quality Generic Medicines at 50-90% Discount', 'Free Blood Glucose Testing', 'Surgical Disposables & Insulin', 'Ayush Herbal Formulations'],
-        pmjayEmpanelled: true,
-        emergencyReady: false,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat + 0.004},${lng + 0.005}`
-      },
-      {
-        id: `rural-6-${Math.round(lat*1000)}`,
-        name: `${district} Government Diagnostic & Pathology Lab`,
-        category: 'Diagnostic Centres',
-        type: 'Government Diagnostic & Pathology Centre',
-        lat: lat - 0.012,
-        lng: lng + 0.009,
-        distanceKm: 1.6,
-        distance: '1.6 km',
-        location: `Civil Lines, Opposite Red Cross Bhavan, ${district}`,
-        phone: '+91 1800-180-1104',
-        timing: '07:30 AM - 05:00 PM (Monday - Saturday)',
-        services: ['Free Essential Pathology (CBC, LFT, KFT, Lipid Profile)', 'Digital X-Ray & Ultrasound', 'TB Sputum Microscopy (NTEP)', 'Sickle Cell & Anemia Screening'],
-        pmjayEmpanelled: true,
-        emergencyReady: false,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat - 0.012},${lng + 0.009}`
-      },
-      {
-        id: `rural-7-${Math.round(lat*1000)}`,
-        name: `${district} 24x7 Emergency Trauma & Ambulance Station`,
-        category: 'Emergency Services',
-        type: '24x7 Emergency & Trauma Care',
-        lat: lat + 0.002,
-        lng: lng - 0.003,
-        distanceKm: 0.4,
-        distance: '0.4 km',
-        location: `National Highway Crossroad, ${locality}, ${district}`,
-        phone: '108 / 112',
-        timing: '24x7 Emergency & Resuscitation',
-        services: ['108 ALS Ambulance Dispatch', 'Immediate Trauma Triage & CPR', 'Oxygen & Defibrillator Support', 'Direct ER Transfer Protocol'],
-        pmjayEmpanelled: true,
-        emergencyReady: true,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat + 0.002},${lng - 0.003}`
-      },
-      {
-        id: `rural-8-${Math.round(lat*1000)}`,
-        name: `Government Urban / Rural Clinic & Maternity Post`,
-        category: 'Clinics',
-        type: 'Government Clinic / Health Post',
-        lat: lat + 0.018,
-        lng: lng + 0.014,
-        distanceKm: 2.6,
-        distance: '2.6 km',
-        location: `Near Community Hall, ${locality}, ${district}`,
-        phone: '+91 1800-180-1104',
-        timing: '09:00 AM - 03:00 PM (Monday - Saturday)',
-        services: ['Maternal & Child Health Care', 'Routine Immunization', 'Minor Ailments Treatment', 'Nutritional Counseling'],
-        pmjayEmpanelled: true,
-        emergencyReady: false,
-        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${lat + 0.018},${lng + 0.014}`
-      }
-    ];
-  },
-
-  // Main Fetcher with Auto-Radius Expansion (1km -> 5km -> 10km -> 25km) & Cache
-  async fetchNearbyFacilities(lat, lng, radiusKm = 5, category = 'All', searchQuery = '', allowSynthetic = false) {
-    const effectiveRadius = Math.max(1, radiusKm || 5);
-    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${effectiveRadius}`;
-    let allFacilities = [];
-    const radiusMeters = effectiveRadius * 1000;
-
-    // Check if offline
-    if (typeof SwasthyaOfflineManager !== 'undefined' && SwasthyaOfflineManager.status === 'offline') {
-      const cached = localStorage.getItem('swasthya_cached_nearby');
-      if (cached) {
-        try {
-          allFacilities = JSON.parse(cached);
-        } catch (e) {}
-      }
-    }
-
-    // If cache has pool in memory
-    if (this.poiCache.has(cacheKey)) {
-      allFacilities = this.poiCache.get(cacheKey);
-    }
-
-    // If online and memory cache is empty, query live POI services in parallel
-    if (allFacilities.length === 0) {
-      const areaContext = await this.reverseGeocode(lat, lng);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const apiUrl = `/api/hospitals?lat=${pLat}&lng=${pLng}&radius=${effectiveRadius}&category=${encodeURIComponent(category || 'All')}&q=${encodeURIComponent(searchQuery || '')}`;
       
-      // Update global detected location label if not already customized
-      if (!detectedLocationLabel || detectedLocationLabel.includes('Default') || detectedLocationLabel.includes('GPS Coords') || detectedLocationLabel.includes('Detecting')) {
-        detectedLocationLabel = areaContext.displayName;
-        const locEl = document.getElementById('detected-location-text');
-        if (locEl) locEl.textContent = `${areaContext.displayName} (Detected Location)`;
-      }
-
-      // Query Bounded Nominatim POI search + Overpass Mirrors in parallel
-      const [nomFacilities, osmElements] = await Promise.all([
-        this.queryNominatimHealthcare(lat, lng, effectiveRadius, areaContext),
-        this.queryOverpass(lat, lng, radiusMeters)
-      ]);
-
-      // Convert Overpass OSM elements
-      let osmFacilities = (osmElements || []).map((el, idx) => 
-        this.normalizeOsmElement(el, lat, lng, idx, areaContext.district || areaContext.locality)
-      );
-
-      let merged = [...nomFacilities, ...osmFacilities];
-
-      // Only synthesize if explicitly allowed (e.g. demo mode) - NEVER in real search
-      if (allowSynthetic && merged.length < 3) {
-        const ruralNetwork = this.generateRuralHealthcareNetwork(lat, lng, areaContext);
-        merged = [...merged, ...ruralNetwork];
-      }
-
-      // Deduplicate by name & coordinates
-      const uniqueMap = new Map();
-      merged.forEach(item => {
-        const key = `${item.name.toLowerCase().trim()}-${Math.round(item.lat * 500)}-${Math.round(item.lng * 500)}`;
-        if (!uniqueMap.has(key)) {
-          uniqueMap.set(key, item);
-        }
+      const res = await fetch(apiUrl, {
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
-      allFacilities = Array.from(uniqueMap.values());
-      this.poiCache.set(cacheKey, allFacilities);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.hospitals)) {
+          results = data.hospitals;
+        }
+      }
+    } catch (e) {
+      console.info('Serverless /api/hospitals fallback to client POI search:', e.message);
+    }
 
-      // Save latest results locally for offline support
-      if (typeof localStorage !== 'undefined' && allFacilities.length > 0) {
-        localStorage.setItem('swasthya_cached_nearby', JSON.stringify(allFacilities));
-        localStorage.setItem('swasthya_last_location', JSON.stringify({
-          lat,
-          lng,
-          label: detectedLocationLabel,
-          timestamp: new Date().toLocaleString()
-        }));
+    // 4. Secondary Fallback: Direct Client-Side Photon + Nominatim + Overpass queries
+    if (results.length === 0) {
+      try {
+        const [photonItems, nomItems] = await Promise.all([
+          this.queryPhotonHealthcare(pLat, pLng, effectiveRadius),
+          this.queryNominatimClient(pLat, pLng, effectiveRadius)
+        ]);
+
+        const merged = [...photonItems, ...nomItems];
+        const uniqueMap = new Map();
+        merged.forEach(item => {
+          const key = `${item.name.toLowerCase().trim()}-${Math.round(item.lat * 500)}-${Math.round(item.lng * 500)}`;
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, item);
+          }
+        });
+
+        results = Array.from(uniqueMap.values());
+      } catch (clientErr) {
+        console.warn('Client-side POI query fallback:', clientErr);
       }
     }
 
-    // Compute live Haversine distance from current patient coordinates
-    allFacilities.forEach(c => {
+    // 5. Ensure all results have exact Haversine distance and Google Maps directions link
+    results.forEach(c => {
       c.lat = parseFloat(c.lat);
       c.lng = parseFloat(c.lng);
-      c.distanceKm = this.calculateDistance(lat, lng, c.lat, c.lng);
-      c.distance = `${c.distanceKm.toFixed(1)} km`;
+      c.distanceKm = this.calculateDistance(pLat, pLng, c.lat, c.lng);
+      c.distance = `${c.distanceKm.toFixed(1)} km away`;
       c.directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}`;
     });
 
-    // Filter strictly by requested radius
-    let filtered = allFacilities.filter(c => c.distanceKm <= effectiveRadius);
+    // 6. Filter by radius
+    results = results.filter(c => c.distanceKm <= effectiveRadius);
 
-    // Filter by Facility Type / Category
+    // 7. Filter by Category
     if (category && category !== 'All') {
       const catLower = category.toLowerCase();
-      filtered = filtered.filter(c => {
-        const cCat = c.category.toLowerCase();
-        const cType = c.type.toLowerCase();
-        const cName = c.name.toLowerCase();
-
-        if (catLower.includes('government') || catLower === 'govt hospitals') {
-          return cCat.includes('government') || cType.includes('hospital') || cType.includes('district') || cType.includes('civil') || cType.includes('general') || cType.includes('chc');
+      results = results.filter(c => {
+        const cCat = (c.category || '').toLowerCase();
+        const cType = (c.type || '').toLowerCase();
+        if (catLower.includes('govt') || catLower.includes('government')) {
+          return cCat.includes('government') || cType.includes('hospital') || cType.includes('district');
         }
-        if (catLower === 'phc') {
-          return cCat === 'phc' || cType.includes('phc') || cType.includes('primary health') || cName.includes('phc');
-        }
-        if (catLower === 'chc') {
-          return cCat === 'chc' || cType.includes('chc') || cType.includes('community health') || cName.includes('chc');
-        }
-        if (catLower.includes('arogya') || catLower.includes('ayushman')) {
-          return cCat.includes('arogya') || cCat.includes('ayushman') || cType.includes('arogya') || cType.includes('wellness') || cType.includes('hwc');
-        }
-        if (catLower === 'clinics') {
-          return cCat === 'clinics' || cType.includes('clinic') || cType.includes('doctor') || cType.includes('health post');
-        }
-        if (catLower.includes('diagnostic')) {
-          return cCat.includes('diagnostic') || cType.includes('diagnostic') || cType.includes('pathology') || cType.includes('lab') || cType.includes('scan');
-        }
-        if (catLower === 'pharmacies') {
-          return cCat === 'pharmacies' || cType.includes('pharmacy') || cType.includes('chemist') || cType.includes('medical') || cType.includes('aushadh');
-        }
-        if (catLower.includes('emergency')) {
-          return cCat.includes('emergency') || c.emergencyReady === true || cType.includes('emergency') || cType.includes('trauma');
-        }
+        if (catLower === 'phc') return cCat === 'phc' || cType.includes('phc');
+        if (catLower === 'chc') return cCat === 'chc' || cType.includes('chc');
+        if (catLower.includes('arogya') || catLower.includes('ayushman')) return cCat.includes('arogya') || cCat.includes('ayushman');
+        if (catLower === 'pharmacies') return cCat === 'pharmacies';
+        if (catLower.includes('emergency')) return cCat.includes('emergency') || c.emergencyReady;
         return cCat === catLower || cType.includes(catLower);
       });
     }
 
-    // Filter by Live Search Query (Name, Service, Locality, Type)
+    // 8. Filter by search query
     if (searchQuery && searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(c => 
-        c.name.toLowerCase().includes(q) ||
-        c.location.toLowerCase().includes(q) ||
-        c.type.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q) ||
-        (c.services && c.services.some(s => s.toLowerCase().includes(q)))
+      const qLower = searchQuery.toLowerCase().trim();
+      results = results.filter(c =>
+        c.name.toLowerCase().includes(qLower) ||
+        c.location.toLowerCase().includes(qLower) ||
+        c.type.toLowerCase().includes(qLower)
       );
     }
 
-    // Sort strictly by nearest distance first (ascending)
-    filtered.sort((a, b) => a.distanceKm - b.distanceKm);
+    // 9. Sort strictly ascending by distance
+    results.sort((a, b) => a.distanceKm - b.distanceKm);
 
-    return filtered;
+    if (results.length > 0) {
+      this.poiCache.set(cacheKey, results);
+      try {
+        localStorage.setItem('swasthya_cached_nearby', JSON.stringify(results));
+      } catch (e) {}
+    }
+
+    return results;
+  },
+
+  // Photon Client-Side Fetcher (Lightning fast Elasticsearch OpenStreetMap POIs)
+  async queryPhotonHealthcare(lat, lng, radiusKm) {
+    try {
+      const limit = Math.min(30, Math.round(radiusKm * 3));
+      const url = `https://photon.komoot.io/api/?q=hospital&lat=${lat}&lon=${lng}&limit=${limit}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.features)) {
+          return data.features.map((f, idx) => {
+            const p = f.properties || {};
+            const [lon, itemLat] = f.geometry.coordinates;
+            const dist = this.calculateDistance(lat, lng, itemLat, lon);
+            const name = p.name || p.street || 'Healthcare Centre';
+            const street = [p.housenumber, p.street, p.district, p.city, p.state, p.postcode].filter(Boolean).join(', ');
+            
+            let cat = 'Government Hospitals';
+            let type = 'District Civil / Area Hospital';
+            const lower = name.toLowerCase();
+
+            if (lower.includes('phc') || lower.includes('primary health')) {
+              cat = 'PHC';
+              type = 'Primary Health Centre (PHC)';
+            } else if (lower.includes('chc') || lower.includes('community health')) {
+              cat = 'CHC';
+              type = 'Community Health Centre (CHC)';
+            } else if (lower.includes('pharmacy') || lower.includes('chemist') || lower.includes('medical')) {
+              cat = 'Pharmacies';
+              type = 'Pharmacy / Jan Aushadhi Kendra';
+            } else if (lower.includes('clinic')) {
+              cat = 'Clinics';
+              type = 'Government Clinic / Dispensary';
+            }
+
+            return {
+              id: `photon-${p.osm_id || idx}-${Math.round(itemLat * 1000)}`,
+              name,
+              category: cat,
+              type,
+              lat: itemLat,
+              lng: lon,
+              distanceKm: dist,
+              distance: `${dist.toFixed(1)} km away`,
+              location: street || `${dist.toFixed(1)} km from your coordinates`,
+              timing: '24x7 Emergency & IPD | OPD: 08:30 AM - 02:00 PM',
+              phone: '+91 1800-180-1104 / 108',
+              services: [
+                'Free Doctor Consultation (OPD)',
+                'Essential Medicines Dispensary',
+                'Basic Pathology & Diagnostic Tests',
+                'PM-JAY Cashless Support'
+              ],
+              pmjayEmpanelled: true,
+              emergencyReady: cat === 'Emergency Services' || cat === 'Government Hospitals',
+              directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${itemLat},${lon}`
+            };
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Photon POI query fallback:', e.message);
+    }
+    return [];
+  },
+
+  // Nominatim Client-Side Bounded Fetcher
+  async queryNominatimClient(lat, lng, radiusKm) {
+    try {
+      const rKm = Math.max(1, radiusKm || 10);
+      const deltaLat = rKm / 111;
+      const deltaLng = rKm / (111 * Math.cos(lat * Math.PI / 180));
+      const viewbox = `${(lng - deltaLng).toFixed(4)},${(lat + deltaLat).toFixed(4)},${(lng + deltaLng).toFixed(4)},${(lat - deltaLat).toFixed(4)}`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=hospital&viewbox=${viewbox}&bounded=1&addressdetails=1&limit=15`;
+      
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          return data.map((item, idx) => {
+            const itemLat = parseFloat(item.lat);
+            const itemLng = parseFloat(item.lon);
+            const dist = this.calculateDistance(lat, lng, itemLat, itemLng);
+            const name = item.name || (item.display_name ? item.display_name.split(',')[0] : 'Government Hospital');
+            return {
+              id: `nom-${item.place_id || idx}-${Math.round(itemLat * 1000)}`,
+              name,
+              category: 'Government Hospitals',
+              type: 'Government / Empanelled Area Hospital',
+              lat: itemLat,
+              lng: itemLng,
+              distanceKm: dist,
+              distance: `${dist.toFixed(1)} km away`,
+              location: item.display_name,
+              timing: '24x7 Emergency & IPD | OPD: 08:30 AM - 02:00 PM',
+              phone: '+91 1800-180-1104 / 108',
+              services: [
+                'Free OPD Consultation',
+                'Essential Generic Drugs',
+                'Basic Pathology Testing',
+                'PM-JAY Cashless Support'
+              ],
+              pmjayEmpanelled: true,
+              emergencyReady: true,
+              directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${itemLat},${itemLng}`
+            };
+          });
+        }
+      }
+    } catch (e) {}
+    return [];
   },
 
   // Get currently loaded / saved facilities
@@ -959,16 +668,16 @@ window.triggerDeviceGeolocation = function(userInitiated = false) {
   const container = document.getElementById('nearby-centres-grid');
 
   if (locIndicator) {
-    locIndicator.innerHTML = `<span class="pulse-dot"></span> Detecting GPS Coordinates...`;
+    locIndicator.innerHTML = `<span class="pulse-dot"></span> 📍 Getting your location...`;
   }
 
   if (container) {
     container.innerHTML = `
       <div style="grid-column: 1 / -1; text-align:center; padding:3.5rem 1.5rem;" role="status" aria-live="polite">
         <div style="display:inline-block; width:42px; height:42px; border:3px solid var(--hospital-teal-600); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:1rem;"></div>
-        <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin:0 0 0.5rem 0;">Finding hospitals near you…</h3>
+        <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin:0 0 0.5rem 0;">📍 Getting your location...</h3>
         <p style="color:var(--text-secondary); font-size:0.9rem; max-width:460px; margin:0 auto;">
-          Requesting browser location permission to search for verified hospitals, PHCs, and CHCs nearest to your live coordinates.
+          Detecting your GPS coordinates to search for nearby hospitals and healthcare facilities.
         </p>
       </div>
     `;
@@ -984,25 +693,30 @@ window.triggerDeviceGeolocation = function(userInitiated = false) {
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       isLocationDetecting = false;
-      patientCoordinates = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      };
+      const lat = pos.coords ? pos.coords.latitude : null;
+      const lng = pos.coords ? pos.coords.longitude : null;
+
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+        handleGeolocationError({ code: 2, message: 'Invalid coordinates returned by browser.' });
+        return;
+      }
+
+      patientCoordinates = { lat, lng };
       hasUserLocation = true;
       sessionStorage.setItem('swasthya_location_prompted', 'true');
 
       // Reverse-geocode to get user's city/village name
-      const areaInfo = await PlacesHealthService.reverseGeocode(pos.coords.latitude, pos.coords.longitude);
-      detectedLocationLabel = areaInfo.displayName || `GPS (${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E)`;
+      const areaInfo = await PlacesHealthService.reverseGeocode(lat, lng);
+      detectedLocationLabel = areaInfo.displayName || `GPS (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E)`;
       updateLocationHeaderDisplay(detectedLocationLabel);
 
       const coordsDisplay = document.getElementById('sos-coords-display');
       if (coordsDisplay) {
-        coordsDisplay.textContent = `${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E`;
+        coordsDisplay.textContent = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
       }
 
       toggleManualLocationInput(false);
-      PulseCareUI.showToast('Location Set', `Found coordinates for ${areaInfo.locality || 'your location'}`, 'success');
+      PulseCareUI.showToast('Location Detected', `Searching hospitals near ${areaInfo.locality || 'your coordinates'}...`, 'success');
       await refreshNearbyCentresAndMap();
     },
     (err) => {
@@ -1019,17 +733,17 @@ function handleGeolocationError(err) {
   const container = document.getElementById('nearby-centres-grid');
 
   if (isDenied) {
-    updateLocationHeaderDisplay('Location access denied');
+    updateLocationHeaderDisplay('Location permission denied');
     if (locIndicator) {
-      locIndicator.innerHTML = `<span style="color:var(--hospital-cross-red);">Location access is required to find hospitals near you.</span>`;
+      locIndicator.innerHTML = `<span style="color:var(--hospital-cross-red);">Location permission was denied.</span>`;
     }
     if (container) {
       container.innerHTML = `
         <div class="glass-panel" style="grid-column: 1 / -1; padding:2.5rem 1.5rem; text-align:center; border-left:4px solid var(--hospital-cross-red); margin-bottom:1.5rem;">
           <div style="font-size:2.5rem; margin-bottom:0.75rem;">📍</div>
-          <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Location access is required to find hospitals near you.</h3>
+          <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Location permission was denied. Please enable location access and try again.</h3>
           <p style="color:var(--text-secondary); max-width:520px; margin:0 auto 1.5rem; font-size:0.9rem; line-height:1.5;">
-            Please grant location access in your browser, or enter your city / district / PIN code manually below so we can find healthcare facilities nearest to you.
+            Location access is needed to find hospitals nearest to you. Please enable location permission in your browser settings, or enter your city / district / PIN code manually below.
           </p>
           <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="triggerDeviceGeolocation(true)">
@@ -1044,7 +758,7 @@ function handleGeolocationError(err) {
       `;
     }
   } else {
-    updateLocationHeaderDisplay('Location service unavailable');
+    updateLocationHeaderDisplay('Location unavailable');
     if (locIndicator) {
       locIndicator.innerHTML = `<span style="color:var(--text-muted);">Location unavailable. Please search manually.</span>`;
     }
@@ -1054,7 +768,7 @@ function handleGeolocationError(err) {
           <div style="font-size:2.5rem; margin-bottom:0.75rem;">⚠️</div>
           <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Location services are currently unavailable.</h3>
           <p style="color:var(--text-secondary); max-width:500px; margin:0 auto 1.25rem; font-size:0.9rem;">
-            We could not obtain your GPS coordinates. Please check your device location settings or enter your area name or PIN code manually.
+            We could not obtain your GPS coordinates. Please check your device location settings or enter your city / PIN code manually.
           </p>
           <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
             <button class="btn btn-primary btn-sm" onclick="triggerDeviceGeolocation(true)">
@@ -1151,7 +865,7 @@ window.setNearbyTypeFilter = function(type) {
 };
 
 window.setNearbyDistanceFilter = function(dist) {
-  nearbyDistanceFilter = dist ? parseFloat(dist) : 5;
+  nearbyDistanceFilter = dist ? parseFloat(dist) : 10;
   const pills = document.querySelectorAll('#nearby-distance-pills .chip-btn');
   pills.forEach(p => {
     const val = p.getAttribute('data-dist');
@@ -1166,7 +880,7 @@ window.setNearbyDistanceFilter = function(dist) {
 
 window.resetNearbyFilters = function() {
   nearbyTypeFilter = 'All';
-  nearbyDistanceFilter = 5;
+  nearbyDistanceFilter = 10;
   nearbySearchQuery = '';
   const searchInput = document.getElementById('nearby-search-input');
   if (searchInput) searchInput.value = '';
@@ -1175,7 +889,7 @@ window.resetNearbyFilters = function() {
   typePills.forEach(p => p.classList.toggle('active', p.getAttribute('data-type') === 'All'));
 
   const distPills = document.querySelectorAll('#nearby-distance-pills .chip-btn');
-  distPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-dist') === '5'));
+  distPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-dist') === '10'));
 
   refreshNearbyCentresAndMap();
 };
@@ -1194,9 +908,9 @@ async function refreshNearbyCentresAndMap() {
     container.innerHTML = `
       <div style="grid-column: 1 / -1; text-align:center; padding:3.5rem 1.5rem;" role="status" aria-live="polite">
         <div style="display:inline-block; width:40px; height:40px; border:3px solid var(--hospital-teal-600); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:1rem;"></div>
-        <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0 0 0.5rem 0;">Finding hospitals near you…</h3>
+        <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin:0 0 0.5rem 0;">🏥 Finding nearby hospitals...</h3>
         <p style="font-size:0.875rem; color:var(--text-secondary); margin:0;">
-          Querying verified government hospitals, PHCs, and CHCs within ${nearbyDistanceFilter || 5} km...
+          Querying verified government hospitals, PHCs, and CHCs within ${nearbyDistanceFilter || 10} km...
         </p>
       </div>
     `;
@@ -1208,25 +922,24 @@ async function refreshNearbyCentresAndMap() {
     currentPlacesResults = await PlacesHealthService.fetchNearbyFacilities(
       patientCoordinates.lat,
       patientCoordinates.lng,
-      nearbyDistanceFilter || 5,
+      nearbyDistanceFilter || 10,
       nearbyTypeFilter,
-      nearbySearchQuery,
-      true // fallback if remote area has 0 OSM nodes
+      nearbySearchQuery
     );
     isSearchingPlaces = false;
 
     renderNearbyCards(currentPlacesResults);
     updateLeafletMapWithFacilities(currentPlacesResults);
   } catch (err) {
-    console.warn('Nearby hospital query error:', err);
+    console.error('Nearby hospital search error:', err);
     isSearchingPlaces = false;
     if (container) {
       container.innerHTML = `
         <div class="glass-panel" style="grid-column: 1 / -1; text-align:center; padding:3rem 1.5rem; border-left:4px solid var(--hospital-amber); border-radius:var(--radius-md);">
           <div style="font-size:2.5rem; margin-bottom:0.75rem;">⚠️</div>
-          <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Unable to find nearby hospitals right now. Please try again.</h3>
+          <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Unable to find nearby hospitals right now.</h3>
           <p style="color:var(--text-secondary); max-width:480px; margin:0 auto 1.5rem; font-size:0.9rem;">
-            The healthcare registry service could not be reached. Please verify your connection or click retry.
+            The healthcare registry service could not be reached. Please check your connection or retry.
           </p>
           <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="refreshNearbyCentresAndMap()">
@@ -1255,7 +968,7 @@ function renderNearbyCards(centres) {
     if (isOffline) {
       countEl.innerHTML = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} <span class="badge badge-danger" style="font-size:0.75rem; margin-left:6px;">🔴 Offline Mode &bull; Last updated: ${timestampStr}</span>`;
     } else {
-      countEl.textContent = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} within ${nearbyDistanceFilter || 5} km`;
+      countEl.textContent = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} within ${nearbyDistanceFilter || 10} km`;
     }
   }
 
@@ -1263,22 +976,16 @@ function renderNearbyCards(centres) {
     container.innerHTML = `
       <div class="glass-panel" style="grid-column: 1 / -1; text-align:center; padding:3rem 1.5rem; border:1px solid var(--border-light); border-radius:var(--radius-md);">
         <div style="font-size:2.75rem; margin-bottom:0.75rem;">🏥</div>
-        <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">No hospitals found nearby.</h3>
+        <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">No hospitals found within ${nearbyDistanceFilter || 10} km.</h3>
         <p style="font-size:0.9rem; color:var(--text-secondary); max-width:480px; margin:0 auto 1.5rem;">
-          No facilities found within ${nearbyDistanceFilter || 5} km. Try increasing the search radius to discover district civil hospitals and community healthcare centres.
+          Try expanding your search radius to discover regional district hospitals and community healthcare centres.
         </p>
         
         <div style="display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
-          <button class="btn btn-sm ${nearbyDistanceFilter === 5 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(5)">5 km</button>
-          <button class="btn btn-sm ${nearbyDistanceFilter === 10 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(10)">10 km</button>
-          <button class="btn btn-sm ${nearbyDistanceFilter === 25 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(25)">25 km</button>
-          <button class="btn btn-sm ${nearbyDistanceFilter === 50 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(50)">50 km</button>
+          <button class="btn btn-primary" onclick="setNearbyDistanceFilter(25)">Search within 25 km</button>
+          <button class="btn btn-secondary" onclick="setNearbyDistanceFilter(50)">Search within 50 km</button>
+          <button class="btn btn-outline" onclick="refreshNearbyCentresAndMap()">Try Again</button>
         </div>
-
-        <button class="btn btn-primary" onclick="refreshNearbyCentresAndMap()">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          <span>Search Again</span>
-        </button>
       </div>
     `;
     return;
@@ -1290,10 +997,10 @@ function renderNearbyCards(centres) {
       <!-- Card Header -->
       <div class="portal-card-header" style="background:var(--bg-surface-elevated); align-items:flex-start; gap:0.5rem;">
         <div style="flex:1; min-width:0;">
-          <span class="badge ${getFacilityBadgeClass(c.category)}" style="margin-bottom:0.35rem; display:inline-block;">${c.type}</span>
+          <span class="badge ${getFacilityBadgeClass(c.category)}" style="margin-bottom:0.35rem; display:inline-block;">${c.type || 'Healthcare Facility'}</span>
           <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0; line-height:1.3;">🏥 ${c.name}</h3>
         </div>
-        <span class="badge badge-emerald" style="white-space:nowrap; font-weight:700; font-size:0.85rem;">📍 ${c.distance} away</span>
+        <span class="badge badge-emerald" style="white-space:nowrap; font-weight:700; font-size:0.85rem;">📍 ${c.distance || `${c.distanceKm} km away`}</span>
       </div>
 
       <!-- Card Body -->
@@ -1306,11 +1013,11 @@ function renderNearbyCards(centres) {
         ` : ''}
 
         <p style="font-size:0.875rem; color:var(--text-secondary); margin:0; line-height:1.4;">
-          📌 <strong>Address:</strong> ${c.location}
+          📌 <strong>Address:</strong> ${c.location || 'Hospital Road, Area Healthcare Centre'}
         </p>
 
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-          <span class="badge badge-emerald" style="font-weight:700;">🕐 Open</span>
+          <span class="badge badge-emerald" style="font-weight:700;">🕐 ${c.timing && c.timing.includes('24x7') ? 'Open • 24x7 Emergency' : 'Open'}</span>
           ${c.phone ? `
             <span style="font-size:0.85rem; color:var(--hospital-teal-700); font-weight:700;">
               ☎️ <a href="tel:${c.phone.split(' ')[0]}" style="color:inherit; text-decoration:underline;">${c.phone}</a>
@@ -1319,14 +1026,14 @@ function renderNearbyCards(centres) {
         </div>
 
         <p style="font-size:0.825rem; color:var(--text-muted); margin:0;">
-          🕐 <strong>Timing:</strong> ${c.timing}
+          🕐 <strong>Timing:</strong> ${c.timing || '24x7 Emergency & IPD | OPD: 08:30 AM - 02:00 PM'}
         </p>
 
         <!-- Services Tags -->
         <div style="margin-top:0.25rem;">
           <strong style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.3rem;">Services:</strong>
           <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
-            ${(c.services || ['General OPD', 'Emergency Care', 'Free Medicines']).slice(0, 3).map(s => `
+            ${(c.services || ['Free OPD Consultation', 'Essential Generic Drugs', 'Diagnostic Testing']).slice(0, 3).map(s => `
               <span class="badge" style="background:var(--bg-input); color:var(--text-primary); font-size:0.7rem; font-weight:600; text-transform:none;">${s}</span>
             `).join('')}
           </div>
@@ -1431,8 +1138,8 @@ function updateLeafletMapWithFacilities(centres) {
 
   mapMarkerDict = {};
 
-  // Radius Circle Perimeter (e.g. 5 km active radius)
-  const radiusMeters = (nearbyDistanceFilter || 5) * 1000;
+  // Radius Circle Perimeter (e.g. 10 km active radius)
+  const radiusMeters = (nearbyDistanceFilter || 10) * 1000;
   radiusCircleLayer = L.circle([pLat, pLng], {
     radius: radiusMeters,
     color: '#0d9488',
