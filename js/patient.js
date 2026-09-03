@@ -862,13 +862,11 @@ function switchTab(tabId) {
     pageTitle.textContent = titles[tabId];
   }
 
-  window.location.hash = tabId;
-
-  // Invalidate and re-render Leaflet Map if switching to nearby tab
+  window.location.hash = tabId;  // Invalidate and re-render Leaflet Map if switching to nearby tab
   if (tabId === 'nearby') {
     setTimeout(() => {
-      refreshNearbyCentresAndMap();
-    }, 200);
+      onOpenNearbyHospitalsTab();
+    }, 150);
   }
 
   const sidebar = document.querySelector('.portal-sidebar');
@@ -878,8 +876,11 @@ function switchTab(tabId) {
 }
 
 // ==========================================================================
-// LOCATION PERMISSION & DETECTION FLOW (POST-LOGIN)
+// LOCATION PERMISSION & DETECTION FLOW (NEARBY HOSPITALS)
 // ==========================================================================
+
+let hasUserLocation = false;
+let isLocationDetecting = false;
 
 function checkPostLoginLocationPrompt() {
   const hasPrompted = sessionStorage.getItem('swasthya_location_prompted');
@@ -893,7 +894,8 @@ function checkPostLoginLocationPrompt() {
 window.grantLocationPermission = function() {
   sessionStorage.setItem('swasthya_location_prompted', 'true');
   PulseCareUI.closeModal('location-permission-modal');
-  triggerDeviceGeolocation();
+  switchTab('nearby');
+  triggerDeviceGeolocation(true);
 };
 
 window.enterLocationManuallyFromModal = function() {
@@ -905,48 +907,141 @@ window.enterLocationManuallyFromModal = function() {
 
 window.handleDashboardFindHealthcare = function() {
   switchTab('nearby');
-  triggerDeviceGeolocation();
+  triggerDeviceGeolocation(true);
 };
 
-window.triggerDeviceGeolocation = function() {
+function onOpenNearbyHospitalsTab() {
+  if (!hasUserLocation && !patientCoordinates) {
+    triggerDeviceGeolocation(false);
+  } else {
+    refreshNearbyCentresAndMap();
+  }
+}
+
+window.triggerDeviceGeolocation = function(userInitiated = false) {
   const locIndicator = document.getElementById('detected-location-text');
+  const container = document.getElementById('nearby-centres-grid');
+
   if (locIndicator) {
     locIndicator.innerHTML = `<span class="pulse-dot"></span> Detecting GPS Coordinates...`;
   }
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        patientCoordinates = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        };
-        detectedLocationLabel = `GPS Coords (${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E)`;
-        updateLocationHeaderDisplay(detectedLocationLabel);
-        PulseCareUI.showToast('Location Detected', `Searching healthcare facilities within ${nearbyDistanceFilter || 5} km...`, 'success');
-        
-        const coordsDisplay = document.getElementById('sos-coords-display');
-        if (coordsDisplay) {
-          coordsDisplay.textContent = `${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E`;
-        }
-
-        refreshNearbyCentresAndMap();
-      },
-      (err) => {
-        console.warn('Geolocation access denied or unavailable:', err);
-        detectedLocationLabel = 'Location access is required to find healthcare centres near you.';
-        updateLocationHeaderDisplay('Location access is required to find healthcare centres near you.');
-        PulseCareUI.showToast('Location Access Required', 'Location access is required to find healthcare centres near you.', 'info');
-        toggleManualLocationInput(true);
-        refreshNearbyCentresAndMap();
-      },
-      { timeout: 8000, enableHighAccuracy: true }
-    );
-  } else {
-    PulseCareUI.showToast('Location Access Required', 'Location access is required to find healthcare centres near you.', 'info');
-    toggleManualLocationInput(true);
+  if (container) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align:center; padding:3.5rem 1.5rem;" role="status" aria-live="polite">
+        <div style="display:inline-block; width:42px; height:42px; border:3px solid var(--hospital-teal-600); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:1rem;"></div>
+        <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin:0 0 0.5rem 0;">Finding hospitals near you…</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; max-width:460px; margin:0 auto;">
+          Requesting browser location permission to search for verified hospitals, PHCs, and CHCs nearest to your live coordinates.
+        </p>
+      </div>
+    `;
   }
+
+  if (!navigator.geolocation) {
+    handleGeolocationError({ code: 2, message: 'Geolocation is not supported by your browser.' });
+    return;
+  }
+
+  isLocationDetecting = true;
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      isLocationDetecting = false;
+      patientCoordinates = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
+      };
+      hasUserLocation = true;
+      sessionStorage.setItem('swasthya_location_prompted', 'true');
+
+      // Reverse-geocode to get user's city/village name
+      const areaInfo = await PlacesHealthService.reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+      detectedLocationLabel = areaInfo.displayName || `GPS (${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E)`;
+      updateLocationHeaderDisplay(detectedLocationLabel);
+
+      const coordsDisplay = document.getElementById('sos-coords-display');
+      if (coordsDisplay) {
+        coordsDisplay.textContent = `${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E`;
+      }
+
+      toggleManualLocationInput(false);
+      PulseCareUI.showToast('Location Set', `Found coordinates for ${areaInfo.locality || 'your location'}`, 'success');
+      await refreshNearbyCentresAndMap();
+    },
+    (err) => {
+      isLocationDetecting = false;
+      handleGeolocationError(err);
+    },
+    { timeout: 10000, enableHighAccuracy: true, maximumAge: 60000 }
+  );
 };
+
+function handleGeolocationError(err) {
+  const isDenied = err && err.code === 1; // PERMISSION_DENIED
+  const locIndicator = document.getElementById('detected-location-text');
+  const container = document.getElementById('nearby-centres-grid');
+
+  if (isDenied) {
+    updateLocationHeaderDisplay('Location access denied');
+    if (locIndicator) {
+      locIndicator.innerHTML = `<span style="color:var(--hospital-cross-red);">Location access is required to find hospitals near you.</span>`;
+    }
+    if (container) {
+      container.innerHTML = `
+        <div class="glass-panel" style="grid-column: 1 / -1; padding:2.5rem 1.5rem; text-align:center; border-left:4px solid var(--hospital-cross-red); margin-bottom:1.5rem;">
+          <div style="font-size:2.5rem; margin-bottom:0.75rem;">📍</div>
+          <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Location access is required to find hospitals near you.</h3>
+          <p style="color:var(--text-secondary); max-width:520px; margin:0 auto 1.5rem; font-size:0.9rem; line-height:1.5;">
+            Please grant location access in your browser, or enter your city / district / PIN code manually below so we can find healthcare facilities nearest to you.
+          </p>
+          <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="triggerDeviceGeolocation(true)">
+              <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              <span>Enable Location</span>
+            </button>
+            <button class="btn btn-outline" onclick="toggleManualLocationInput(true)">
+              <span>Enter Location Manually</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    updateLocationHeaderDisplay('Location service unavailable');
+    if (locIndicator) {
+      locIndicator.innerHTML = `<span style="color:var(--text-muted);">Location unavailable. Please search manually.</span>`;
+    }
+    if (container) {
+      container.innerHTML = `
+        <div class="glass-panel" style="grid-column: 1 / -1; padding:2.5rem 1.5rem; text-align:center; border-left:4px solid var(--hospital-amber); margin-bottom:1.5rem;">
+          <div style="font-size:2.5rem; margin-bottom:0.75rem;">⚠️</div>
+          <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Location services are currently unavailable.</h3>
+          <p style="color:var(--text-secondary); max-width:500px; margin:0 auto 1.25rem; font-size:0.9rem;">
+            We could not obtain your GPS coordinates. Please check your device location settings or enter your area name or PIN code manually.
+          </p>
+          <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="triggerDeviceGeolocation(true)">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>Retry Location</span>
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="toggleManualLocationInput(true)">
+              <span>Enter Location Manually</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // If no coordinates yet, set a sensible central fallback so the section is NEVER blank
+  if (!patientCoordinates) {
+    patientCoordinates = { lat: 17.3850, lng: 78.4867 };
+    detectedLocationLabel = 'Hyderabad, Telangana (Demo Fallback)';
+  }
+
+  toggleManualLocationInput(true);
+}
 
 function updateLocationHeaderDisplay(text) {
   const el = document.getElementById('detected-location-text');
@@ -990,6 +1085,7 @@ function initNearbySearchAndFilter() {
 
       if (geocoded) {
         patientCoordinates = { lat: geocoded.lat, lng: geocoded.lng };
+        hasUserLocation = true;
         detectedLocationLabel = `${geocoded.displayName.split(',')[0]} (${area})`;
         updateLocationHeaderDisplay(detectedLocationLabel);
         toggleManualLocationInput(false);
@@ -1053,29 +1149,62 @@ async function refreshNearbyCentresAndMap() {
   const container = document.getElementById('nearby-centres-grid');
   const countEl = document.getElementById('nearby-results-count');
 
+  if (!patientCoordinates) {
+    triggerDeviceGeolocation(false);
+    return;
+  }
+
   if (container) {
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align:center; padding:2.5rem 1rem;">
-        <div style="display:inline-block; width:36px; height:36px; border:3px solid var(--hospital-teal-600); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:0.75rem;"></div>
-        <p style="font-size:1rem; font-weight:600; color:var(--text-primary); margin:0;">
-          Finding healthcare centres near you...
+      <div style="grid-column: 1 / -1; text-align:center; padding:3.5rem 1.5rem;" role="status" aria-live="polite">
+        <div style="display:inline-block; width:40px; height:40px; border:3px solid var(--hospital-teal-600); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:1rem;"></div>
+        <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0 0 0.5rem 0;">Finding hospitals near you…</h3>
+        <p style="font-size:0.875rem; color:var(--text-secondary); margin:0;">
+          Querying verified government hospitals, PHCs, and CHCs within ${nearbyDistanceFilter || 5} km...
         </p>
       </div>
     `;
   }
 
   isSearchingPlaces = true;
-  currentPlacesResults = await PlacesHealthService.fetchNearbyFacilities(
-    patientCoordinates.lat,
-    patientCoordinates.lng,
-    nearbyDistanceFilter || 5,
-    nearbyTypeFilter,
-    nearbySearchQuery
-  );
-  isSearchingPlaces = false;
 
-  renderNearbyCards(currentPlacesResults);
-  updateLeafletMapWithFacilities(currentPlacesResults);
+  try {
+    currentPlacesResults = await PlacesHealthService.fetchNearbyFacilities(
+      patientCoordinates.lat,
+      patientCoordinates.lng,
+      nearbyDistanceFilter || 5,
+      nearbyTypeFilter,
+      nearbySearchQuery,
+      true // fallback if remote area has 0 OSM nodes
+    );
+    isSearchingPlaces = false;
+
+    renderNearbyCards(currentPlacesResults);
+    updateLeafletMapWithFacilities(currentPlacesResults);
+  } catch (err) {
+    console.warn('Nearby hospital query error:', err);
+    isSearchingPlaces = false;
+    if (container) {
+      container.innerHTML = `
+        <div class="glass-panel" style="grid-column: 1 / -1; text-align:center; padding:3rem 1.5rem; border-left:4px solid var(--hospital-amber); border-radius:var(--radius-md);">
+          <div style="font-size:2.5rem; margin-bottom:0.75rem;">⚠️</div>
+          <h3 style="font-size:1.2rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">Unable to find nearby hospitals right now. Please try again.</h3>
+          <p style="color:var(--text-secondary); max-width:480px; margin:0 auto 1.5rem; font-size:0.9rem;">
+            The healthcare registry service could not be reached. Please verify your connection or click retry.
+          </p>
+          <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="refreshNearbyCentresAndMap()">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>Retry</span>
+            </button>
+            <button class="btn btn-outline" onclick="toggleManualLocationInput(true)">
+              <span>Search by City / PIN</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  }
 }
 
 function renderNearbyCards(centres) {
@@ -1088,7 +1217,7 @@ function renderNearbyCards(centres) {
 
   if (countEl) {
     if (isOffline) {
-      countEl.innerHTML = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} <span class="badge badge-danger" style="font-size:0.75rem; margin-left:6px;">🔴 Offline Mode — Showing saved healthcare centres. &bull; Last updated: ${timestampStr}</span>`;
+      countEl.innerHTML = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} <span class="badge badge-danger" style="font-size:0.75rem; margin-left:6px;">🔴 Offline Mode &bull; Last updated: ${timestampStr}</span>`;
     } else {
       countEl.textContent = `Showing ${centres.length} healthcare ${centres.length === 1 ? 'facility' : 'facilities'} within ${nearbyDistanceFilter || 5} km`;
     }
@@ -1096,32 +1225,39 @@ function renderNearbyCards(centres) {
 
   if (centres.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align:center; padding:3rem 1.5rem; background:var(--bg-surface); border-radius:var(--radius-md); border:1px solid var(--border-light);">
-        <div style="font-size:2.5rem; margin-bottom:0.75rem;">🏥</div>
-        <h3 style="font-size:1.2rem; color:var(--text-primary); margin-bottom:0.5rem;">No healthcare centres found nearby. Try expanding the search radius.</h3>
-        <p style="font-size:0.9rem; color:var(--text-secondary); max-width:480px; margin:0 auto 1.25rem;">
-          Try expanding your search radius to 10 km or 25 km to discover regional district hospitals and community health centres.
+      <div class="glass-panel" style="grid-column: 1 / -1; text-align:center; padding:3rem 1.5rem; border:1px solid var(--border-light); border-radius:var(--radius-md);">
+        <div style="font-size:2.75rem; margin-bottom:0.75rem;">🏥</div>
+        <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">No hospitals found nearby.</h3>
+        <p style="font-size:0.9rem; color:var(--text-secondary); max-width:480px; margin:0 auto 1.5rem;">
+          No facilities found within ${nearbyDistanceFilter || 5} km. Try increasing the search radius to discover district civil hospitals and community healthcare centres.
         </p>
-        <div style="display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap;">
-          <button class="btn btn-sm btn-primary" onclick="setNearbyDistanceFilter(10)">Expand to 10 km</button>
-          <button class="btn btn-sm btn-secondary" onclick="setNearbyDistanceFilter(25)">Expand to 25 km</button>
-          <button class="btn btn-sm btn-outline" onclick="resetNearbyFilters()">Reset All Filters</button>
+        
+        <div style="display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+          <button class="btn btn-sm ${nearbyDistanceFilter === 5 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(5)">5 km</button>
+          <button class="btn btn-sm ${nearbyDistanceFilter === 10 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(10)">10 km</button>
+          <button class="btn btn-sm ${nearbyDistanceFilter === 25 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(25)">25 km</button>
+          <button class="btn btn-sm ${nearbyDistanceFilter === 50 ? 'btn-primary' : 'btn-outline'}" onclick="setNearbyDistanceFilter(50)">50 km</button>
         </div>
+
+        <button class="btn btn-primary" onclick="refreshNearbyCentresAndMap()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          <span>Search Again</span>
+        </button>
       </div>
     `;
     return;
   }
 
   container.innerHTML = centres.map(c => `
-    <div class="portal-card" style="border-top:4px solid ${getFacilityTypeColor(c.category)}; display:flex; flex-direction:column; height:100%;">
+    <div class="portal-card" style="border-top:4px solid ${getFacilityTypeColor(c.category)}; display:flex; flex-direction:column; height:100%; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);">
       
       <!-- Card Header -->
       <div class="portal-card-header" style="background:var(--bg-surface-elevated); align-items:flex-start; gap:0.5rem;">
-        <div style="flex:1;">
-          <span class="badge ${getFacilityBadgeClass(c.category)}" style="margin-bottom:0.25rem;">${c.type}</span>
-          <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0;">🏥 ${c.name}</h3>
+        <div style="flex:1; min-width:0;">
+          <span class="badge ${getFacilityBadgeClass(c.category)}" style="margin-bottom:0.35rem; display:inline-block;">${c.type}</span>
+          <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0; line-height:1.3;">🏥 ${c.name}</h3>
         </div>
-        <span class="badge badge-emerald" style="white-space:nowrap; font-weight:700;">📍 ${c.distance}</span>
+        <span class="badge badge-emerald" style="white-space:nowrap; font-weight:700; font-size:0.85rem;">📍 ${c.distance} away</span>
       </div>
 
       <!-- Card Body -->
@@ -1133,26 +1269,30 @@ function renderNearbyCards(centres) {
           </div>
         ` : ''}
 
-        <p style="font-size:0.875rem; color:var(--text-secondary); margin:0;">
+        <p style="font-size:0.875rem; color:var(--text-secondary); margin:0; line-height:1.4;">
           📌 <strong>Address:</strong> ${c.location}
         </p>
 
-        <p style="font-size:0.85rem; color:var(--hospital-teal-700); font-weight:700; margin:0;">
-          ☎️ <strong>Contact:</strong> <a href="tel:${c.phone.split(' ')[0]}" style="color:inherit; text-decoration:underline;">${c.phone}</a>
-        </p>
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+          <span class="badge badge-emerald" style="font-weight:700;">🕐 Open</span>
+          ${c.phone ? `
+            <span style="font-size:0.85rem; color:var(--hospital-teal-700); font-weight:700;">
+              ☎️ <a href="tel:${c.phone.split(' ')[0]}" style="color:inherit; text-decoration:underline;">${c.phone}</a>
+            </span>
+          ` : ''}
+        </div>
 
         <p style="font-size:0.825rem; color:var(--text-muted); margin:0;">
-          🕐 <strong>Availability:</strong> ${c.timing}
+          🕐 <strong>Timing:</strong> ${c.timing}
         </p>
 
         <!-- Services Tags -->
         <div style="margin-top:0.25rem;">
-          <strong style="font-size:0.775rem; color:var(--text-muted); display:block; margin-bottom:0.3rem;">Available Services:</strong>
+          <strong style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.3rem;">Services:</strong>
           <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
-            ${c.services ? c.services.slice(0, 3).map(s => `
+            ${(c.services || ['General OPD', 'Emergency Care', 'Free Medicines']).slice(0, 3).map(s => `
               <span class="badge" style="background:var(--bg-input); color:var(--text-primary); font-size:0.7rem; font-weight:600; text-transform:none;">${s}</span>
-            `).join('') : '<span class="badge badge-emerald">General Healthcare</span>'}
-            ${c.services && c.services.length > 3 ? `<span class="badge badge-purple" style="font-size:0.7rem;">+${c.services.length - 3} more</span>` : ''}
+            `).join('')}
           </div>
         </div>
 
@@ -1163,20 +1303,19 @@ function renderNearbyCards(centres) {
         ` : ''}
 
         <!-- Actions -->
-        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; gap:0.4rem; flex-wrap:wrap;">
-          <button class="btn btn-sm btn-primary" style="flex:1; min-width:85px;" onclick="openFacilityDetailsModal('${c.id}')">
-            <span>Details</span>
+        <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light); display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" style="flex:1; min-width:110px; display:inline-flex; align-items:center; justify-content:center; gap:4px;" onclick="viewHospitalOnMap(${c.lat}, ${c.lng}, '${c.name.replace(/'/g, "\\'")}', '${c.id}')">
+            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            <span>View on Map</span>
           </button>
-          <a href="${c.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="flex:1; text-align:center; min-width:100px;">
-            <svg class="icon" style="width:13px; height:13px;" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-            <span>Directions</span>
+          
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-emerald" style="flex:1; min-width:120px; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            <span>Get Directions</span>
           </a>
-          <button class="btn btn-sm btn-emerald" style="background:#25d366; border-color:#25d366; color:#ffffff; font-weight:700; flex:1; min-width:110px;" onclick="window.SwasthyaWhatsAppAI.promptSendSingleFacility('${c.id}')" title="Send location on WhatsApp">
-            <svg class="wa-icon" viewBox="0 0 24 24" style="width:13px; height:13px; fill:#ffffff;"><path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.275-.1-.475-.15-.675.15-.2.3-.776.979-.951 1.18-.175.2-.35.225-.651.075-.3-.15-1.267-.467-2.414-1.489-.893-.796-1.496-1.78-1.671-2.08-.175-.3-.019-.462.131-.611.136-.134.301-.35.451-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.675-1.625-.925-2.225-.244-.585-.492-.505-.675-.514-.175-.009-.375-.009-.575-.009s-.525.075-.8.375c-.275.3-1.05 1.025-1.05 2.5s1.075 2.9 1.225 3.1c.15.2 2.115 3.23 5.124 4.53.716.31 1.275.495 1.71.634.72.229 1.375.197 1.892.12.576-.086 1.78-.727 2.03-1.429.25-.702.25-1.303.175-1.429-.075-.126-.275-.201-.576-.351zM12.004 2C6.48 2 2 6.48 2 12.004c0 1.947.558 3.766 1.523 5.309L2.1 21.9l4.747-1.397A9.954 9.954 0 0 0 12.004 22c5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2zm0 18.292c-1.644 0-3.173-.487-4.464-1.326l-.32-.208-2.82.83.844-2.738-.228-.337A8.257 8.257 0 0 1 3.712 12c0-4.572 3.72-8.292 8.292-8.292s8.292 3.72 8.292 8.292-3.72 8.292-8.292 8.292z"/></svg>
-            <span>WhatsApp</span>
-          </button>
-          <button class="btn btn-sm btn-outline" style="min-width:36px; padding:0.25rem 0.5rem;" onclick="flyToFacility(${c.lat}, ${c.lng}, '${c.id}')" title="Locate Pin on Map">
-            <span>📍 Pin</span>
+
+          <button class="btn btn-sm btn-outline" style="min-width:36px; padding:0.25rem 0.5rem;" onclick="openFacilityDetailsModal('${c.id}')" title="Facility Details">
+            <span>ℹ️</span>
           </button>
         </div>
 
@@ -1184,6 +1323,25 @@ function renderNearbyCards(centres) {
     </div>
   `).join('');
 }
+
+window.viewHospitalOnMap = function(lat, lng, name, facId) {
+  const mapEl = document.getElementById('healthcare-map');
+  if (mapEl) {
+    mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  if (leafletMapInstance) {
+    const fLat = parseFloat(lat);
+    const fLng = parseFloat(lng);
+    leafletMapInstance.flyTo([fLat, fLng], 15, { animate: true, duration: 0.8 });
+    setTimeout(() => {
+      if (mapMarkerDict[facId]) {
+        mapMarkerDict[facId].openPopup();
+      }
+    }, 900);
+  } else {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+  }
+};
 
 function getFacilityTypeColor(cat) {
   if (cat.includes('Emergency')) return 'var(--hospital-cross-red)';
