@@ -1,0 +1,405 @@
+/* ==========================================================================
+   SwasthyaConnect - Premium Medical & Healthcare Animation Design System
+   Modern + Medical + AI + Professional + Minimal
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 2–3 Second ECG Pulse Intro Loading Screen
+   -------------------------------------------------------------------------- */
+.swasthya-medical-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: radial-gradient(circle at 50% 45%, #0d2a45 0%, #06111c 80%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.swasthya-medical-splash.splash-fade-out {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.splash-inner {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* ECG Heartbeat SVG Container */
+.splash-ecg-container {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  height: 120px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.splash-ecg-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.splash-ecg-guide {
+  fill: none;
+  stroke: rgba(13, 148, 136, 0.15);
+  stroke-width: 2;
+}
+
+.splash-ecg-line {
+  fill: none;
+  stroke: #2dd4bf;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 800;
+  stroke-dashoffset: 800;
+  filter: drop-shadow(0 0 10px rgba(45, 212, 191, 0.85)) drop-shadow(0 0 20px rgba(13, 148, 136, 0.5));
+  animation: ecg-draw 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes ecg-draw {
+  0% {
+    stroke-dashoffset: 800;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  85% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.85;
+  }
+}
+
+/* Center Content & Medical AI Glow */
+.splash-center-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-glow-ring {
+  position: absolute;
+  top: -15px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.45) 0%, rgba(20, 184, 166, 0) 70%);
+  filter: blur(8px);
+  transform: scale(0.6);
+  opacity: 0;
+  animation: glow-expand 1.6s ease-out 0.7s forwards;
+}
+
+@keyframes glow-expand {
+  0% { transform: scale(0.4); opacity: 0; }
+  50% { opacity: 0.9; transform: scale(1.3); }
+  100% { transform: scale(1.1); opacity: 0.7; }
+}
+
+.splash-logo-symbol {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 0 28px rgba(13, 148, 136, 0.6);
+  opacity: 0;
+  transform: scale(0.5);
+  animation: logo-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s forwards;
+  margin-bottom: 1.25rem;
+}
+
+@keyframes logo-pop {
+  0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.splash-cross-vertical {
+  position: absolute;
+  width: 6px;
+  height: 28px;
+  background: #ffffff;
+  border-radius: 4px;
+}
+
+.splash-cross-horizontal {
+  position: absolute;
+  width: 28px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 4px;
+}
+
+.splash-pulse-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2dd4bf;
+  box-shadow: 0 0 10px #2dd4bf;
+  animation: dot-pulse 1.2s infinite ease-in-out 1.2s;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.7; }
+}
+
+.splash-brand-wrap {
+  text-align: center;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: text-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.05s forwards;
+}
+
+@keyframes text-reveal {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.splash-brand-title {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.02em;
+}
+
+.splash-brand-accent {
+  background: linear-gradient(135deg, #2dd4bf 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.splash-brand-tagline {
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.splash-skip-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.splash-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   2. Page & Card Staggered Entrances
+   -------------------------------------------------------------------------- */
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-stagger {
+  animation: cardStagger 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cardStagger {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-tab-enter {
+  animation: tabEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes tabEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Live Medical Telemetry & Vitals Heartbeat Pulse
+   -------------------------------------------------------------------------- */
+.animate-vitals-live {
+  position: relative;
+}
+
+.animate-vitals-live::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hospital-healing-green, #059669);
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.7);
+  animation: vitals-heartbeat 1.8s infinite ease-in-out;
+}
+
+@keyframes vitals-heartbeat {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  15% {
+    transform: scale(1.45);
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(5, 150, 105, 0.9);
+  }
+  30% {
+    transform: scale(1.1);
+    opacity: 0.85;
+  }
+  45% {
+    transform: scale(1.5);
+    opacity: 1;
+    box-shadow: 0 0 14px rgba(5, 150, 105, 1);
+  }
+  60% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+/* Emergency Beacon Pulse */
+.emergency-sos-pulse {
+  animation: sos-beacon 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes sos-beacon {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(225, 29, 72, 0);
+  }
+}
+
+/* Gentle Floating Healthcare Icons */
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Button Hover, Click & Ripple Micro-Animations
+   -------------------------------------------------------------------------- */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0);
+  animation: ripple-spread 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple-spread {
+  to {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. Accessibility & Reduced Motion Support
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .swasthya-medical-splash,
+  .splash-ecg-line,
+  .splash-glow-ring,
+  .splash-logo-symbol,
+  .splash-brand-wrap,
+  .animate-fade-slide-up,
+  .animate-card-stagger,
+  .animate-tab-enter,
+  .animate-vitals-live::after,
+  .emergency-sos-pulse,
+  .animate-float-gentle {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
