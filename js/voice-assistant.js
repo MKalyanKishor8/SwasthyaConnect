@@ -23,13 +23,14 @@
   const isSpeechSupported = !!SpeechRecognition;
   const isSynthesisSupported = 'speechSynthesis' in window;
 
-  // Assistant State
+  // Assistant State (Strict Off by default, only activated when explicitly opened)
+  let voiceAssistantOpen = false;
+  let isOpen = false; // Backward-compatible alias
   let selectedLanguage = 'en-IN'; // Standard BCP 47: 'en-IN', 'te-IN', 'hi-IN'
   let recognition = null;
   let isListening = false;
   let isSpeaking = false;
   let isProcessing = false;
-  let isOpen = false;
   let patientCoords = null; // { lat, lng, accuracy }
   let availableVoices = [];
   let showDebugPanel = false;
@@ -72,6 +73,7 @@
       label: 'English',
       nativeLabel: 'English',
       tapToSpeak: 'Tap microphone to speak',
+      statusOff: 'Voice Assistant Off',
       statusReady: 'Ready (Tap microphone to speak)',
       statusListening: 'Listening... (Speak in English)',
       statusProcessing: 'Processing request...',
@@ -83,7 +85,7 @@
       locDenied: 'Location permission is required to find healthcare near you.',
       locFailed: 'Unable to detect your location. Please try again or enter your location manually.',
       apiUnavailable: 'Healthcare search is temporarily unavailable. Please try again.',
-      micDenied: 'Microphone access was denied. Please allow microphone permissions in your browser.',
+      micDenied: 'Microphone permission is required for voice commands. You can type your medical request in the box below.',
       unsupported: 'Voice recognition is not supported in this browser. Please use Google Chrome on Android/Desktop or type your request.',
       noVoiceWarning: 'English voice is not available on this device/browser.',
       searchingWithinRadius: (r) => `🔍 Searching within ${r} km...`,
@@ -145,6 +147,7 @@
       label: 'తెలుగు',
       nativeLabel: 'తెలుగు (Telugu)',
       tapToSpeak: 'మాట్లాడటానికి మైక్రోఫోన్ నొక్కండి',
+      statusOff: 'వాయిస్ అసిస్టెంట్ ఆఫ్‌లో ఉంది',
       statusReady: 'సిద్ధంగా ఉంది (మాట్లాడటానికి మైక్ నొక్కండి)',
       statusListening: 'వింటున్నాను... (తెలుగులో మాట్లాడండి)',
       statusProcessing: 'మీ అభ్యర్థనను ప్రాసెస్ చేస్తున్నాను...',
@@ -156,7 +159,7 @@
       locDenied: 'మీ సమీపంలో ఆరోగ్య కేంద్రాలను కనుగొనడానికి లొకేషన్ అనుమతి అవసరం.',
       locFailed: 'మీ లొకేషన్ గుర్తించడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి లేదా లొకేషన్ స్వయంగా నమోదు చేయండి.',
       apiUnavailable: 'ఆరోగ్య కేంద్రాల శోధన తాత్కాలికంగా అందుబాటులో లేదు. దయచేసి మళ్లీ ప్రయత్నించండి.',
-      micDenied: 'మైక్రోఫోన్ అనుమతి నిరాకరించబడింది. దయచేసి బ్రౌజర్ సెట్టింగ్స్‌లో మైక్ ఆన్ చేయండి.',
+      micDenied: 'వాయిస్ ఆదేశాల కోసం మైక్రోఫోన్ అనుమతి అవసరం. మీరు క్రింది బాక్స్‌లో మీ అభ్యర్థనను టైప్ చేయవచ్చు.',
       unsupported: 'ఈ బ్రౌజర్‌లో వాయిస్ రికగ్నిషన్ సపోర్ట్ లేదు. దయచేసి Google Chrome లేదా Android ఉపయోగించండి.',
       noVoiceWarning: 'Telugu voice is not available on this device/browser. Please try Chrome on Android or enable Telugu speech services.',
       searchingWithinRadius: (r) => `🔍 ${r} కి.మీ పరిధిలో శోధిస్తున్నాను...`,
@@ -218,6 +221,7 @@
       label: 'हिन्दी',
       nativeLabel: 'हिन्दी (Hindi)',
       tapToSpeak: 'बोलने के लिए माइक दबाएं',
+      statusOff: 'वॉयस असिस्टेंट बंद है',
       statusReady: 'तैयार (बोलने के लिए माइक दबाएं)',
       statusListening: 'सुन रहा हूँ... (हिंदी में बोलें)',
       statusProcessing: 'आपके अनुरोध पर काम हो रहा है...',
@@ -229,7 +233,7 @@
       locDenied: 'आपके पास स्वास्थ्य सेवाएं खोजने के लिए स्थान अनुमति आवश्यक है।',
       locFailed: 'आपका स्थान पहचानने में असमर्थ। कृपया पुनः प्रयास करें या अपना स्थान दर्ज करें।',
       apiUnavailable: 'स्वास्थ्य सेवा खोज अस्थायी रूप से अनुपलब्ध है। कृपया पुनः प्रयास करें।',
-      micDenied: 'माइक्रोफ़ोन अनुमति नहीं दी गई। कृपया ब्राउज़र सेटिंग्स में माइक्रोफ़ोन चालू करें।',
+      micDenied: 'वॉयस कमांड के लिए माइक्रोफ़ोन अनुमति आवश्यक है। आप नीचे दिए गए बॉक्स में टाइप कर सकते हैं।',
       unsupported: 'इस ब्राउज़र में वॉयस इनपुट समर्थित नहीं है। कृपया Google Chrome या Android का उपयोग करें।',
       noVoiceWarning: 'Hindi voice is not available on this device/browser. Please try Chrome on Android or enable Hindi speech services.',
       searchingWithinRadius: (r) => `🔍 ${r} किमी के दायरे में खोज रहा हूँ...`,
@@ -348,6 +352,7 @@
    */
   function initSpeechRecognition() {
     if (!isSpeechSupported) return null;
+    if (!voiceAssistantOpen) return null;
 
     try {
       if (recognition) {
@@ -357,6 +362,7 @@
           recognition.onerror = null;
           recognition.onend = null;
           recognition.abort();
+          recognition.stop();
         } catch (e) {}
         recognition = null;
       }
@@ -370,6 +376,11 @@
       recognition.lang = selectedLanguage;
 
       recognition.onstart = () => {
+        if (!voiceAssistantOpen) {
+          try { recognition.abort(); } catch (e) {}
+          isListening = false;
+          return;
+        }
         isListening = true;
         updateUIState('listening');
         updateDebugInfo();
@@ -389,7 +400,7 @@
         }
 
         // Live interim text display in status bar
-        if (currentInterim && !finalTranscript) {
+        if (currentInterim && !finalTranscript && voiceAssistantOpen) {
           const statusText = document.getElementById('va-status-text');
           if (statusText) {
             statusText.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> <em>"${escapeHTML(currentInterim)}"</em>`;
@@ -409,18 +420,26 @@
 
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           appendMessage('bot', cfg.micDenied);
-          speakResponse(cfg.micDenied, selectedLanguage);
+          updateUIState('mic-denied');
+          const input = document.getElementById('va-text-input');
+          if (input) input.focus();
         } else if (event.error === 'language-not-supported') {
           appendMessage('bot', cfg.unsupported);
+          updateUIState(voiceAssistantOpen ? 'idle' : 'off');
+        } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          updateUIState(voiceAssistantOpen ? 'idle' : 'off');
         }
-        updateUIState('idle');
         updateDebugInfo();
       };
 
       recognition.onend = () => {
         isListening = false;
-        if (!isSpeaking && !isProcessing) {
-          updateUIState('idle');
+        if (voiceAssistantOpen) {
+          if (!isSpeaking && !isProcessing) {
+            updateUIState('idle');
+          }
+        } else {
+          updateUIState('off');
         }
         updateDebugInfo();
       };
@@ -432,11 +451,16 @@
     }
   }
 
-  // Start Voice Listening
+  // Start Voice Listening (Strictly only when assistant is open)
   function startListening() {
     const cfg = getLangConfig();
     if (!isSpeechSupported) {
       appendMessage('bot', cfg.unsupported);
+      return;
+    }
+
+    if (!voiceAssistantOpen) {
+      console.log('Voice Assistant is closed. Listening blocked.');
       return;
     }
 
@@ -450,24 +474,42 @@
         try {
           recognition.abort();
           setTimeout(() => {
-            if (recognition) recognition.start();
+            if (recognition && voiceAssistantOpen) {
+              recognition.start();
+            }
           }, 150);
         } catch (e) {}
       }
     }
   }
 
-  // Stop Voice Listening
+  // Stop Voice Listening and release microphone
   function stopListening() {
-    if (recognition && isListening) {
-      try { recognition.stop(); } catch (e) {}
+    if (recognition) {
+      try {
+        recognition.onstart = null;
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+        recognition.abort();
+        recognition.stop();
+      } catch (e) {}
+      recognition = null;
     }
     isListening = false;
-    updateUIState('idle');
+    if (voiceAssistantOpen) {
+      updateUIState('idle');
+    } else {
+      updateUIState('off');
+    }
   }
 
   // Toggle listening state
   function toggleListening() {
+    if (!voiceAssistantOpen) {
+      toggleAssistant(true);
+      return;
+    }
     if (isListening) {
       stopListening();
     } else {
@@ -1342,7 +1384,10 @@
     micBtn.classList.remove('state-listening', 'state-speaking', 'state-processing', 'state-idle');
     if (visualizer) visualizer.classList.remove('vis-active');
 
-    if (state === 'listening') {
+    if (!voiceAssistantOpen || state === 'off') {
+      statusText.innerHTML = `<span class="pulse-dot" style="background:#94a3b8;"></span> ${cfg.statusOff || 'Voice Assistant Off'}`;
+      micBtn.classList.add('state-idle');
+    } else if (state === 'listening') {
       statusText.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> ${cfg.statusListening}`;
       micBtn.classList.add('state-listening');
       if (visualizer) visualizer.classList.add('vis-active');
@@ -1353,6 +1398,12 @@
       statusText.innerHTML = `<span class="pulse-dot" style="background:#10b981;"></span> ${cfg.statusSpeaking}`;
       micBtn.classList.add('state-speaking');
       if (visualizer) visualizer.classList.add('vis-active');
+    } else if (state === 'mic-denied') {
+      const deniedNotice = selectedLanguage === 'te-IN' ? 'మైక్ అనుమతి నిరాకరించబడింది (టైప్ చేయండి)' :
+                           selectedLanguage === 'hi-IN' ? 'माइक अनुमति अस्वीकृत (टाइप करें)' :
+                           'Mic Permission Denied (Use text box)';
+      statusText.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> ⚠️ ${deniedNotice}`;
+      micBtn.classList.add('state-idle');
     } else {
       statusText.innerHTML = `<span class="pulse-dot" style="background:#64748b;"></span> ${cfg.statusReady}`;
       micBtn.classList.add('state-idle');
@@ -1362,9 +1413,9 @@
   /**
    * Switch Language (Dynamic Language Switching Pipeline)
    * 1. Updates selectedLanguage state variable immediately ('en-IN', 'te-IN', 'hi-IN')
-   * 2. Re-initializes SpeechRecognition object with recognition.lang = selectedLanguage
+   * 2. Re-initializes SpeechRecognition object with recognition.lang = selectedLanguage (if open)
    * 3. Selects matching native TTS voice or fallback warning
-   * 4. Updates quick prompts and greets user in new language
+   * 4. Updates quick prompts and greets user in new language (if open)
    * 5. Translates the entire website DOM via SwasthyaI18n
    */
   function setLanguage(lang, skipGlobalSync = false) {
@@ -1381,22 +1432,25 @@
     stopSpeaking();
     stopListening();
 
-    // 3. Re-create / Reinitialize Speech Recognition instance with the new language
-    initSpeechRecognition();
-
-    // 4. Update Quick Prompts in the selected language
+    // 3. Update Quick Prompts in the selected language
     renderQuickPrompts();
-    updateUIState('idle');
     updateDebugInfo();
 
-    // 5. Greet user in newly selected language
-    const cfg = getLangConfig();
-    appendMessage('bot', cfg.greeting);
-    speakResponse(cfg.greetingSpeech, selectedLanguage);
+    // 4. Only re-initialize recognition, greet, or listen IF the Voice Assistant is open
+    if (voiceAssistantOpen) {
+      initSpeechRecognition();
+      updateUIState('idle');
+      const cfg = getLangConfig();
+      appendMessage('bot', cfg.greeting);
+      speakResponse(cfg.greetingSpeech, selectedLanguage);
+      startListening();
+    } else {
+      updateUIState('off');
+    }
 
-    // 6. Sync with Global SwasthyaI18n to translate the ENTIRE page immediately
+    // 5. Sync with Global SwasthyaI18n to translate the ENTIRE page immediately
     if (!skipGlobalSync && typeof window.SwasthyaI18n !== 'undefined' && typeof window.SwasthyaI18n.setLanguage === 'function') {
-      window.SwasthyaI18n.setLanguage(cfg.short, true);
+      window.SwasthyaI18n.setLanguage(getShortLangCode(normalized), true);
     }
   }
 
@@ -1406,22 +1460,26 @@
     if (!win) return;
 
     if (shouldOpen === null) {
-      isOpen = !isOpen;
+      voiceAssistantOpen = !voiceAssistantOpen;
     } else {
-      isOpen = !!shouldOpen;
+      voiceAssistantOpen = !!shouldOpen;
     }
+    isOpen = voiceAssistantOpen;
 
-    if (isOpen) {
+    if (voiceAssistantOpen) {
       win.style.display = 'flex';
       renderQuickPrompts();
       updateDebugInfo();
+      // Start fresh voice recognition session only after panel is opened
       if (!isListening && !isSpeaking) {
         startListening();
       }
     } else {
       win.style.display = 'none';
+      // Immediately stop speech recognition, microphone listening, speaking, and reset state
       stopListening();
       stopSpeaking();
+      updateUIState('off');
     }
   }
 
@@ -1482,10 +1540,14 @@
   function buildVoiceAssistantDOM() {
     if (document.getElementById('swasthya-va-root')) return;
 
-    const isPatientPage = window.location.pathname.endsWith('patient.html') || 
-                          window.location.pathname.endsWith('/patient') ||
-                          document.getElementById('patient-portal-body') ||
-                          document.querySelector('.portal-sidebar [data-tab="nearby"]');
+    const isPatientPage = (typeof window !== 'undefined' && window.location && (
+                            (window.location.pathname && (window.location.pathname.endsWith('patient.html') || window.location.pathname.endsWith('/patient'))) ||
+                            (window.location.href && window.location.href.includes('patient'))
+                          )) || 
+                          (typeof document !== 'undefined' && (
+                            document.getElementById('patient-portal-body') ||
+                            (document.querySelector && document.querySelector('.portal-sidebar [data-tab="nearby"]'))
+                          ));
 
     if (!isPatientPage) return;
 
@@ -1749,8 +1811,8 @@
         <span>Voice AI</span>
       </button>
 
-      <!-- Assistant Window -->
-      <div id="swasthya-va-window" class="swasthya-va-window" role="dialog" aria-label="Voice AI Assistant">
+      <!-- Assistant Window (Initially closed/off) -->
+      <div id="swasthya-va-window" class="swasthya-va-window" role="dialog" aria-label="Voice AI Assistant" style="display:none;">
         <!-- Header -->
         <div class="va-header">
           <div class="va-header-title">
@@ -1778,7 +1840,7 @@
             <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
           </button>
           <div id="va-status-text" style="font-size:0.8rem; margin-top:0.4rem; color:var(--text-secondary); min-height:18px;">
-            Ready (Tap microphone to speak)
+            Voice Assistant Off
           </div>
           <div id="va-visualizer" class="va-visualizer-container">
             <div class="va-vis-bar"></div>
@@ -1829,7 +1891,11 @@
 
     document.body.appendChild(wrap);
     renderQuickPrompts();
-    updateUIState('idle');
+    voiceAssistantOpen = false;
+    isOpen = false;
+    isListening = false;
+    recognition = null;
+    updateUIState('off');
     updateDebugInfo();
   }
 
@@ -1849,6 +1915,18 @@
 
   // Public API
   window.SwasthyaVoiceAssistant = {
+    get voiceAssistantOpen() {
+      return voiceAssistantOpen;
+    },
+    set voiceAssistantOpen(val) {
+      toggleAssistant(val);
+    },
+    get isOpen() {
+      return voiceAssistantOpen;
+    },
+    get isListening() {
+      return isListening;
+    },
     get selectedLanguage() {
       return selectedLanguage;
     },
@@ -1863,6 +1941,8 @@
     speakText,
     handleVoiceQuery,
     toggleAssistant,
+    openAssistant: () => toggleAssistant(true),
+    closeAssistant: () => toggleAssistant(false),
     setLanguage,
     getLanguage: () => selectedLanguage,
     getVoiceForLanguage,
@@ -1876,7 +1956,7 @@
     obtainGPSCoordinates
   };
 
-  // Auto-init on DOM ready
+  // Auto-init on DOM ready (Builds DOM shell only, Voice Assistant remains OFF by default)
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       buildVoiceAssistantDOM();
