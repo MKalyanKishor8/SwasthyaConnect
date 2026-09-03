@@ -1953,6 +1953,13 @@ Powered by SwasthyaConnect.`;
     setLanguage
   };
 
+  // Sync with global language changes
+  window.addEventListener('swasthyaLanguageChanged', (e) => {
+    if (e.detail && e.detail.lang) {
+      setLanguage(e.detail.lang);
+    }
+  });
+
   // Auto-init on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
