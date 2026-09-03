@@ -224,7 +224,115 @@
         handleLogout();
       });
     });
+
+    // Automatically request location access when user enters the website
+    if (window.SwasthyaLocation) {
+      window.SwasthyaLocation.initOnSiteEntry();
+    }
   });
+
+  // Global Geolocation Access Manager (triggers automatically on website entry)
+  const LocationManager = {
+    coords: null,
+    label: '',
+    isRequesting: false,
+
+    initOnSiteEntry() {
+      // Check for previously cached location
+      try {
+        const cached = localStorage.getItem('swasthya_user_coords');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.lat && parsed.lng) {
+            this.coords = { lat: parsed.lat, lng: parsed.lng };
+            this.label = parsed.label || `GPS (${parsed.lat.toFixed(3)}°, ${parsed.lng.toFixed(3)}°)`;
+            this.updateAllLocationBadges(this.label);
+          }
+        }
+      } catch (e) {}
+
+      // Prompt browser for location immediately upon entering the site
+      this.requestLocation(false);
+    },
+
+    requestLocation(isUserAction = false) {
+      if (!navigator.geolocation) {
+        console.warn('Geolocation is not supported by this browser.');
+        return;
+      }
+
+      this.isRequesting = true;
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          this.isRequesting = false;
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          this.coords = { lat, lng };
+
+          let areaLabel = `GPS (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E)`;
+          try {
+            // Reverse-geocode via Nominatim or PlacesHealthService
+            if (typeof PlacesHealthService !== 'undefined' && typeof PlacesHealthService.reverseGeocode === 'function') {
+              const areaInfo = await PlacesHealthService.reverseGeocode(lat, lng);
+              if (areaInfo && areaInfo.displayName) {
+                areaLabel = areaInfo.displayName;
+              }
+            } else {
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`, {
+                headers: { 'Accept': 'application/json' }
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (data && data.address) {
+                  const addr = data.address;
+                  const loc = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city || addr.district || '';
+                  const st = addr.state || '';
+                  areaLabel = [loc, st].filter(Boolean).join(', ') || data.display_name.split(',').slice(0, 2).join(',');
+                }
+              }
+            }
+          } catch (e) {}
+
+          this.label = areaLabel;
+          try {
+            localStorage.setItem('swasthya_user_coords', JSON.stringify({
+              lat,
+              lng,
+              label: areaLabel,
+              timestamp: Date.now()
+            }));
+          } catch (e) {}
+
+          this.updateAllLocationBadges(areaLabel);
+
+          // Dispatch global custom event for any listeners (Nearby tab, Voice AI, SOS)
+          window.dispatchEvent(new CustomEvent('swasthya:location_detected', {
+            detail: { lat, lng, label: areaLabel }
+          }));
+        },
+        (err) => {
+          this.isRequesting = false;
+          console.info('Location prompt status on site entry:', err.message || err);
+          window.dispatchEvent(new CustomEvent('swasthya:location_error', {
+            detail: { error: err }
+          }));
+        },
+        { timeout: 12000, enableHighAccuracy: true, maximumAge: 60000 }
+      );
+    },
+
+    updateAllLocationBadges(label) {
+      document.querySelectorAll('.detected-location-badge, #detected-location-text, #site-detected-location-badge').forEach(el => {
+        el.textContent = label;
+      });
+      const coordsDisplay = document.getElementById('sos-coords-display');
+      if (coordsDisplay && this.coords) {
+        coordsDisplay.textContent = `${this.coords.lat.toFixed(4)}° N, ${this.coords.lng.toFixed(4)}° E`;
+      }
+    }
+  };
+
+  window.SwasthyaLocation = LocationManager;
 
   // Expose to window
   const UIInterface = {

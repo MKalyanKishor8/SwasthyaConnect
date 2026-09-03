@@ -749,6 +749,42 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle Post-Login Location Permission Popup
   checkPostLoginLocationPrompt();
 
+  // Listen for location detection event from site-entry geolocation
+  window.addEventListener('swasthya:location_detected', (e) => {
+    if (e.detail && e.detail.lat && e.detail.lng) {
+      patientCoordinates = { lat: e.detail.lat, lng: e.detail.lng };
+      hasUserLocation = true;
+      detectedLocationLabel = e.detail.label || `GPS (${e.detail.lat.toFixed(4)}° N, ${e.detail.lng.toFixed(4)}° E)`;
+      updateLocationHeaderDisplay(detectedLocationLabel);
+
+      const activeTab = window.location.hash.replace('#', '') || 'overview';
+      if (activeTab === 'nearby') {
+        refreshNearbyCentresAndMap();
+      }
+    }
+  });
+
+  // Check if location is already detected or stored in localStorage
+  if (window.SwasthyaLocation && window.SwasthyaLocation.coords) {
+    patientCoordinates = { lat: window.SwasthyaLocation.coords.lat, lng: window.SwasthyaLocation.coords.lng };
+    hasUserLocation = true;
+    detectedLocationLabel = window.SwasthyaLocation.label;
+    updateLocationHeaderDisplay(detectedLocationLabel);
+  } else {
+    try {
+      const storedLoc = localStorage.getItem('swasthya_user_coords');
+      if (storedLoc) {
+        const parsed = JSON.parse(storedLoc);
+        if (parsed && parsed.lat && parsed.lng) {
+          patientCoordinates = { lat: parsed.lat, lng: parsed.lng };
+          hasUserLocation = true;
+          detectedLocationLabel = parsed.label || `GPS (${parsed.lat.toFixed(4)}° N, ${parsed.lng.toFixed(4)}° E)`;
+          updateLocationHeaderDisplay(detectedLocationLabel);
+        }
+      }
+    } catch (e) {}
+  }
+
   // Resize / Invalidate map on window resize
   window.addEventListener('resize', () => {
     if (leafletMapInstance) {
