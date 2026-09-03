@@ -1,21 +1,13 @@
 /**
- * SwasthyaConnect AI Voice Assistant - Universal Multilingual Edition
- * Supports all major Indian & Global languages:
- * English, Hindi (हिंदी), Telugu (తెలుగు), Tamil (தமிழ்), Kannada (ಕನ್ನಡ),
- * Malayalam (മലയാളം), Bengali (বাংলা), Marathi (मराठी), Gujarati (ગુજરાતી),
- * Punjabi (ਪੰਜਾਬੀ), Urdu (اردو), Odia (ଓଡ଼ିଆ)
- *
- * Features:
- * - Real-time Speech-to-Text & Text-to-Speech (Web Speech API)
- * - Automatic Language Detection (Unicode script analysis + NLP token parsing)
- * - GPS-driven healthcare discovery (Zero hardcoding)
- * - Multilingual intent recognition (Emergency, Hospitals, PHC, Pharmacy, Schemes, WhatsApp, Records, Appointments)
+ * SwasthyaConnect AI Voice Assistant
+ * Complete, high-fidelity Multilingual Voice Engine (English, Telugu, Hindi)
+ * Web Speech Recognition (STT) + Web Speech Synthesis (TTS) + GPS Healthcare Discovery
  */
 
 (function () {
   'use strict';
 
-  // Speech API Availability
+  // Browser Web Speech API references
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
   const isSpeechSupported = !!SpeechRecognition;
   const isSynthesisSupported = 'speechSynthesis' in window;
@@ -25,35 +17,48 @@
   let isListening = false;
   let isSpeaking = false;
   let isProcessing = false;
-  let currentLang = 'en'; // Active language
+  let selectedLanguage = 'en'; // 'en', 'te', 'hi'
   let isOpen = false;
   let patientCoords = null;
   let availableVoices = [];
+  let interimTranscript = '';
+  let showDebugPanel = false;
 
-  // Multilingual Configuration for all supported languages
+  // Language Definitions & I18N
   const langConfig = {
     en: {
-      code: 'en-IN',
+      recCode: 'en-IN',
       synthLang: 'en-IN',
       name: 'English',
-      welcomeSpeech: 'Hello! I am your SwasthyaConnect Voice Assistant. How can I help you today with hospitals, appointments, prescriptions, or government schemes?',
-      welcomeText: 'Hi! I’m <strong>SwasthyaConnect Voice Assistant</strong>. How can I help you today?',
-      listeningText: '🎤 Listening... Please speak your question',
-      processingText: '🧠 Processing your request...',
-      speakingText: '🔊 Speaking...',
-      idleText: 'Tap the microphone to speak',
-      locatingText: 'Getting your real GPS location...',
-      locSuccess: '📍 Location received successfully',
-      locDenied: 'Location access was not granted. You can speak or type your city/PIN code.',
-      micPermissionDenied: 'Microphone access was denied. Please allow microphone permission in your browser.',
-      micNotSupported: 'Speech recognition is not supported in this browser. You can type your question below.',
+      label: 'English',
+      tapToSpeak: 'Tap microphone to speak',
+      listening: '🎤 Listening... (Speak in English)',
+      processing: '🧠 Processing request...',
+      speaking: '🔊 Speaking...',
+      idle: 'Tap to speak',
+      greeting: 'Hi! I’m <strong>SwasthyaConnect Voice Assistant</strong>. How can I help you today?',
+      greetingSpeech: 'Hi! I am SwasthyaConnect Voice Assistant. How can I help you with hospitals, appointments, prescriptions, or government schemes?',
+      locating: 'Getting your real GPS location...',
+      locDenied: 'Location access was not granted. Please speak or enter your city or PIN code.',
+      micDenied: 'Microphone access was denied. Please allow microphone permissions in your browser.',
+      unsupported: 'Voice input is not supported in this browser. Please use Chrome/Android or type your request.',
+      noVoiceWarning: 'English voice is not available in this browser/device.',
+      searchingHealthcare: 'Searching for healthcare facilities near you...',
+      foundFacilitiesSpeech: (count, name, dist) => `I found ${count} healthcare facilities near you. The nearest one is ${name}, approximately ${dist} away.`,
+      foundFacilitiesText: (count, radius) => `Found <strong>${count}</strong> healthcare facilities near you (within ${radius} km):`,
+      noFacilitiesFound: (radius) => `No healthcare centres found within ${radius} km. Try asking to expand search radius.`,
       emergencyTitle: '🚨 Emergency Medical Assistance (Dial 108)',
-      emergencySpeech: 'If you are facing a medical emergency, please dial 108 immediately for an ambulance. I have displayed emergency options and nearby trauma care.',
-      nearestHospitalSpeech: (name, dist) => `I found healthcare facilities near you. The nearest one is ${name}, approximately ${dist} away.`,
-      whatsAppPrompt: (name) => `I have prepared the WhatsApp message for ${name}. Click the button to open WhatsApp and review before sending.`,
+      emergencySpeech: 'If you are facing a medical emergency, please dial 108 immediately for an ambulance. I have displayed emergency trauma centers.',
+      emergencyText: 'Immediate 24x7 Ambulance & Helpline Dispatch:',
+      whatsAppPreparedSpeech: (name) => `I have prepared the WhatsApp message for ${name}. Click the button to review and send.`,
+      whatsAppPreparedText: (name) => `Review hospital details for <strong>${name}</strong> before sending:`,
+      appointmentsSpeech: (count) => `You have ${count} upcoming doctor appointment${count === 1 ? '' : 's'}. Details are on your screen.`,
+      appointmentsTitle: (count) => `📅 <strong>Upcoming Appointments (${count})</strong>:`,
+      prescriptionsSpeech: (count) => `You have ${count} active digital prescription${count === 1 ? '' : 's'}. Details are on your screen.`,
+      prescriptionsTitle: '💊 <strong>Active Prescriptions & Records</strong>:',
       schemesSpeech: 'Ayushman Bharat PM-JAY provides up to 5 lakh rupees per family per year for cashless hospitalization at 27,000+ empanelled hospitals.',
-      appointmentsSpeech: (count) => `You have ${count} upcoming doctor appointment${count === 1 ? '' : 's'}. Details are shown on your screen.`,
-      prescriptionsSpeech: (count) => `You have ${count} active digital prescription${count === 1 ? '' : 's'}. Details are shown on your screen.`,
+      schemesTitle: '🏛️ <strong>Ayushman Bharat PM-JAY</strong>',
+      schemesDesc: 'Provides ₹5,00,000 per family per year for cashless treatment across empanelled government and private hospitals.',
       quickPrompts: [
         'Find hospitals near me',
         'Find government hospitals',
@@ -66,473 +71,209 @@
         'I need emergency healthcare'
       ]
     },
-    hi: {
-      code: 'hi-IN',
-      synthLang: 'hi-IN',
-      name: 'हिंदी (Hindi)',
-      welcomeSpeech: 'नमस्ते! मैं आपका स्वास्थ्यकनेक्ट वॉयस असिस्टेंट हूँ। मैं अस्पताल खोजने, अपॉइंटमेंट, पर्चे या सरकारी योजनाओं में आपकी क्या मदद कर सकता हूँ?',
-      welcomeText: 'नमस्ते! मैं <strong>स्वास्थ्यकनेक्ट वॉयस असिस्टेंट</strong> हूँ। मैं आपकी क्या मदद कर सकता हूँ?',
-      listeningText: '🎤 सुन रहा हूँ... कृपया अपना प्रश्न बोलें',
-      processingText: '🧠 आपके अनुरोध पर काम हो रहा है...',
-      speakingText: '🔊 बोल रहा हूँ...',
-      idleText: 'बोलने के लिए माइक बटन दबाएं',
-      locatingText: 'आपका सटीक जीपीएस स्थान प्राप्त किया जा रहा है...',
-      locSuccess: '📍 आपका स्थान सफलतापूर्वक प्राप्त हो गया',
-      locDenied: 'स्थान अनुमति नहीं मिली। आप शहर या पिन कोड बोल सकते हैं।',
-      micPermissionDenied: 'माइक्रोफ़ोन अनुमति नहीं दी गई। कृपया ब्राउज़र में माइक्रोफ़ोन चालू करें।',
-      micNotSupported: 'इस ब्राउज़र में वॉयस रिकग्निशन समर्थित नहीं है। आप नीचे टाइप कर सकते हैं।',
-      emergencyTitle: '🚨 आपातकालीन चिकित्सा सहायता (108 डायल करें)',
-      emergencySpeech: 'यदि कोई आपात स्थिति है, तो कृपया तुरंत 108 डायल करें। मैंने नजदीकी ट्रॉमा अस्पताल स्क्रीन पर दिखा दिए हैं।',
-      nearestHospitalSpeech: (name, dist) => `मुझे आपके पास अस्पताल मिले हैं। सबसे नजदीकी ${name} है, जो लगभग ${dist} की दूरी पर है।`,
-      whatsAppPrompt: (name) => `मैंने ${name} के लिए व्हाट्सएप संदेश तैयार कर दिया है। भेजने से पहले देखने के लिए बटन दबाएं।`,
-      schemesSpeech: 'आयुष्मान भारत योजना के तहत प्रति वर्ष प्रति परिवार ₹5 लाख तक का मुफ्त इलाज मिलता है।',
-      appointmentsSpeech: (count) => `आपके पास ${count} आगामी डॉक्टर अपॉइंटमेंट हैं।`,
-      prescriptionsSpeech: (count) => `आपके पास ${count} सक्रिय डिजिटल पर्चे उपलब्ध हैं।`,
-      quickPrompts: [
-        'नजदीकी अस्पताल खोजें',
-        'सरकारी अस्पताल खोजें',
-        'नजदीकी पीएचसी (PHC) दिखाएं',
-        'पास की दवा दुकान खोजें',
-        'मेरे अपॉइंटमेंट दिखाएं',
-        'मेरे पर्चे दिखाएं',
-        'आयुष्मान भारत योजना के बारे में बताएं',
-        'अस्पताल व्हाट्सएप पर भेजें',
-        'मुझे आपातकालीन मदद चाहिए'
-      ]
-    },
     te: {
-      code: 'te-IN',
+      recCode: 'te-IN',
       synthLang: 'te-IN',
       name: 'తెలుగు (Telugu)',
-      welcomeSpeech: 'నమస్కారం! నేను మీ స్వాస్థ్యకనెక్ట్ వాయిస్ అసిస్టెంట్‌ని. ఆసుపత్రులు, అపాయింట్‌మెంట్లు, ప్రిస్క్రిప్షన్లు లేదా ప్రభుత్వ పథకాల గురించి నేను మీకు ఎలా సహాయపడగలను?',
-      welcomeText: 'నమస్కారం! నేను <strong>స్వాస్థ్యకనెక్ట్ వాయిస్ అసిస్టెంట్‌ని</strong>. నేను మీకు ఎలా సహాయపడగలను?',
-      listeningText: '🎤 వింటున్నాను... దయచేసి మాట్లాడండి',
-      processingText: '🧠 మీ అభ్యర్థనను ప్రాసెస్ చేస్తున్నాను...',
-      speakingText: '🔊 సమాధానం చెబుతున్నాను...',
-      idleText: 'మాట్లాడటానికి మైక్రోఫోన్ నొక్కండి',
-      locatingText: 'మీ ఖచ్చితమైన జీపీఎస్ లొకేషన్ తీసుకుంటున్నాను...',
-      locSuccess: '📍 లొకేషన్ విజయవంతంగా అందింది',
-      locDenied: 'లొకేషన్ అనుమతి లభించలేదు. మీ ఊరు లేదా పిన్ కోడ్ చెప్పవచ్చు.',
-      micPermissionDenied: 'మైక్రోఫోన్ అనుమతి నిరాకరించబడింది. దయచేసి బ్రౌజర్ సెట్టింగ్స్‌లో మైక్ ఆన్ చేయండి.',
-      micNotSupported: 'ఈ బ్రౌజర్‌లో వాయిస్ రికగ్నిషన్ సపోర్ట్ లేదు. మీరు టైప్ చేయవచ్చు.',
+      label: 'తెలుగు',
+      tapToSpeak: 'మాట్లాడటానికి మైక్రోఫోన్ నొక్కండి',
+      listening: '🎤 వింటున్నాను... (తెలుగులో మాట్లాడండి)',
+      processing: '🧠 మీ అభ్యర్థనను ప్రాసెస్ చేస్తున్నాను...',
+      speaking: '🔊 సమాధానం చెబుతున్నాను...',
+      idle: 'మాట్లాడటానికి మైక్ నొక్కండి',
+      greeting: 'నమస్కారం! నేను <strong>స్వాస్థ్యకనెక్ట్ వాయిస్ అసిస్టెంట్‌ని</strong>. మీకు ఎలా సహాయపడగలను?',
+      greetingSpeech: 'నమస్కారం! నేను మీ స్వాస్థ్యకనెక్ట్ వాయిస్ అసిస్టెంట్‌ని. ఆసుపత్రులు, అపాయింట్‌మెంట్లు, ప్రిస్క్రిప్షన్లు లేదా ప్రభుత్వ పథకాల గురించి నేను మీకు ఎలా సహాయపడగలను?',
+      locating: 'మీ ఖచ్చితమైన జీపీఎస్ లొకేషన్ తీసుకుంటున్నాను...',
+      locDenied: 'లొకేషన్ అనుమతి లభించలేదు. మీ నగరం లేదా పిన్ కోడ్ చెప్పండి.',
+      micDenied: 'మైక్రోఫోన్ అనుమతి నిరాకరించబడింది. దయచేసి బ్రౌజర్ సెట్టింగ్స్‌లో మైక్ ఆన్ చేయండి.',
+      unsupported: 'ఈ బ్రౌజర్‌లో తెలుగు వాయిస్ రికగ్నిషన్ సపోర్ట్ లేదు. దయచేసి Chrome/Android ఉపయోగించండి లేదా టైప్ చేయండి.',
+      noVoiceWarning: 'ఈ బ్రౌజర్ లేదా పరికరంలో తెలుగు వాయిస్ అందుబాటులో లేదు. దయచేసి Google Chrome లేదా Android పరికరంలో ప్రయత్నించండి.',
+      searchingHealthcare: 'మీకు దగ్గరలో ఉన్న ఆసుపత్రులను వెతుకుతున్నాను...',
+      foundFacilitiesSpeech: (count, name, dist) => `మీ సమీపంలో ${count} ఆరోగ్య కేంద్రాలు కనిపించాయి. అత్యంత సమీపంలో ఉన్నది ${name}, దాదాపు ${dist} దూరంలో ఉంది.`,
+      foundFacilitiesText: (count, radius) => `మీ సమీపంలో <strong>${count}</strong> ఆరోగ్య కేంద్రాలు కనుగొనబడ్డాయి (${radius} కి.మీ పరిధిలో):`,
+      noFacilitiesFound: (radius) => `${radius} కి.మీ పరిధిలో ఆరోగ్య కేంద్రాలు కనిపించలేదు. శోధన పరిధిని పెంచండి.`,
       emergencyTitle: '🚨 అత్యవసర వైద్య సహాయం (108 కాల్ చేయండి)',
-      emergencySpeech: 'వైద్య అత్యవసర పరిస్థితి అయితే వెంటనే 108కి కాల్ చేయండి. సమీపంలోని ట్రూమా ఆసుపత్రుల వివరాలను స్క్రీన్‌పై చూపించాను.',
-      nearestHospitalSpeech: (name, dist) => `మీ సమీపంలో ఆరోగ్య కేంద్రాలు కనిపించాయి. అత్యంత సమీపంలో ఉన్నది ${name}, దాదాపు ${dist} దూరంలో ఉంది.`,
-      whatsAppPrompt: (name) => `నేను ${name} వివరాలతో వాట్సాప్ సందేశం సిద్ధం చేసాను. పంపేముందు చూడటానికి బటన్ నొక్కండి.`,
-      schemesSpeech: 'ఆయుష్మాన్ భారత్ పీఎం-జేవై పథకం ద్వారా ప్రతి కుటుంబానికి సంవత్సరానికి ₹5 లక్షల ఉచిత వైద్యం లభిస్తుంది.',
+      emergencySpeech: 'వైద్య అత్యవసర పరిస్థితి అయితే వెంటనే 108 కి కాల్ చేయండి. సమీపంలోని ట్రూమా ఆసుపత్రుల వివరాలను స్క్రీన్‌పై చూపించాను.',
+      emergencyText: 'తక్షణ 24x7 అంబులెన్స్ మరియు అత్యవసర సేవలు:',
+      whatsAppPreparedSpeech: (name) => `నేను ${name} వివరాలతో వాట్సాప్ సందేశం సిద్ధం చేసాను. పంపేముందు చూడటానికి బటన్ నొక్కండి.`,
+      whatsAppPreparedText: (name) => `పంపే ముందు <strong>${name}</strong> ఆసుపత్రి వివరాలను సమీక్షించండి:`,
       appointmentsSpeech: (count) => `మీకు ${count} రాబోయే డాక్టర్ అపాయింట్‌మెంట్లు ఉన్నాయి. వివరాలను స్క్రీన్‌పై చూపించాను.`,
-      prescriptionsSpeech: (count) => `మీకు ${count} యాక్టివ్ డిజిటల్ ప్రిస్క్రిప్షన్లు ఉన్నాయి.`,
+      appointmentsTitle: (count) => `📅 <strong>రాబోయే అపాయింట్‌మెంట్లు (${count})</strong>:`,
+      prescriptionsSpeech: (count) => `మీకు ${count} క్రియాశీల డిజిటల్ ప్రిస్క్రిప్షన్లు ఉన్నాయి.`,
+      prescriptionsTitle: '💊 <strong>క్రియాశీల ప్రిస్క్రిప్షన్లు & రికార్డులు</strong>:',
+      schemesSpeech: 'ఆయుష్మాన్ భారత్ పీఎం-జేవై పథకం ద్వారా ప్రతి కుటుంబానికి సంవత్సరానికి ₹5 లక్షల ఉచిత నగదు రహిత వైద్యం లభిస్తుంది.',
+      schemesTitle: '🏛️ <strong>ఆయుష్మాన్ భారత్ పీఎం-జేవై</strong>',
+      schemesDesc: 'నెట్‌వర్క్ ఆసుపత్రులలో ప్రతి కుటుంబానికి సంవత్సరానికి ₹5,00,000 ఉచిత వైద్య చికిత్స అందిస్తుంది.',
       quickPrompts: [
-        'సమీప ఆసుపత్రులను కనుగొనండి',
-        'ప్రభుత్వ ఆసుపత్రులు చూపించండి',
-        'సమీప పీహెచ్‌సీలు (PHC) చూపించండి',
-        'సమీప మందుల దుకాణం',
-        'నా అపాయింట్‌మెంట్లు చూపించండి',
-        'నా ప్రిస్క్రిప్షన్లు చూపించండి',
-        'ఆయుష్మాన్ భారత్ పథకం వివరాలు',
-        'ఆసుపత్రిని వాట్సాప్‌కి పంపండి',
-        'నాకు అత్యవసర సహాయం కావాలి'
+        'నా దగ్గరలో ఆసుపత్రులను కనుగొను',
+        'ప్రభుత్వ ఆసుపత్రి చూపించు',
+        'దగ్గరలో PHC ఉందా?',
+        'నా దగ్గరలో ఫార్మసీ కనుగొను',
+        'నాకు దగ్గరలో ఎమర్జెన్సీ ఆసుపత్రి కావాలి',
+        'నా అపాయింట్‌మెంట్లు చూపించు',
+        'నా ప్రిస్క్రిప్షన్లు చూపించు',
+        'ఆయుష్మాన్ భారత్ పథకం',
+        'ఆసుపత్రిని వాట్సాప్‌కి పంపు'
       ]
     },
-    ta: {
-      code: 'ta-IN',
-      synthLang: 'ta-IN',
-      name: 'தமிழ் (Tamil)',
-      welcomeSpeech: 'வணக்கம்! நான் உங்கள் ஸ்வஸ்த்யா கனெக்ட் குரல் உதவியாளர். மருத்துவமனைகள், முன்பதிவுகள் அல்லது அரசுத் திட்டங்கள் குறித்து நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?',
-      welcomeText: 'வணக்கம்! நான் <strong>ஸ்வஸ்த்யா கனெக்ட் குரல் உதவியாளர்</strong>. நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?',
-      listeningText: '🎤 கேட்கிறேன்... தயவுசெய்து பேசுங்கள்',
-      processingText: '🧠 செயலாக்குகிறது...',
-      speakingText: '🔊 பேசுகிறது...',
-      idleText: 'பேச மைக்ரோஃபோனைத் தொடவும்',
-      locatingText: 'உங்கள் ஜி.பி.எஸ் இருப்பிடத்தைக் கண்டறிகிறது...',
-      locSuccess: '📍 இருப்பிடம் பெறப்பட்டது',
-      locDenied: 'இருப்பிட அனுமதி கிடைக்கவில்லை.',
-      micPermissionDenied: 'மைக்ரோஃபோன் அனுமதி மறுக்கப்பட்டது.',
-      micNotSupported: 'குரல் உள்ளீடு ஆதரிக்கப்படவில்லை.',
-      emergencyTitle: '🚨 அவசர மருத்துவ உதவி (108 அழைக்கவும்)',
-      emergencySpeech: 'மருத்துவ அவசரநிலைக்கு உடனே 108 ஐ அழைக்கவும்.',
-      nearestHospitalSpeech: (name, dist) => `உங்களுக்கு அருகில் உள்ள மருத்துவமனை ${name}, சுமார் ${dist} தொலைவில் உள்ளது.`,
-      whatsAppPrompt: (name) => `${name} விவரங்களுடன் வாட்ஸ்அப் செய்தி தயார்.`,
-      schemesSpeech: 'ஆயுஷ்மான் பாரத் திட்டம் மூலம் குடும்பத்திற்கு ₹5 லட்சம் வரை இலவச சிகிச்சை பெறலாம்.',
-      appointmentsSpeech: (count) => `உங்களுக்கு ${count} மருத்துவ சந்திப்புகள் உள்ளன.`,
-      prescriptionsSpeech: (count) => `உங்களுக்கு ${count} மருந்துக் குறிப்புகள் உள்ளன.`,
+    hi: {
+      recCode: 'hi-IN',
+      synthLang: 'hi-IN',
+      name: 'हिन्दी (Hindi)',
+      label: 'हिन्दी',
+      tapToSpeak: 'बोलने के लिए माइक दबाएं',
+      listening: '🎤 सुन रहा हूँ... (हिंदी में बोलें)',
+      processing: '🧠 आपके अनुरोध पर काम हो रहा है...',
+      speaking: '🔊 बोल रहा हूँ...',
+      idle: 'बोलने के लिए माइक दबाएं',
+      greeting: 'नमस्ते! मैं <strong>स्वास्थ्यकनेक्ट वॉयस असिस्टेंट</strong> हूँ। मैं आपकी क्या मदद कर सकता हूँ?',
+      greetingSpeech: 'नमस्ते! मैं आपका स्वास्थ्यकनेक्ट वॉयस असिस्टेंट हूँ। मैं अस्पताल खोजने, अपॉइंटमेंट, पर्चे या सरकारी योजनाओं में आपकी क्या मदद कर सकता हूँ?',
+      locating: 'आपका सटीक जीपीएस स्थान प्राप्त किया जा रहा है...',
+      locDenied: 'स्थान अनुमति नहीं मिली। कृपया शहर या पिन कोड बोलें या टाइप करें।',
+      micDenied: 'माइक्रोफ़ोन अनुमति नहीं दी गई। कृपया ब्राउज़र सेटिंग्स में माइक्रोफ़ोन चालू करें।',
+      unsupported: 'इस ब्राउज़र में हिंदी वॉयस इनपुट समर्थित नहीं है। कृपया Chrome/Android का उपयोग करें या टाइप करें।',
+      noVoiceWarning: 'इस ब्राउज़र/डिवाइस में हिंदी वॉयस उपलब्ध नहीं है। कृपया Chrome या Android में Speech Services सक्षम करें।',
+      searchingHealthcare: 'मैं आपके पास अस्पताल खोज रहा हूँ...',
+      foundFacilitiesSpeech: (count, name, dist) => `मुझे आपके पास ${count} स्वास्थ्य केंद्र मिले हैं। सबसे नजदीकी ${name} है, जो लगभग ${dist} की दूरी पर है।`,
+      foundFacilitiesText: (count, radius) => `आपके पास <strong>${count}</strong> स्वास्थ्य केंद्र मिले (${radius} किमी के दायरे में):`,
+      noFacilitiesFound: (radius) => `${radius} किमी के भीतर कोई स्वास्थ्य केंद्र नहीं मिला। खोज का दायरा बढ़ाएं।`,
+      emergencyTitle: '🚨 आपातकालीन चिकित्सा सहायता (108 डायल करें)',
+      emergencySpeech: 'यदि कोई आपात स्थिति है, तो कृपया तुरंत 108 डायल करें। मैंने नजदीकी ट्रॉमा अस्पताल स्क्रीन पर दिखा दिए हैं।',
+      emergencyText: 'तत्काल 24x7 राष्ट्रीय एम्बुलेंस सेवा:',
+      whatsAppPreparedSpeech: (name) => `मैंने ${name} के लिए व्हाट्सएप संदेश तैयार कर दिया है। भेजने से पहले देखने के लिए बटन दबाएं।`,
+      whatsAppPreparedText: (name) => `भेजने से पहले <strong>${name}</strong> अस्पताल के विवरण की समीक्षा करें:`,
+      appointmentsSpeech: (count) => `आपके पास ${count} आगामी डॉक्टर अपॉइंटमेंट हैं।`,
+      appointmentsTitle: (count) => `📅 <strong>आगामी अपॉइंटमेंट (${count})</strong>:`,
+      prescriptionsSpeech: (count) => `आपके पास ${count} सक्रिय डिजिटल पर्चे उपलब्ध हैं।`,
+      prescriptionsTitle: '💊 <strong>सक्रिय पर्चे एवं मेडिकल रिकॉर्ड</strong>:',
+      schemesSpeech: 'आयुष्मान भारत योजना के तहत प्रति वर्ष प्रति परिवार ₹5 लाख तक का मुफ्त इलाज मिलता है।',
+      schemesTitle: '🏛️ <strong>आयुष्मान भारत पीएम-जय (PM-JAY)</strong>',
+      schemesDesc: 'सूचीबद्ध अस्पतालों में प्रति परिवार प्रति वर्ष ₹5,00,000 का मुफ्त कैशलेस इलाज प्रदान करती है।',
       quickPrompts: [
-        'அருகிலுள்ள மருத்துவமனைகள்',
-        'அரசு மருத்துவமனைகள்',
-        'அருகிலுள்ள ஆரம்ப சுகாதார நிலையம்',
-        'மருந்தகம் தேடுங்கள்',
-        'என் சந்திப்புகளைக் காட்டு',
-        'என் மருந்து சீட்டுகள்',
-        'ஆயுஷ்மான் பாரத் திட்டம்',
-        'வாட்ஸ்அப்பில் அனுப்பு',
-        'அவசர உதவி தேவை'
-      ]
-    },
-    kn: {
-      code: 'kn-IN',
-      synthLang: 'kn-IN',
-      name: 'ಕನ್ನಡ (Kannada)',
-      welcomeSpeech: 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ ಸ್ವಾಸ್ಥ್ಯಕನೆಕ್ಟ್ ಧ್ವನಿ ಸಹಾಯಕ. ಆಸ್ಪತ್ರೆಗಳು, ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಳು ಅಥವಾ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
-      welcomeText: 'ನಮಸ್ಕಾರ! ನಾನು <strong>ಸ್ವಾಸ್ಥ್ಯಕನೆಕ್ಟ್ ಧ್ವನಿ ಸಹಾಯಕ</strong>. ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
-      listeningText: '🎤 ಆಲಿಸಲಾಗುತ್ತಿದೆ... ದಯವಿಟ್ಟು ಮಾತನಾಡಿ',
-      processingText: '🧠 ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ...',
-      speakingText: '🔊 ಮಾತನಾಡಲಾಗುತ್ತಿದೆ...',
-      idleText: 'ಮಾತನಾಡಲು ಮೈಕ್ ಒತ್ತಿರಿ',
-      locatingText: 'ನಿಮ್ಮ ಜಿಪಿಎಸ್ ಸ್ಥಳವನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...',
-      locSuccess: '📍 ಸ್ಥಳ ಯಶಸ್ವಿಯಾಗಿ ದೊರೆತಿದೆ',
-      locDenied: 'ಸ್ಥಳದ ಅನುಮತಿ ಸಿಗಲಿಲ್ಲ.',
-      micPermissionDenied: 'ಮೈಕ್ರೊಫೋನ್ ಅನುಮತಿ ನಿರಾಕರಿಸಲಾಗಿದೆ.',
-      micNotSupported: 'ಧ್ವನಿ ಗುರುತಿಸುವಿಕೆ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ.',
-      emergencyTitle: '🚨 ತುರ್ತು ವೈದ್ಯಕೀಯ ನೆರವು (108 ಡಯಲ್ ಮಾಡಿ)',
-      emergencySpeech: 'ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ದಯವಿಟ್ಟು ತಕ್ಷಣ 108 ಗೆ ಕರೆ ಮಾಡಿ.',
-      nearestHospitalSpeech: (name, dist) => `ನಿಮ್ಮ ಸಮೀಪದ ಆಸ್ಪತ್ರೆ ${name}, ಸುಮಾರು ${dist} ದೂರದಲ್ಲಿದೆ.`,
-      whatsAppPrompt: (name) => `${name} ಮಾಹಿತಿಯೊಂದಿಗೆ ವಾಟ್ಸಾಪ್ ಸಂದೇಶ ಸಿದ್ಧವಾಗಿದೆ.`,
-      schemesSpeech: 'ಆಯುಷ್ಮಾನ್ ಭಾರತ್ ಯೋಜನೆಯಡಿ ಪ್ರತಿ ಕುಟುಂಬಕ್ಕೆ ₹5 ಲಕ್ಷದವರೆಗೆ ಉಚಿತ ಚಿಕಿತ್ಸೆ ಸಿಗುತ್ತದೆ.',
-      appointmentsSpeech: (count) => `ನಿಮಗೆ ${count} ವೈದ್ಯರ ಭೇಟಿಗಳಿವೆ.`,
-      prescriptionsSpeech: (count) => `ನಿಮ್ಮಲ್ಲಿ ${count} ಸಕ್ರಿಯ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳಿವೆ.`,
-      quickPrompts: [
-        'ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳನ್ನು ಹುಡುಕಿ',
-        'ಸರ್ಕಾರಿ ಆಸ್ಪತ್ರೆಗಳು',
-        'ಪ್ರಾಥಮಿಕ ಆರೋಗ್ಯ ಕೇಂದ್ರ (PHC)',
-        'ಔಷಧಿ ಅಂಗಡಿ ಹುಡುಕಿ',
-        'ನನ್ನ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಳು',
-        'ನನ್ನ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು',
-        'ಆಯುಷ್ಮಾನ್ ಭಾರತ್ ಯೋಜನೆ',
-        'ವಾಟ್ಸಾಪ್‌ಗೆ ಕಳುಹಿಸಿ',
-        'ತುರ್ತು ನೆರವು ಬೇಕು'
-      ]
-    },
-    ml: {
-      code: 'ml-IN',
-      synthLang: 'ml-IN',
-      name: 'മലയാളം (Malayalam)',
-      welcomeSpeech: 'നമസ്കാരം! ഞാൻ നിങ്ങളുടെ സ്വാസ്ഥ്യകണക്ട് വോയ്‌സ് അസിസ്റ്റന്റാണ്. ആശുപത്രികൾ, അപ്പോയിന്റ്‌മെന്റുകൾ അല്ലെങ്കിൽ സർക്കാർ പദ്ധതികൾ എന്നിവയിൽ ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കും?',
-      welcomeText: 'നമസ്കാരം! ഞാൻ <strong>സ്വാസ്ഥ്യകണക്ട് വോയ്‌സ് അസിസ്റ്റന്റാണ്</strong>.',
-      listeningText: '🎤 കേൾക്കുന്നു... ദയവായി സംസാരിക്കുക',
-      processingText: '🧠 പ്രോസസ്സ് ചെയ്യുന്നു...',
-      speakingText: '🔊 സംസാരിക്കുന്നു...',
-      idleText: 'സംസാരിക്കാൻ മൈക്ക് അമർത്തുക',
-      locatingText: 'ജിപിഎസ് ലൊക്കേഷൻ എടുക്കുന്നു...',
-      locSuccess: '📍 ലൊക്കേഷൻ ലഭിച്ചു',
-      locDenied: 'ലൊക്കേഷൻ അനുമതി ലഭിച്ചില്ല.',
-      micPermissionDenied: 'മൈക്രോഫോൺ അനുമതി നിഷേധിച്ചു.',
-      micNotSupported: 'വോയ്‌സ് റെക്കഗ്നിഷൻ പിന്തുണ ലഭ്യമല്ല.',
-      emergencyTitle: '🚨 അടിയന്തര സഹായം (108 വിളിക്കുക)',
-      emergencySpeech: 'അടിയന്തര ഘട്ടങ്ങളിൽ ദയവായി ഉടൻ 108 വിളിക്കുക.',
-      nearestHospitalSpeech: (name, dist) => `അടുത്തുള്ള ആശുപത്രി ${name} ആണ്, ഏകദേശം ${dist} അകലെയാണ്.`,
-      whatsAppPrompt: (name) => `${name} വിവരങ്ങളോടെ വാട്ട്‌സ്ആപ്പ് സന്ദേശം തയ്യാറാണ്.`,
-      schemesSpeech: 'ആയുഷ്മാൻ ഭാരത് വഴി പ്രതിവർഷം 5 ലക്ഷം രൂപ വരെ സൗജന്യ ചികിത്സ ലഭിക്കും.',
-      appointmentsSpeech: (count) => `നിങ്ങൾക്ക് ${count} അപ്പോയിന്റ്‌മെന്റുകൾ ഉണ്ട്.`,
-      prescriptionsSpeech: (count) => `നിങ്ങൾക്ക് ${count} കുറിപ്പടികൾ ഉണ്ട്.`,
-      quickPrompts: [
-        'അടുത്തുള്ള ആശുപത്രികൾ',
-        'സർക്കാർ ആശുപത്രികൾ',
-        'പ്രാഥമിക ആരോഗ്യ കേന്ദ്രം (PHC)',
-        'മെഡിക്കൽ ഷോപ്പ്',
-        'എന്റെ അപ്പോയിന്റ്‌മെന്റുകൾ',
-        'എന്റെ മരുന്നുകൾ',
-        'ആയുഷ്മാൻ ഭാരത്',
-        'വാട്ട്‌സ്ആപ്പിൽ അയക്കുക',
-        'അടിയന്തര സഹായം'
-      ]
-    },
-    bn: {
-      code: 'bn-IN',
-      synthLang: 'bn-IN',
-      name: 'বাংলা (Bengali)',
-      welcomeSpeech: 'নমস্কার! আমি আপনার স্বাস্থ্যকানেক্ট ভয়েস সহকারী। হাসপাতাল, অ্যাপয়েন্টমেন্ট বা সরকারি স্বাস্থ্য প্রকল্প সম্পর্কে কীভাবে সাহায্য করতে পারি?',
-      welcomeText: 'নমস্কার! আমি <strong>স্বাস্থ্যকানেক্ট ভয়েস সহকারী</strong>।',
-      listeningText: '🎤 শুনছি... অনুগ্রহ করে বলুন',
-      processingText: '🧠 প্রক্রিয়া করা হচ্ছে...',
-      speakingText: '🔊 কথা বলছি...',
-      idleText: 'কথা বলতে মাইকে চাপ দিন',
-      locatingText: 'জিপিএস অবস্থান নেওয়া হচ্ছে...',
-      locSuccess: '📍 অবস্থান পাওয়া গেছে',
-      locDenied: 'অবস্থানের অনুমতি মেলেনি।',
-      micPermissionDenied: 'মাইক্রোফোনের অনুমতি দেওয়া হয়নি।',
-      micNotSupported: 'ভয়েস রিকগনিশন সমর্থিত নয়।',
-      emergencyTitle: '🚨 জরুরি চিকিৎসা সহায়তা (১০৮ ডায়াল করুন)',
-      emergencySpeech: 'জরুরি পরিস্থিতিতে অবিলম্বে ১০৮ নম্বরে অ্যাম্বুলেন্স ডাকুন।',
-      nearestHospitalSpeech: (name, dist) => `নিকটতম হাসপাতাল হল ${name}, প্রায় ${dist} দূরে।`,
-      whatsAppPrompt: (name) => `${name} এর জন্য হোয়াটসঅ্যাপ বার্তা তৈরি।`,
-      schemesSpeech: 'আয়ুষ্মান ভারত যোজনার অধীনে বার্ষিক ₹৫ লক্ষ টাকার বিনামূল্যে চিকিৎসা পাওয়া যায়।',
-      appointmentsSpeech: (count) => `আপনার ${count}টি অ্যাপয়েন্টমেন্ট রয়েছে।`,
-      prescriptionsSpeech: (count) => `আপনার ${count}টি প্রেসক্রিপশন রয়েছে।`,
-      quickPrompts: [
-        'কাছের হাসপাতাল খুঁজুন',
-        'সরকারি হাসপাতাল',
-        'নিকটবর্তী পিএইচসি (PHC)',
-        'ওষুধের দোকান খুঁজুন',
-        'আমার অ্যাপয়েন্টমেন্ট',
-        'আমার প্রেসক্রিপশন',
-        'আয়ুষ্মান ভারত যোজনা',
-        'হোয়াটসঅ্যাপে পাঠান',
-        'জরুরি সাহায্য চাই'
-      ]
-    },
-    mr: {
-      code: 'mr-IN',
-      synthLang: 'mr-IN',
-      name: 'मराठी (Marathi)',
-      welcomeSpeech: 'नमस्कार! मी आपला स्वास्थ्यकनेक्ट व्हॉइस असिस्टंट आहे. रुग्णालये, अपॉइंटमेंट्स किंवा सरकारी योजनांबद्दल मी कशी मदत करू?',
-      welcomeText: 'नमस्कार! मी <strong>स्वास्थ्यकनेक्ट व्हॉइस असिस्टंट</strong> आहे.',
-      listeningText: '🎤 ऐकत आहे... कृपया बोला',
-      processingText: '🧠 प्रक्रिया सुरू आहे...',
-      speakingText: '🔊 बोलत आहे...',
-      idleText: 'बोलण्यासाठी माइक दाबा',
-      locatingText: 'जीपीएस स्थान शोधत आहे...',
-      locSuccess: '📍 स्थान प्राप्त झाले',
-      locDenied: 'स्थान परवानगी नाकारली.',
-      micPermissionDenied: 'मायक्रोफोन परवानगी नाकारली.',
-      micNotSupported: 'व्हॉइस रेकग्निशन समर्थित नाही.',
-      emergencyTitle: '🚨 आपत्कालीन वैद्यकीय मदत (१०८ डायल करा)',
-      emergencySpeech: 'वैद्यकीय आणीबाणीसाठी त्वरित १०८ क्रमांकावर कॉल करा.',
-      nearestHospitalSpeech: (name, dist) => `सर्वात जवळचे रुग्णालय ${name} आहे, अंदाजे ${dist} अंतरावर आहे.`,
-      whatsAppPrompt: (name) => `${name} साठी व्हॉट्सॲप संदेश तयार आहे.`,
-      schemesSpeech: 'आयुष्मान भारत योजनेअंतर्गत प्रति कुटुंब ₹५ लाख पर्यंत मोफत उपचार मिळतात.',
-      appointmentsSpeech: (count) => `आपल्याकडे ${count} अपॉइंटमेंट्स आहेत.`,
-      prescriptionsSpeech: (count) => `आपल्याकडे ${count} औषधोपचार पत्रके आहेत.`,
-      quickPrompts: [
-        'जवळचे रुग्णालय शोधा',
-        'सरकारी रुग्णालय',
-        'प्राथमिक आरोग्य केंद्र (PHC)',
-        'औषधांचे दुकान शोधा',
-        'माझ्या अपॉइंटमेंट्स',
-        'माझे प्रिस्क्रिप्शन',
+        'मेरे पास अस्पताल खोजो',
+        'सरकारी अस्पताल दिखाओ',
+        'मेरे पास PHC खोजो',
+        'पास में फार्मेसी खोजो',
+        'मेरे पास आपातकालीन अस्पताल खोजो',
+        'मेरे अपॉइंटमेंट दिखाओ',
+        'मेरे पर्चे दिखाओ',
         'आयुष्मान भारत योजना',
-        'व्हॉट्सॲपवर पाठवा',
-        'आपत्कालीन मदत हवी'
-      ]
-    },
-    gu: {
-      code: 'gu-IN',
-      synthLang: 'gu-IN',
-      name: 'ગુજરાતી (Gujarati)',
-      welcomeSpeech: 'નમસ્તે! હું તમારો સ્વાસ્થ્યકનેક્ટ વૉઇસ આસિસ્ટન્ટ છું. હોસ્પિટલ, એપોઇન્ટમેન્ટ્સ કે સરકારી યોજનાઓમાં હું કેવી રીતે મદદ કરી શકું?',
-      welcomeText: 'નમસ્તે! હું <strong>સ્વાસ્થ્યકનેક્ટ વૉઇસ આસિસ્ટન્ટ</strong> છું.',
-      listeningText: '🎤 સાંભળી રહ્યો છું... કૃપા કરીને બોલો',
-      processingText: '🧠 પ્રક્રિયા થઈ રહી છે...',
-      speakingText: '🔊 બોલી રહ્યો છું...',
-      idleText: 'બોલવા માટે માઇક દબાવો',
-      locatingText: 'જીપીએસ લોકેશન મેળવી રહ્યું છે...',
-      locSuccess: '📍 લોકેશન મળી ગયું',
-      locDenied: 'લોકેશન પરવાનગી મળી નથી.',
-      micPermissionDenied: 'માઇક્રોફોન પરવાનગી નકારી.',
-      micNotSupported: 'વૉઇસ રેકગ્નિશન સપોર્ટેડ નથી.',
-      emergencyTitle: '🚨 ઇમરજન્સી મેડિકલ સહાય (108 ડાયલ કરો)',
-      emergencySpeech: 'ઇમરજન્સી માટે કૃપા કરીને તરત જ 108 પર કૉલ કરો.',
-      nearestHospitalSpeech: (name, dist) => `સૌથી નજીકની હોસ્પિટલ ${name} છે, આશરે ${dist} દૂર છે.`,
-      whatsAppPrompt: (name) => `${name} માટે વોટ્સએપ મેસેજ તૈયાર છે.`,
-      schemesSpeech: 'આયુષ્માન ભારત યોજના હેઠળ વાર્ષિક ₹5 લાખ સુધીની મફત સારવાર મળે છે.',
-      appointmentsSpeech: (count) => `તમારી પાસે ${count} એપોઇન્ટમેન્ટ્સ છે.`,
-      prescriptionsSpeech: (count) => `તમારી પાસે ${count} દવાના પ્રિસ્ક્રિપ્શન્સ છે.`,
-      quickPrompts: [
-        'નજીકની હોસ્પિટલ શોધો',
-        'સરકારી હોસ્પિટલ',
-        'પ્રાથમિક આરોગ્ય કેન્દ્ર (PHC)',
-        'દવાની દુકાન શોધો',
-        'મારી એપોઇન્ટમેન્ટ્સ',
-        'મારા પ્રિસ્ક્રિપ્શન્સ',
-        'આયુષ્માન ભારત યોજના',
-        'વોટ્સએપ પર મોકલો',
-        'ઇમરજન્સી મદદ જોઈએ'
-      ]
-    },
-    pa: {
-      code: 'pa-IN',
-      synthLang: 'pa-IN',
-      name: 'ਪੰਜਾਬੀ (Punjabi)',
-      welcomeSpeech: 'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ ਸਵਾਸਥਿਆਕਨੈਕਟ ਵੌਇਸ ਅਸਿਸਟੈਂਟ ਹਾਂ। ਹਸਪਤਾਲ, ਮੁਲਾਕਾਤਾਂ ਜਾਂ ਸਰਕਾਰੀ ਸਕੀਮਾਂ ਬਾਰੇ ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?',
-      welcomeText: 'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ <strong>ਸਵਾਸਥਿਆਕਨੈਕਟ ਵੌਇਸ ਅਸਿਸਟੈਂਟ</strong> ਹਾਂ।',
-      listeningText: '🎤 ਸੁਣ ਰਿਹਾ ਹਾਂ... ਕਿਰਪਾ ਕਰਕੇ ਬੋਲੋ',
-      processingText: '🧠 ਕਾਰਵਾਈ ਹੋ ਰਹੀ ਹੈ...',
-      speakingText: '🔊 ਬੋਲ ਰਿਹਾ ਹਾਂ...',
-      idleText: 'ਬੋਲਣ ਲਈ ਮਾਈਕ ਦਬਾਓ',
-      locatingText: 'ਜੀਪੀਐਸ ਟਿਕਾਣਾ ਲੱਭ ਰਿਹਾ ਹੈ...',
-      locSuccess: '📍 ਟਿਕਾਣਾ ਮਿਲ ਗਿਆ',
-      locDenied: 'ਟਿਕਾਣਾ ਇਜਾਜ਼ਤ ਨਹੀਂ ਮਿਲੀ।',
-      micPermissionDenied: 'ਮਾਈਕ੍ਰੋਫੋਨ ਇਜਾਜ਼ਤ ਰੱਦ ਕੀਤੀ ਗਈ।',
-      micNotSupported: 'ਵੌਇਸ ਪਛਾਣ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।',
-      emergencyTitle: '🚨 ਐਮਰਜੈਂਸੀ ਮੈਡੀਕਲ ਸਹਾਇਤਾ (108 ਡਾਇਲ ਕਰੋ)',
-      emergencySpeech: 'ਐਮਰਜੈਂਸੀ ਵਿੱਚ ਕਿਰਪਾ ਕਰਕੇ ਤੁਰੰਤ 108 ਡਾਇਲ ਕਰੋ।',
-      nearestHospitalSpeech: (name, dist) => `ਸਭ ਤੋਂ ਨੇੜਲਾ ਹਸਪਤਾਲ ${name} ਹੈ, ਲਗਭਗ ${dist} ਦੂਰ।`,
-      whatsAppPrompt: (name) => `${name} ਲਈ ਵਟਸਐਪ ਸੁਨੇਹਾ ਤਿਆਰ ਹੈ।`,
-      schemesSpeech: 'ਆਯੁਸ਼ਮਾਨ ਭਾਰਤ ਸਕੀਮ ਤਹਿਤ ₹5 ਲੱਖ ਤੱਕ ਦਾ ਮੁਫ਼ਤ ਇਲਾਜ ਮਿਲਦਾ ਹੈ।',
-      appointmentsSpeech: (count) => `ਤੁਹਾਡੀਆਂ ${count} ਮੁਲਾਕਾਤਾਂ ਹਨ।`,
-      prescriptionsSpeech: (count) => `ਤੁਹਾਡੀਆਂ ${count} ਪਰਚੀਆਂ ਹਨ।`,
-      quickPrompts: [
-        'ਨੇੜਲੇ ਹਸਪਤਾਲ ਲੱਭੋ',
-        'ਸਰਕਾਰੀ ਹਸਪਤਾਲ',
-        'ਪ੍ਰਾਇਮਰੀ ਹੈਲਥ ਸੈਂਟਰ (PHC)',
-        'ਦਵਾਈਆਂ ਦੀ ਦੁਕਾਨ',
-        'ਮੇਰੀਆਂ ਮੁਲਾਕਾਤਾਂ',
-        'ਮੇਰੀਆਂ ਪਰਚੀਆਂ',
-        'ਆਯੁਸ਼ਮਾਨ ਭਾਰਤ ਸਕੀਮ',
-        'ਵਟਸਐਪ ਤੇ ਭੇਜੋ',
-        'ਐਮਰਜੈਂਸੀ ਮਦਦ ਚਾਹੀਦੀ'
-      ]
-    },
-    ur: {
-      code: 'ur-IN',
-      synthLang: 'ur-IN',
-      name: 'اردو (Urdu)',
-      welcomeSpeech: 'السلام علیکم! میں آپ کا سواستھیہ کنیکٹ وائس اسسٹنٹ ہوں۔ ہسپتال، اپائنٹمنٹس، یا سرکاری اسکیموں کے بارے میں کیسے مدد کر سکتا ہوں؟',
-      welcomeText: 'السلام علیکم! میں <strong>سواستھیہ کنیکٹ وائس اسسٹنٹ</strong> ہوں۔',
-      listeningText: '🎤 سن رہا ہوں... براہ کرم بولیں',
-      processingText: '🧠 عمل جاری ہے...',
-      speakingText: '🔊 بول رہا ہوں...',
-      idleText: 'بولنے کے لیے مائیک دبائیں',
-      locatingText: 'جی پی ایس مقام حاصل کیا جا رہا ہے...',
-      locSuccess: '📍 مقام موصول ہو گیا',
-      locDenied: 'مقام کی اجازت نہیں ملی۔',
-      micPermissionDenied: 'مائیکروفون کی اجازت مسترد کر دی گئی۔',
-      micNotSupported: 'آواز کی شناخت معاون نہیں ہے۔',
-      emergencyTitle: '🚨 ایمرجنسی طبی امداد (108 ڈائل کریں)',
-      emergencySpeech: 'ہنگامی حالت میں فوری طور پر 108 پر ایمبولینس کے لیے کال کریں۔',
-      nearestHospitalSpeech: (name, dist) => `قریب ترین ہسپتال ${name} ہے، تقریباً ${dist} کے فاصلے پر۔`,
-      whatsAppPrompt: (name) => `${name} کے لیے واٹس ایپ پیغام تیار ہے۔`,
-      schemesSpeech: 'آیوشمان بھارت کے تحت فی خاندان سالانہ 5 لاکھ روپے تک کا مفت علاج ملتا ہے۔',
-      appointmentsSpeech: (count) => `آپ کی ${count} اپائنٹمنٹس ہیں۔`,
-      prescriptionsSpeech: (count) => `آپ کے پاس ${count} نسخے ہیں۔`,
-      quickPrompts: [
-        'قریبی ہسپتال تلاش کریں',
-        'سرکاری ہسپتال',
-        'پرائمری ہیلتھ سینٹر (PHC)',
-        'میڈیکل اسٹور تلاش کریں',
-        'میری اپائنٹمنٹس',
-        'میرے نسخے',
-        'آیوشمان بھارت اسکیم',
-        'واٹس ایپ پر بھیجیں',
-        'ایمرجنسی مدد چاہیے'
-      ]
-    },
-    or: {
-      code: 'or-IN',
-      synthLang: 'or-IN',
-      name: 'ଓଡ଼ିଆ (Odia)',
-      welcomeSpeech: 'ନମସ୍କାର! ମୁଁ ଆପଣଙ୍କ ସ୍ବାସ୍ଥ୍ୟକନେକ୍ଟ ଭଏସ୍ ଆସିଷ୍ଟାଣ୍ଟ। ଡାକ୍ତରଖାନା, ଆପଏଣ୍ଟମେଣ୍ଟ କିମ୍ବା ସରକାରୀ ଯୋଜନା ବିଷୟରେ ମୁଁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?',
-      welcomeText: 'ନମସ୍କାର! ମୁଁ <strong>ସ୍ବାସ୍ଥ୍ୟକନେକ୍ଟ ଭଏସ୍ ଆସିଷ୍ଟାଣ୍ଟ</strong>।',
-      listeningText: '🎤 ଶୁଣୁଛି... ଦୟାକରି କୁହନ୍ତୁ',
-      processingText: '🧠 ପ୍ରକ୍ରିୟାକରଣ ଚାଲିଛି...',
-      speakingText: '🔊 କହୁଛି...',
-      idleText: 'କହିବା ପାଇଁ ମାଇକ୍ ଦବାନ୍ତୁ',
-      locatingText: 'ଜିପିଏସ୍ ଲୋକେସନ୍ ନିଆଯାଉଛି...',
-      locSuccess: '📍 ଲୋକେସନ୍ ମିଳିଗଲା',
-      locDenied: 'ଲୋକେସନ୍ ଅନୁମତି ମିଳିଲା ନାହିଁ।',
-      micPermissionDenied: 'ମାଇକ୍ରୋଫୋନ୍ ଅନୁମତି ମିଳିଲା ନାହିଁ।',
-      micNotSupported: 'ଭଏସ୍ ସପୋର୍ଟ ଉପଲବ୍ଧ ନାହିଁ।',
-      emergencyTitle: '🚨 ଜରୁରୀକାଳୀନ ଚିକିତ୍ସା ସହାୟତା (୧୦୮ ଡାଏଲ କରନ୍ତୁ)',
-      emergencySpeech: 'ଜରୁରୀକାଳୀନ ପରିସ୍ଥିତିରେ ଦୟାକରି ତୁରନ୍ତ ୧୦୮ କୁ କଲ୍ କରନ୍ତୁ।',
-      nearestHospitalSpeech: (name, dist) => `ନିକଟତମ ଡାକ୍ତରଖାନା ହେଉଛି ${name}, ପାଖାପାଖି ${dist} ଦୂରରେ।`,
-      whatsAppPrompt: (name) => `${name} ପାଇଁ ହ୍ୱାଟ୍ସଆପ୍ ବାର୍ତ୍ତା ପ୍ରସ୍ତୁତ।`,
-      schemesSpeech: 'ଆୟୁଷ୍ମାନ ଭାରତ ଯୋଜନା ଅଧୀନରେ ₹୫ ଲକ୍ଷ ପର୍ଯ୍ୟନ୍ତ ମାଗଣା ଚିକିତ୍ସା ଉପଲବ୍ଧ।',
-      appointmentsSpeech: (count) => `ଆପଣଙ୍କର ${count}ଟି ଆପଏଣ୍ଟମେଣ୍ଟ ଅଛି।`,
-      prescriptionsSpeech: (count) => `ଆପଣଙ୍କର ${count}ଟି ପ୍ରେସକ୍ରିପସନ୍ ଅଛି।`,
-      quickPrompts: [
-        'ନିକଟସ୍ଥ ଡାକ୍ତରଖାନା ଖୋଜନ୍ତୁ',
-        'ସରକାରୀ ଡାକ୍ତରଖାନା',
-        'ପ୍ରାଥମିକ ସ୍ବାସ୍ଥ୍ୟ କେନ୍ଦ୍ର (PHC)',
-        'ଔଷଧ ଦୋକାନ ଖୋଜନ୍ତୁ',
-        'ମୋର ଆପଏଣ୍ଟମେଣ୍ଟ',
-        'ମୋର ପ୍ରେସକ୍ରିପସନ୍',
-        'ଆୟୁଷ୍ମାନ ଭାରତ ଯୋଜନା',
-        'ହ୍ୱାଟ୍ସଆପ୍ ରେ ପଠାନ୍ତୁ',
-        'ଜରୁରୀ ସାହାଯ୍ୟ ଦରକାର'
+        'अस्पताल व्हाट्सएप पर भेजो'
       ]
     }
   };
 
-  // Automatic Language Detection (Unicode script analysis)
-  function detectLanguageFromText(text) {
-    if (!text) return currentLang;
-    
-    // Telugu script: \u0C00-\u0C7F
-    if (/[\u0C00-\u0C7F]/.test(text)) return 'te';
-    // Tamil script: \u0B80-\u0BFF
-    if (/[\u0B80-\u0BFF]/.test(text)) return 'ta';
-    // Kannada script: \u0C80-\u0CFF
-    if (/[\u0C80-\u0CFF]/.test(text)) return 'kn';
-    // Malayalam script: \u0D00-\u0D7F
-    if (/[\u0D00-\u0D7F]/.test(text)) return 'ml';
-    // Bengali script: \u0980-\u09FF
-    if (/[\u0980-\u09FF]/.test(text)) return 'bn';
-    // Gujarati script: \u0A80-\u0AFF]
-    if (/[\u0A80-\u0AFF]/.test(text)) return 'gu';
-    // Gurmukhi (Punjabi): \u0A00-\u0A7F
-    if (/[\u0A00-\u0A7F]/.test(text)) return 'pa';
-    // Arabic/Urdu: \u0600-\u06FF
-    if (/[\u0600-\u06FF]/.test(text)) return 'ur';
-    // Odia script: \u0B00-\u0B7F
-    if (/[\u0B00-\u0B7F]/.test(text)) return 'or';
-    // Devanagari script: \u0900-\u097F (Hindi or Marathi)
-    if (/[\u0900-\u097F]/.test(text)) {
-      if (text.includes('रुग्णालय') || text.includes('माझे') || text.includes('आहे')) return 'mr';
-      return 'hi';
-    }
-
-    // Phonetic keywords in Latin/English transliteration
-    const lower = text.toLowerCase();
-    if (lower.includes('dawa') || lower.includes('aspataal') || lower.includes('aspatal') || lower.includes('yojana')) return 'hi';
-    if (lower.includes('mandulu') || lower.includes('aspathri') || lower.includes('pathakam') || lower.includes('samipam')) return 'te';
-    if (lower.includes('marunthu') || lower.includes('maruthuvamanai') || lower.includes('thittam')) return 'ta';
-    if (lower.includes('aushadhi') || lower.includes('aspathre')) return 'kn';
-
-    return currentLang;
-  }
-
-  // Load synthesized voices
-  function loadVoices() {
-    if (!isSynthesisSupported) return;
-    availableVoices = window.speechSynthesis.getVoices();
+  // Load available voices from SpeechSynthesis
+  function loadAvailableVoices() {
+    if (!isSynthesisSupported) return [];
+    availableVoices = window.speechSynthesis.getVoices() || [];
+    updateDebugInfo();
+    return availableVoices;
   }
 
   if (isSynthesisSupported) {
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    loadVoices();
+    speechSynthesis.onvoiceschanged = () => {
+      loadAvailableVoices();
+    };
+    loadAvailableVoices();
   }
 
-  // Initialize Speech Recognition
+  // Find voice for specific language
+  function getVoiceForLanguage(langKey) {
+    if (!isSynthesisSupported) return null;
+    const voices = availableVoices.length > 0 ? availableVoices : loadAvailableVoices();
+    if (!voices || voices.length === 0) return null;
+
+    if (langKey === 'te') {
+      return voices.find(v => {
+        const vl = (v.lang || '').toLowerCase();
+        const vn = (v.name || '').toLowerCase();
+        return vl.startsWith('te') || vl.includes('te-') || vl.includes('telugu') || vn.includes('telugu');
+      }) || null;
+    }
+
+    if (langKey === 'hi') {
+      return voices.find(v => {
+        const vl = (v.lang || '').toLowerCase();
+        const vn = (v.name || '').toLowerCase();
+        return vl.startsWith('hi') || vl.includes('hi-') || vl.includes('hindi') || vn.includes('hindi') || vn.includes('lekhraj') || vn.includes('swara');
+      }) || null;
+    }
+
+    // Default English (Prefer Indian English en-IN)
+    return voices.find(v => {
+      const vl = (v.lang || '').toLowerCase();
+      const vn = (v.name || '').toLowerCase();
+      return vl === 'en-in' || vl.startsWith('en-in') || vn.includes('india') || vn.includes('prabhat') || vn.includes('veena');
+    }) || voices.find(v => (v.lang || '').toLowerCase().startsWith('en')) || voices[0] || null;
+  }
+
+  // Initialize Speech Recognition instance with active language
   function initSpeechRecognition() {
     if (!isSpeechSupported) return;
 
     try {
+      if (recognition) {
+        try { recognition.abort(); } catch (e) {}
+      }
+
       recognition = new SpeechRecognition();
       recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.interimResults = true; // Live interim transcription
       recognition.maxAlternatives = 1;
 
-      const cfg = langConfig[currentLang] || langConfig.en;
-      recognition.lang = cfg.code;
+      // Dynamically set language code based on selected language
+      const cfg = langConfig[selectedLanguage] || langConfig.en;
+      recognition.lang = cfg.recCode;
 
       recognition.onstart = () => {
         isListening = true;
+        interimTranscript = '';
         updateUIState('listening');
+        updateDebugInfo();
       };
 
       recognition.onresult = (event) => {
-        isListening = false;
-        const transcript = event.results[0][0].transcript;
-        if (transcript && transcript.trim()) {
-          // Auto-detect language if different from current
-          const detectedLang = detectLanguageFromText(transcript);
-          if (detectedLang && detectedLang !== currentLang && langConfig[detectedLang]) {
-            setLanguage(detectedLang);
+        let finalTranscript = '';
+        let currentInterim = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const item = event.results[i];
+          if (item.isFinal) {
+            finalTranscript += item[0].transcript;
+          } else {
+            currentInterim += item[0].transcript;
           }
-          handleVoiceQuery(transcript.trim());
-        } else {
-          updateUIState('idle');
+        }
+
+        // Live interim text display in status
+        if (currentInterim && !finalTranscript) {
+          const statusText = document.getElementById('va-status-text');
+          if (statusText) {
+            statusText.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> <em>"${escapeHTML(currentInterim)}"</em>`;
+          }
+        }
+
+        if (finalTranscript && finalTranscript.trim()) {
+          isListening = false;
+          handleVoiceQuery(finalTranscript.trim());
         }
       };
 
       recognition.onerror = (event) => {
         isListening = false;
-        console.warn('Voice Assistant error:', event.error);
-        if (event.error === 'not-allowed') {
-          const msg = (langConfig[currentLang] || langConfig.en).micPermissionDenied;
+        console.warn('Speech recognition error:', event.error);
+
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          const msg = (langConfig[selectedLanguage] || langConfig.en).micDenied;
           appendMessage('bot', msg);
-          speakText(msg);
+          speakText(msg, selectedLanguage);
+        } else if (event.error === 'language-not-supported') {
+          const msg = (langConfig[selectedLanguage] || langConfig.en).unsupported;
+          appendMessage('bot', msg);
         }
         updateUIState('idle');
+        updateDebugInfo();
       };
 
       recognition.onend = () => {
@@ -540,40 +281,37 @@
         if (!isSpeaking && !isProcessing) {
           updateUIState('idle');
         }
+        updateDebugInfo();
       };
+
     } catch (e) {
-      console.error('Speech recognition initialization failed:', e);
+      console.error('Error creating SpeechRecognition instance:', e);
     }
   }
 
-  // Start Listening
+  // Start Voice Listening
   function startListening() {
     if (!isSpeechSupported) {
-      appendMessage('bot', (langConfig[currentLang] || langConfig.en).micNotSupported);
+      appendMessage('bot', (langConfig[selectedLanguage] || langConfig.en).unsupported);
       return;
     }
 
     stopSpeaking();
-
-    if (!recognition) {
-      initSpeechRecognition();
-    }
+    initSpeechRecognition();
 
     if (recognition) {
-      const cfg = langConfig[currentLang] || langConfig.en;
-      recognition.lang = cfg.code;
       try {
         recognition.start();
       } catch (err) {
         try {
-          recognition.stop();
+          recognition.abort();
           setTimeout(() => recognition.start(), 150);
         } catch (e) {}
       }
     }
   }
 
-  // Stop Listening
+  // Stop Voice Listening
   function stopListening() {
     if (recognition && isListening) {
       try { recognition.stop(); } catch (e) {}
@@ -582,34 +320,45 @@
     updateUIState('idle');
   }
 
-  // Text to Speech
-  function speakText(text, onEndCallback = null) {
-    if (!isSynthesisSupported || !text) {
-      if (onEndCallback) onEndCallback();
-      return;
-    }
+  // Text-To-Speech (TTS) with Language Verification
+  function speakText(text, langKey = null) {
+    if (!isSynthesisSupported || !text) return;
 
+    const targetLang = langKey || selectedLanguage;
     const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim();
-    if (!cleanText) {
-      if (onEndCallback) onEndCallback();
-      return;
-    }
+    if (!cleanText) return;
 
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    const cfg = langConfig[currentLang] || langConfig.en;
-    utterance.lang = cfg.synthLang;
-    utterance.rate = 0.92; // Slightly measured pacing for elder accessibility
-    utterance.pitch = 1.0;
+    // Check voice support for Telugu or Hindi
+    const matchedVoice = getVoiceForLanguage(targetLang);
 
-    if (availableVoices.length > 0) {
-      const targetPrefix = cfg.code.split('-')[0].toLowerCase();
-      const matchedVoice = availableVoices.find(v => v.lang.toLowerCase().includes(cfg.code.toLowerCase())) ||
-                           availableVoices.find(v => v.lang.toLowerCase().startsWith(targetPrefix));
-      if (matchedVoice) {
-        utterance.voice = matchedVoice;
-      }
+    if (targetLang === 'te' && !matchedVoice) {
+      const warnMsg = langConfig.te.noVoiceWarning;
+      console.warn('Telugu voice not available in current browser engine:', warnMsg);
+      // Display visual notice without crashing or speaking wrong language
+      appendVoiceNotice(warnMsg);
+      updateUIState('idle');
+      return;
+    }
+
+    if (targetLang === 'hi' && !matchedVoice) {
+      const warnMsg = langConfig.hi.noVoiceWarning;
+      console.warn('Hindi voice not available in current browser engine:', warnMsg);
+      appendVoiceNotice(warnMsg);
+      updateUIState('idle');
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const cfg = langConfig[targetLang] || langConfig.en;
+    utterance.lang = cfg.synthLang;
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    if (matchedVoice) {
+      utterance.voice = matchedVoice;
     }
 
     utterance.onstart = () => {
@@ -620,13 +369,11 @@
     utterance.onend = () => {
       isSpeaking = false;
       updateUIState('idle');
-      if (onEndCallback) onEndCallback();
     };
 
     utterance.onerror = () => {
       isSpeaking = false;
       updateUIState('idle');
-      if (onEndCallback) onEndCallback();
     };
 
     window.speechSynthesis.speak(utterance);
@@ -643,42 +390,36 @@
     }
   }
 
-  // Main NLP Voice Processing Engine
+  // Notice helper for missing speech synthesis voice
+  function appendVoiceNotice(notice) {
+    const stream = document.getElementById('va-chat-stream');
+    if (!stream) return;
+    const el = document.createElement('div');
+    el.className = 'va-voice-notice';
+    el.innerHTML = `⚠️ <small>${escapeHTML(notice)}</small>`;
+    stream.appendChild(el);
+    stream.scrollTop = stream.scrollHeight;
+  }
+
+  // Core NLP Query Engine
   async function handleVoiceQuery(query) {
     if (!query) return;
 
-    // Detect language and update if needed
-    const detected = detectLanguageFromText(query);
-    if (detected && detected !== currentLang && langConfig[detected]) {
-      setLanguage(detected);
-    }
-
+    // Display user question
     appendMessage('user', query);
     updateUIState('processing');
     isProcessing = true;
 
     const lower = query.toLowerCase().trim();
-    const cfg = langConfig[currentLang] || langConfig.en;
+    const cfg = langConfig[selectedLanguage] || langConfig.en;
 
-    // 1. EMERGENCY (108 / Ambulance / Urgent)
+    // 1. EMERGENCY COMMANDS
     if (
-      lower.includes('emergency') ||
-      lower.includes('आपातकालीन') ||
-      lower.includes('ఆపద') ||
-      lower.includes('అత్యవసరం') ||
-      lower.includes('அவசரம்') ||
-      lower.includes('ತುರ್ತು') ||
-      lower.includes('അടിയന്തര') ||
-      lower.includes('জরুরি') ||
-      lower.includes('आपत्कालीन') ||
-      lower.includes('ઇમરજન્સી') ||
-      lower.includes('ਐਮਰਜੈਂਸੀ') ||
-      lower.includes('ایمرجنسی') ||
-      lower.includes('ଜରୁରୀ') ||
-      lower.includes('ambulance') ||
-      lower.includes('108') ||
-      lower.includes('heart attack') ||
-      lower.includes('accident')
+      lower.includes('emergency') || lower.includes('ambulance') || lower.includes('108') ||
+      lower.includes('ఆపద') || lower.includes('అత్యవసరం') || lower.includes('ఎమర్జెన్సీ') ||
+      lower.includes('ఆసుపత్రి కావాలి') ||
+      lower.includes('आपातकालीन') || lower.includes('इमरजेंसी') || lower.includes('एंबुलेंस') ||
+      lower.includes('मदद')
     ) {
       isProcessing = false;
       const html = `
@@ -687,40 +428,30 @@
             <span style="font-size:1.5rem;">🚨</span>
             <strong style="color:var(--hospital-cross-red); font-size:1.05rem;">${cfg.emergencyTitle}</strong>
           </div>
-          <p style="margin:0 0 0.75rem 0; font-size:0.875rem;">National 24x7 Ambulance & Health Dispatch:</p>
+          <p style="margin:0 0 0.75rem 0; font-size:0.875rem;">${cfg.emergencyText}</p>
           <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem;">
             <a href="tel:108" class="btn btn-danger btn-sm" style="flex:1; text-align:center; font-weight:700; font-size:0.95rem;">
-              📞 Dial 108 (Ambulance)
+              📞 108 (Ambulance)
             </a>
             <a href="tel:104" class="btn btn-outline btn-sm" style="flex:1; text-align:center; font-weight:700;">
-              📞 Dial 104 (Helpline)
+              📞 104 (Helpline)
             </a>
           </div>
           <button class="btn btn-sm btn-primary" style="width:100%;" onclick="PulseCareUI.switchTab('emergency')">
-            🏥 View Trauma Centres & SOS Guide
+            🏥 Emergency SOS / Trauma Center
           </button>
         </div>
       `;
       appendMessage('bot', html);
-      speakText(cfg.emergencySpeech);
+      speakText(cfg.emergencySpeech, selectedLanguage);
       return;
     }
 
-    // 2. WHATSAPP SHARING
+    // 2. WHATSAPP HOSPITAL SHARING
     if (
-      lower.includes('whatsapp') ||
-      lower.includes('व्हाट्सएप') ||
-      lower.includes('వాట్సాప్') ||
-      lower.includes('வாட்ஸ்அப்') ||
-      lower.includes('ವಾಟ್ಸಾಪ್') ||
-      lower.includes('വാട്ട്സ്ആപ്പ്') ||
-      lower.includes('হোয়াটসঅ্যাপ') ||
-      lower.includes('व्हॉट्सॲप') ||
-      lower.includes('વોટ્સએપ') ||
-      lower.includes('ਵਟਸਐਪ') ||
-      lower.includes('واٹس ایپ') ||
-      lower.includes('ହ୍ୱାଟ୍ସଆପ୍') ||
-      (lower.includes('send') && (lower.includes('hospital') || lower.includes('centre')))
+      lower.includes('whatsapp') || lower.includes('व्हाट्सएप') || lower.includes('వాట్సాప్') ||
+      (lower.includes('send') && (lower.includes('hospital') || lower.includes('centre'))) ||
+      lower.includes('వాట్సాప్‌కి పంపు') || lower.includes('व्हाट्सएप पर भेजो')
     ) {
       await handleWhatsAppVoiceShare();
       return;
@@ -728,24 +459,14 @@
 
     // 3. APPOINTMENTS
     if (
-      lower.includes('appointment') ||
-      lower.includes('अपॉइंटमेंट') ||
-      lower.includes('అపాయింట్') ||
-      lower.includes('சந்திப்பு') ||
-      lower.includes('ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್') ||
-      lower.includes('അപ്പോയിന്റ്മെന്റ്') ||
-      lower.includes('অ্যাপয়েন্টমেন্ট') ||
-      lower.includes('એપોઇન્ટમેન્ટ') ||
-      lower.includes('ਮੁਲਾਕਾਤ') ||
-      lower.includes('اپائنٹمنٹ') ||
-      lower.includes('doctor visit') ||
-      lower.includes('consultation')
+      lower.includes('appointment') || lower.includes('अपॉइंटमेंट') || lower.includes('అపాయింట్') ||
+      lower.includes('డాక్టర్') || lower.includes('doctor')
     ) {
       isProcessing = false;
       const appointments = typeof PulseCareStore !== 'undefined' ? PulseCareStore.getAppointments() : [];
       const upcoming = appointments.filter(a => a.status === 'Upcoming' || a.status === 'Confirmed');
 
-      let html = `<div style="font-size:0.9rem; margin-bottom:0.5rem;">📅 <strong>Upcoming Appointments (${upcoming.length})</strong>:</div>`;
+      let html = `<div style="font-size:0.9rem; margin-bottom:0.5rem;">${cfg.appointmentsTitle(upcoming.length)}</div>`;
       if (upcoming.length > 0) {
         html += `<div style="display:flex; flex-direction:column; gap:0.5rem;">`;
         upcoming.slice(0, 3).forEach(apt => {
@@ -757,90 +478,64 @@
           `;
         });
         html += `</div>`;
-        html += `<button class="btn btn-sm btn-primary" style="width:100%; margin-top:0.6rem;" onclick="PulseCareUI.switchTab('appointments')">View All Appointments</button>`;
+        html += `<button class="btn btn-sm btn-primary" style="width:100%; margin-top:0.6rem;" onclick="PulseCareUI.switchTab('appointments')">Appointments</button>`;
       } else {
-        html += `<p style="font-size:0.85rem; color:var(--text-muted);">No upcoming appointments scheduled.</p>`;
-        html += `<button class="btn btn-sm btn-primary" style="width:100%;" onclick="PulseCareUI.openModal('book-apt-modal')">Book New Appointment</button>`;
+        html += `<p style="font-size:0.85rem; color:var(--text-muted);">No upcoming appointments.</p>`;
+        html += `<button class="btn btn-sm btn-primary" style="width:100%;" onclick="PulseCareUI.openModal('book-apt-modal')">Book Visit</button>`;
       }
 
       appendMessage('bot', html);
-      speakText(cfg.appointmentsSpeech(upcoming.length));
+      speakText(cfg.appointmentsSpeech(upcoming.length), selectedLanguage);
       return;
     }
 
     // 4. PRESCRIPTIONS & MEDICAL RECORDS
     if (
-      lower.includes('prescription') ||
-      lower.includes('medicine') ||
-      lower.includes('medication') ||
-      lower.includes('पर्चे') ||
-      lower.includes('दवा') ||
-      lower.includes('మందులు') ||
-      lower.includes('மருந்து') ||
-      lower.includes('ಔಷಧಿ') ||
-      lower.includes('മരുന്ന്') ||
-      lower.includes('প্রেসক্রিপশন') ||
-      lower.includes('प्रिस्क्रिप्शन') ||
-      lower.includes('પરચੀਆਂ') ||
-      lower.includes('نسخے') ||
-      lower.includes('ପ୍ରେସକ୍ରିପସନ୍') ||
-      lower.includes('records') ||
-      lower.includes('lab')
+      lower.includes('prescription') || lower.includes('medicine') || lower.includes('medication') ||
+      lower.includes('పర్చీ') || lower.includes('దవా') || lower.includes('दवा') || lower.includes('पर्चे') ||
+      lower.includes('మందులు') || lower.includes('ప్రిస్క్రిప్షన్') || lower.includes('రికార్డు')
     ) {
       isProcessing = false;
       const prescriptions = typeof PulseCareStore !== 'undefined' ? PulseCareStore.getPrescriptions() : [];
-      let html = `<div style="font-size:0.9rem; margin-bottom:0.5rem;">💊 <strong>Active Prescriptions & Records</strong>:</div>`;
+      let html = `<div style="font-size:0.9rem; margin-bottom:0.5rem;">${cfg.prescriptionsTitle}</div>`;
       if (prescriptions.length > 0) {
         html += `<div style="display:flex; flex-direction:column; gap:0.5rem;">`;
         prescriptions.slice(0, 2).forEach(p => {
           html += `
             <div style="padding:0.6rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light); font-size:0.85rem;">
-              <strong>Rx by ${p.doctorName || 'Attending Physician'}</strong> (${p.date})<br>
-              <span style="color:var(--text-muted); font-size:0.8rem;">Diagnosis: ${p.diagnosis || 'Clinical Checkup'}</span><br>
-              <span style="color:var(--hospital-teal-700); font-weight:600; font-size:0.8rem;">Medications: ${p.medications ? p.medications.map(m => m.name || m).join(', ') : 'Paracetamol, Amoxicillin'}</span>
+              <strong>Rx by ${p.doctorName || 'Doctor'}</strong> (${p.date})<br>
+              <span style="color:var(--text-muted); font-size:0.8rem;">Diagnosis: ${p.diagnosis || 'General Checkup'}</span><br>
+              <span style="color:var(--hospital-teal-700); font-weight:600; font-size:0.8rem;">Rx: ${p.medications ? p.medications.map(m => m.name || m).join(', ') : 'Paracetamol, Multivitamin'}</span>
             </div>
           `;
         });
         html += `</div>`;
-        html += `<button class="btn btn-sm btn-primary" style="width:100%; margin-top:0.6rem;" onclick="PulseCareUI.switchTab('records')">Open Health Records</button>`;
+        html += `<button class="btn btn-sm btn-primary" style="width:100%; margin-top:0.6rem;" onclick="PulseCareUI.switchTab('records')">View Records</button>`;
       } else {
         html += `<p style="font-size:0.85rem; color:var(--text-muted);">No active prescriptions found.</p>`;
-        html += `<button class="btn btn-sm btn-primary" style="width:100%;" onclick="PulseCareUI.switchTab('records')">View All Records</button>`;
+        html += `<button class="btn btn-sm btn-primary" style="width:100%;" onclick="PulseCareUI.switchTab('records')">Open Records</button>`;
       }
 
       appendMessage('bot', html);
-      speakText(cfg.prescriptionsSpeech(prescriptions.length));
+      speakText(cfg.prescriptionsSpeech(prescriptions.length), selectedLanguage);
       return;
     }
 
-    // 5. GOVERNMENT HEALTH SCHEMES (PM-JAY, Arogyasri, Jan Aushadhi)
+    // 5. GOVERNMENT SCHEMES
     if (
-      lower.includes('scheme') ||
-      lower.includes('ayushman') ||
-      lower.includes('pmjay') ||
-      lower.includes('pm-jay') ||
-      lower.includes('योजना') ||
-      lower.includes('పథకం') ||
-      lower.includes('திட்டம்') ||
-      lower.includes('ಯೋಜನೆ') ||
-      lower.includes('പദ്ധതി') ||
-      lower.includes('যোজনা') ||
-      lower.includes('યોજના') ||
-      lower.includes('ਸਕੀਮ') ||
-      lower.includes('اسکیم') ||
-      lower.includes('ଯୋଜନା') ||
-      lower.includes('aarogyasri') ||
-      lower.includes('aushadhi')
+      lower.includes('scheme') || lower.includes('ayushman') || lower.includes('pmjay') || lower.includes('pm-jay') ||
+      lower.includes('యोजना') || lower.includes('పథకం') || lower.includes('योजना') || lower.includes('aarogyasri') ||
+      lower.includes('ఆరోగ్యశ్రీ') || lower.includes('aushadhi')
     ) {
       isProcessing = false;
       const html = `
         <div class="va-scheme-card" style="padding:0.75rem; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border-light);">
           <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem;">
             <span style="font-size:1.3rem;">🏛️</span>
-            <strong style="color:var(--hospital-teal-800); font-size:0.95rem;">Ayushman Bharat PM-JAY</strong>
+            <strong style="color:var(--hospital-teal-800); font-size:0.95rem;">${cfg.schemesTitle}</strong>
           </div>
           <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem 0;">
-            Provides <strong>₹5,00,000 per family per year</strong> cashless treatment across 27,000+ empanelled government and private hospitals.
+            ${cfg.schemesDesc}
           </p>
           <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
             <button class="btn btn-sm btn-primary" style="flex:1;" onclick="PulseCareUI.switchTab('schemes')">
@@ -853,57 +548,28 @@
         </div>
       `;
       appendMessage('bot', html);
-      speakText(cfg.schemesSpeech);
+      speakText(cfg.schemesSpeech, selectedLanguage);
       return;
     }
 
-    // 6. HEALTHCARE FACILITIES SEARCH (Default / Primary Intent)
+    // 6. HEALTHCARE FACILITIES DISCOVERY (DEFAULT)
     let category = 'All';
-    if (
-      lower.includes('government') || lower.includes('सरकारी') || lower.includes('ప్రభుత్వ') ||
-      lower.includes('அரசு') || lower.includes('ಸರ್ಕಾರಿ') || lower.includes('സർക്കാർ') ||
-      lower.includes('সরকারি') || lower.includes('સરકારી') || lower.includes('ਸਰਕਾਰੀ') ||
-      lower.includes('سرکاری') || lower.includes('ସରକାରୀ')
-    ) {
+    if (lower.includes('government') || lower.includes('सरकारी') || lower.includes('ప్రభుత్వ')) {
       category = 'Government Hospitals';
-    } else if (
-      lower.includes('phc') || lower.includes('primary') || lower.includes('प्राथमिक') ||
-      lower.includes('ప్రాథమిక') || lower.includes('ஆரம்ப') || lower.includes('ಪ್ರಾಥಮିକ') ||
-      lower.includes('പ്രാഥമിക') || lower.includes('প্রাথমিক') || lower.includes('ਪ੍ਰਾਇਮਰੀ') ||
-      lower.includes('پرائمری') || lower.includes('ପ୍ରାଥମିକ')
-    ) {
+    } else if (lower.includes('phc') || lower.includes('primary') || lower.includes('प्राथमिक') || lower.includes('ప్రాథమిక')) {
       category = 'PHC (Primary Health)';
-    } else if (
-      lower.includes('chc') || lower.includes('community') || lower.includes('सामुदायिक') ||
-      lower.includes('కమ్యూనిటీ') || lower.includes('சமூக')
-    ) {
+    } else if (lower.includes('chc') || lower.includes('community') || lower.includes('सामुदायिक') || lower.includes('కమ్యూనిటీ')) {
       category = 'CHC (Community Health)';
-    } else if (
-      lower.includes('pharmacy') || lower.includes('chemist') || lower.includes('दवा') ||
-      lower.includes('మందుల') || lower.includes('மருந்தகம்') || lower.includes('ಔಷಧಿ') ||
-      lower.includes('മെഡിക്കൽ') || lower.includes('ওষুধ') || lower.includes('દવા') ||
-      lower.includes('ਮੈਡੀਕਲ') || lower.includes('میڈیکل') || lower.includes('ଔଷଧ')
-    ) {
+    } else if (lower.includes('pharmacy') || lower.includes('chemist') || lower.includes('दवा') || lower.includes('మందుల') || lower.includes('ఫార్మసీ')) {
       category = 'Pharmacies & Jan Aushadhi';
-    } else if (
-      lower.includes('diagnostic') || lower.includes('lab') || lower.includes('blood test') ||
-      lower.includes('టెస్ట్') || lower.includes('சோதனை') || lower.includes('ಟೆಸ್ಟ್') ||
-      lower.includes('ടെസ്റ്റ്') || lower.includes('টেস্ট') || lower.includes('ટેસ્ટ') ||
-      lower.includes('ਟੈਸਟ') || lower.includes('ٹیسٹ') || lower.includes('ଟେଷ୍ଟ')
-    ) {
+    } else if (lower.includes('diagnostic') || lower.includes('lab') || lower.includes('test') || lower.includes('టెస్ట్')) {
       category = 'Diagnostic Labs';
-    } else if (
-      lower.includes('clinic') || lower.includes('dispensary') || lower.includes('क्लिनिक') ||
-      lower.includes('క్లినిక్') || lower.includes('கிளினிக்') || lower.includes('ಕ್ಲಿನಿಕ್') ||
-      lower.includes('ക്ലിനിക്ക്') || lower.includes('ক্লিনিক') || lower.includes('ક્લિનિક') ||
-      lower.includes('ਕਲੀਨਿਕ') || lower.includes('کلینک') || lower.includes('କ୍ଲିନିକ୍')
-    ) {
+    } else if (lower.includes('clinic') || lower.includes('क्लिनिक') || lower.includes('క్లినిక్')) {
       category = 'Clinics & Dispensaries';
     }
 
-    // Radius parser
     let radius = 5;
-    const matchKm = lower.match(/(\d+)\s*(km|kilometre|kilometer|किमी|కిమీ|கிமீ|ಕಿಮೀ|കിമീ|কিমি|કિમી|ਕਿਲੋਮੀਟਰ|کلومیٹر|କିମି)/);
+    const matchKm = lower.match(/(\d+)\s*(km|kilometre|kilometer|किमी|కిమీ)/);
     if (matchKm && matchKm[1]) {
       radius = parseInt(matchKm[1], 10);
     }
@@ -911,12 +577,12 @@
     await executeVoiceHealthcareSearch(category, radius, query);
   }
 
-  // Execute Real Location Healthcare Search for Voice
+  // Execute GPS Healthcare Search for Voice
   async function executeVoiceHealthcareSearch(category = 'All', radius = 5, userQuery = '') {
-    const cfg = langConfig[currentLang] || langConfig.en;
+    const cfg = langConfig[selectedLanguage] || langConfig.en;
 
     if (!patientCoords) {
-      appendMessage('bot', `<p style="margin:0; font-size:0.875rem;">📡 <em>${cfg.locatingText}</em></p>`);
+      appendMessage('bot', `<p style="margin:0; font-size:0.875rem;">📡 <em>${cfg.locating}</em></p>`);
       try {
         await obtainGPSCoordinates();
       } catch (err) {
@@ -930,7 +596,7 @@
             </div>
           </div>
         `);
-        speakText(cfg.locDenied);
+        speakText(cfg.locDenied, selectedLanguage);
         updateUIState('idle');
         return;
       }
@@ -945,26 +611,24 @@
         category,
         userQuery
       );
-    } else if (window.SwasthyaWhatsAppAI && typeof window.SwasthyaWhatsAppAI.fetchFacilities === 'function') {
-      results = await window.SwasthyaWhatsAppAI.fetchFacilities(patientCoords.lat, patientCoords.lng, radius, category);
     }
 
     isProcessing = false;
 
     if (!results || results.length === 0) {
-      const noResultsText = `No healthcare centres found within ${radius} km. Try expanding the search radius.`;
+      const noResultsText = cfg.noFacilitiesFound(radius);
       appendMessage('bot', `<p style="margin:0; font-size:0.875rem;">🏥 ${noResultsText}</p>`);
-      speakText(noResultsText);
+      speakText(noResultsText, selectedLanguage);
       updateUIState('idle');
       return;
     }
 
     const topFacility = results[0];
-    const speechSummary = cfg.nearestHospitalSpeech(topFacility.name, topFacility.distance);
+    const speechSummary = cfg.foundFacilitiesSpeech(results.length, topFacility.name, topFacility.distance);
 
     let html = `
       <div style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);">
-        📍 Found <strong>${results.length}</strong> facilities near your location (within ${radius} km):
+        📍 ${cfg.foundFacilitiesText(results.length, radius)}
       </div>
       <div style="display:flex; flex-direction:column; gap:0.6rem; max-height:260px; overflow-y:auto; padding-right:4px;">
     `;
@@ -993,17 +657,17 @@
     html += `
       </div>
       <button class="btn btn-sm btn-outline" style="width:100%; margin-top:0.6rem;" onclick="PulseCareUI.switchTab('nearby')">
-        🗺️ View All on Map & Nearby Tab
+        🗺️ Open Nearby Map Tab
       </button>
     `;
 
     appendMessage('bot', html);
-    speakText(speechSummary);
+    speakText(speechSummary, selectedLanguage);
   }
 
-  // Handle WhatsApp Voice Sharing
+  // Handle WhatsApp Voice Share
   async function handleWhatsAppVoiceShare(facilityId = null) {
-    const cfg = langConfig[currentLang] || langConfig.en;
+    const cfg = langConfig[selectedLanguage] || langConfig.en;
 
     if (!patientCoords) {
       try { await obtainGPSCoordinates(); } catch (e) {}
@@ -1031,13 +695,15 @@
     isProcessing = false;
 
     if (!targetFac) {
-      const errText = 'No hospital details available to share on WhatsApp yet. Please ask for nearby hospitals first.';
+      const errText = selectedLanguage === 'te' ? 'వాట్సాప్‌లో పంపడానికి ఆసుపత్రి వివరాలు లేవు. దయచేసి ముందుగా సమీప ఆసుపత్రుల కోసం అడగండి.' :
+                      selectedLanguage === 'hi' ? 'व्हाट्सएप पर भेजने के लिए अस्पताल के विवरण उपलब्ध नहीं हैं। पहले अस्पताल खोजें।' :
+                      'No hospital details available to share on WhatsApp yet. Please search for nearby hospitals first.';
       appendMessage('bot', errText);
-      speakText(errText);
+      speakText(errText, selectedLanguage);
       return;
     }
 
-    const message = `*SwasthyaConnect Healthcare Facility Information*%0A%0A*Facility:* ${encodeURIComponent(targetFac.name)}%0A*Type:* ${encodeURIComponent(targetFac.type || 'Healthcare')}%0A*Distance:* ${encodeURIComponent(targetFac.distance)}%0A*Address:* ${encodeURIComponent(targetFac.location)}%0A*Directions (Google Maps):* ${encodeURIComponent(targetFac.directionsUrl)}%0A%0A_Sent via SwasthyaConnect Voice Assistant_`;
+    const message = `*SwasthyaConnect Healthcare Facility*%0A%0A*Name:* ${encodeURIComponent(targetFac.name)}%0A*Type:* ${encodeURIComponent(targetFac.type || 'Healthcare')}%0A*Distance:* ${encodeURIComponent(targetFac.distance)}%0A*Address:* ${encodeURIComponent(targetFac.location)}%0A*Directions:* ${encodeURIComponent(targetFac.directionsUrl)}%0A%0A_Sent via SwasthyaConnect Voice Assistant_`;
     const waUrl = `https://api.whatsapp.com/send?text=${message}`;
 
     const html = `
@@ -1047,19 +713,19 @@
           <strong style="color:#075e54;">WhatsApp Message Ready</strong>
         </div>
         <p style="margin:0 0 0.5rem 0; color:var(--text-secondary);">
-          Review hospital details for <strong>${targetFac.name}</strong> before sending:
+          ${cfg.whatsAppPreparedText(targetFac.name)}
         </p>
         <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-emerald" style="width:100%; text-align:center; background:#25d366; border-color:#25d366; color:#ffffff; font-weight:700;">
-          📱 Open WhatsApp & Send
+          📱 Open WhatsApp & Review
         </a>
       </div>
     `;
 
     appendMessage('bot', html);
-    speakText(cfg.whatsAppPrompt(targetFac.name));
+    speakText(cfg.whatsAppPrompt(targetFac.name), selectedLanguage);
   }
 
-  // Obtain REAL GPS Coordinates (Strictly no hardcoding)
+  // Get REAL GPS Coordinates
   function obtainGPSCoordinates() {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -1105,16 +771,16 @@
         };
         await executeVoiceHealthcareSearch('All', 5, locationQuery);
       } else {
-        appendMessage('bot', `Could not find "${locationQuery}". Searching general healthcare...`);
+        appendMessage('bot', `Could not find "${locationQuery}". Searching nearest healthcare...`);
         updateUIState('idle');
       }
     } catch (e) {
-      appendMessage('bot', `Failed to locate area. Please try again.`);
+      appendMessage('bot', `Failed to locate area.`);
       updateUIState('idle');
     }
   }
 
-  // Append Chat Message
+  // Append Chat Bubble
   function appendMessage(sender, contentHtml) {
     const stream = document.getElementById('va-chat-stream');
     if (!stream) return;
@@ -1125,7 +791,7 @@
     if (sender === 'user') {
       row.innerHTML = `
         <div class="va-bubble va-bubble-user">
-          <span style="font-size:0.75rem; color:rgba(255,255,255,0.7); display:block; margin-bottom:2px;">You said:</span>
+          <span style="font-size:0.75rem; color:rgba(255,255,255,0.7); display:block; margin-bottom:2px;">You (${langConfig[selectedLanguage].label}):</span>
           ${contentHtml}
         </div>
       `;
@@ -1134,7 +800,7 @@
         <div class="va-bubble va-bubble-bot">
           <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:4px;">
             <span style="font-size:0.9rem;">🤖</span>
-            <strong style="font-size:0.8rem; color:var(--hospital-teal-700);">SwasthyaConnect Voice AI</strong>
+            <strong style="font-size:0.8rem; color:var(--hospital-teal-700);">SwasthyaConnect Voice AI (${langConfig[selectedLanguage].label})</strong>
           </div>
           <div class="va-bubble-content">${contentHtml}</div>
         </div>
@@ -1145,12 +811,12 @@
     stream.scrollTop = stream.scrollHeight;
   }
 
-  // UI Status & Visualizer
+  // UI Status Indicator
   function updateUIState(state) {
     const statusText = document.getElementById('va-status-text');
     const micBtn = document.getElementById('va-main-mic-btn');
     const visualizer = document.getElementById('va-visualizer');
-    const cfg = langConfig[currentLang] || langConfig.en;
+    const cfg = langConfig[selectedLanguage] || langConfig.en;
 
     if (!statusText || !micBtn) return;
 
@@ -1158,20 +824,50 @@
     if (visualizer) visualizer.classList.remove('vis-active');
 
     if (state === 'listening') {
-      statusText.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> ${cfg.listeningText}`;
+      statusText.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> ${cfg.listening}`;
       micBtn.classList.add('state-listening');
       if (visualizer) visualizer.classList.add('vis-active');
     } else if (state === 'processing') {
-      statusText.innerHTML = `<span class="pulse-dot" style="background:#3b82f6;"></span> ${cfg.processingText}`;
+      statusText.innerHTML = `<span class="pulse-dot" style="background:#3b82f6;"></span> ${cfg.processing}`;
       micBtn.classList.add('state-processing');
     } else if (state === 'speaking') {
-      statusText.innerHTML = `<span class="pulse-dot" style="background:#10b981;"></span> ${cfg.speakingText}`;
+      statusText.innerHTML = `<span class="pulse-dot" style="background:#10b981;"></span> ${cfg.speaking}`;
       micBtn.classList.add('state-speaking');
       if (visualizer) visualizer.classList.add('vis-active');
     } else {
-      statusText.innerHTML = `<span class="pulse-dot" style="background:#64748b;"></span> ${cfg.idleText}`;
+      statusText.innerHTML = `<span class="pulse-dot" style="background:#64748b;"></span> ${cfg.idle}`;
       micBtn.classList.add('state-idle');
     }
+  }
+
+  // Switch Language (Dynamically switches Speech Recognition + Speech Synthesis + AI language)
+  function setLanguage(lang) {
+    if (!langConfig[lang]) return;
+    selectedLanguage = lang;
+
+    // Update Dropdown
+    const select = document.getElementById('va-lang-select');
+    if (select && select.value !== lang) {
+      select.value = lang;
+    }
+
+    // Update Speech Recognition language
+    if (recognition) {
+      recognition.lang = langConfig[lang].recCode;
+    }
+
+    // Stop ongoing speech
+    stopSpeaking();
+    stopListening();
+
+    renderQuickPrompts();
+    updateUIState('idle');
+    updateDebugInfo();
+
+    // Friendly speech feedback in the new language
+    const cfg = langConfig[selectedLanguage];
+    appendMessage('bot', cfg.greeting);
+    speakText(cfg.greetingSpeech, selectedLanguage);
   }
 
   // Toggle Assistant Modal
@@ -1183,54 +879,74 @@
     win.style.display = isOpen ? 'flex' : 'none';
 
     if (isOpen) {
-      // Sync with global i18n language if set
+      loadAvailableVoices();
+
+      // Sync with global language switcher if present
       if (typeof SwasthyaI18n !== 'undefined' && typeof SwasthyaI18n.getLanguage === 'function') {
         const globalLang = SwasthyaI18n.getLanguage();
-        if (globalLang && langConfig[globalLang] && globalLang !== currentLang) {
-          setLanguage(globalLang);
+        if (globalLang && langConfig[globalLang] && globalLang !== selectedLanguage) {
+          selectedLanguage = globalLang;
+          const select = document.getElementById('va-lang-select');
+          if (select) select.value = globalLang;
         }
       }
 
-      const cfg = langConfig[currentLang] || langConfig.en;
       const stream = document.getElementById('va-chat-stream');
       if (stream && stream.children.length === 0) {
-        appendMessage('bot', cfg.welcomeText);
-        speakText(cfg.welcomeSpeech);
+        const cfg = langConfig[selectedLanguage] || langConfig.en;
+        appendMessage('bot', cfg.greeting);
+        speakText(cfg.greetingSpeech, selectedLanguage);
       }
+      updateDebugInfo();
     } else {
       stopListening();
       stopSpeaking();
     }
   }
 
-  // Set Language
-  function setLanguage(lang) {
-    if (!langConfig[lang]) return;
-    currentLang = lang;
-    const select = document.getElementById('va-lang-select');
-    if (select && select.value !== lang) {
-      select.value = lang;
-    }
-
-    if (recognition) {
-      recognition.lang = langConfig[lang].code;
-    }
-
-    renderQuickPrompts();
-    updateUIState('idle');
-  }
-
-  // Render Language Quick Prompts
+  // Render Quick Prompts
   function renderQuickPrompts() {
     const container = document.getElementById('va-quick-prompts');
     if (!container) return;
 
-    const cfg = langConfig[currentLang] || langConfig.en;
+    const cfg = langConfig[selectedLanguage] || langConfig.en;
     container.innerHTML = cfg.quickPrompts.map(p => `
       <button type="button" class="va-chip-btn" onclick="SwasthyaVoiceAssistant.handleVoiceQuery('${p.replace(/'/g, "\\'")}')">
         💬 "${p}"
       </button>
     `).join('');
+  }
+
+  // Toggle Debug Panel
+  function toggleDebugPanel() {
+    showDebugPanel = !showDebugPanel;
+    const panel = document.getElementById('va-debug-panel');
+    if (panel) {
+      panel.style.display = showDebugPanel ? 'block' : 'none';
+      if (showDebugPanel) updateDebugInfo();
+    }
+  }
+
+  // Update Debug Information
+  function updateDebugInfo() {
+    const debugEl = document.getElementById('va-debug-content');
+    if (!debugEl) return;
+
+    const voices = availableVoices.length > 0 ? availableVoices : (isSynthesisSupported ? window.speechSynthesis.getVoices() : []);
+    const teVoices = voices.filter(v => (v.lang || '').toLowerCase().startsWith('te'));
+    const hiVoices = voices.filter(v => (v.lang || '').toLowerCase().startsWith('hi'));
+    const enVoices = voices.filter(v => (v.lang || '').toLowerCase().startsWith('en'));
+
+    debugEl.innerHTML = `
+      <div><strong>Detected browser:</strong> ${navigator.userAgent.includes('Chrome') ? 'Chrome / Chromium' : navigator.userAgent.includes('Firefox') ? 'Firefox' : navigator.userAgent.includes('Safari') ? 'Safari' : 'Standard Browser'}</div>
+      <div><strong>Speech Recognition:</strong> ${isSpeechSupported ? '✅ Supported' : '❌ Unsupported'}</div>
+      <div><strong>Speech Synthesis:</strong> ${isSynthesisSupported ? '✅ Supported' : '❌ Unsupported'}</div>
+      <div><strong>Selected language:</strong> <code>${selectedLanguage}</code> (${langConfig[selectedLanguage].name})</div>
+      <div><strong>Recognition lang:</strong> <code>${langConfig[selectedLanguage].recCode}</code></div>
+      <div><strong>Available Telugu voices:</strong> ${teVoices.length > 0 ? teVoices.map(v => `${v.name} (${v.lang})`).join(', ') : '⚠️ None found on this browser'}</div>
+      <div><strong>Available Hindi voices:</strong> ${hiVoices.length > 0 ? hiVoices.map(v => `${v.name} (${v.lang})`).join(', ') : '⚠️ None found on this browser'}</div>
+      <div><strong>Available English voices:</strong> ${enVoices.length > 0 ? `${enVoices.length} voice(s) (${enVoices[0].name})` : '⚠️ None'}</div>
+    `;
   }
 
   // Build Voice Assistant DOM
@@ -1240,9 +956,7 @@
                           document.getElementById('patient-portal-body') ||
                           document.querySelector('.portal-sidebar [data-tab="nearby"]');
 
-    if (!isPatientPage) {
-      return;
-    }
+    if (!isPatientPage) return;
 
     // Styles
     const style = document.createElement('style');
@@ -1280,19 +994,16 @@
         pointer-events: none;
       }
       @keyframes va-ping {
-        75%, 100% {
-          transform: scale(1.15, 1.3);
-          opacity: 0;
-        }
+        75%, 100% { transform: scale(1.15, 1.3); opacity: 0; }
       }
 
       .swasthya-va-window {
         position: fixed;
         bottom: 150px;
         right: 22px;
-        width: 390px;
+        width: 395px;
         max-width: calc(100vw - 32px);
-        height: 570px;
+        height: 580px;
         max-height: calc(100vh - 180px);
         background: var(--bg-surface);
         border: 1px solid var(--border-light);
@@ -1323,6 +1034,23 @@
         display: flex;
         align-items: center;
         gap: 0.45rem;
+      }
+
+      .va-lang-picker {
+        background: rgba(255, 255, 255, 0.22);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        border-radius: var(--radius-xs);
+        padding: 3px 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        outline: none;
+        cursor: pointer;
+      }
+      .va-lang-picker option {
+        background: #ffffff;
+        color: #1e293b;
+        font-weight: 600;
       }
 
       .va-status-bar {
@@ -1448,6 +1176,16 @@
         border-bottom-left-radius: var(--radius-xs);
       }
 
+      .va-voice-notice {
+        padding: 0.5rem 0.75rem;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: var(--radius-xs);
+        color: #b45309;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+      }
+
       .va-quick-prompts {
         display: flex;
         gap: 0.35rem;
@@ -1493,52 +1231,70 @@
       .va-input-field:focus {
         border-color: var(--hospital-teal-600);
       }
+
+      .va-debug-panel {
+        background: var(--bg-surface-elevated);
+        border-top: 1px dashed var(--border-light);
+        padding: 0.6rem 0.9rem;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+        max-height: 120px;
+        overflow-y: auto;
+      }
     `;
 
     document.head.appendChild(style);
 
-    // Build language options dynamically
-    const langOptionsHtml = Object.keys(langConfig).map(k => `
-      <option value="${k}" ${k === currentLang ? 'selected' : ''} style="color:#000;">${langConfig[k].name}</option>
-    `).join('');
-
-    // DOM markup
+    // DOM Root
     const wrap = document.createElement('div');
     wrap.id = 'swasthya-va-root';
     wrap.innerHTML = `
+      <!-- Floating Voice Assistant Launcher -->
       <button id="swasthya-va-launcher" class="swasthya-va-launcher" title="Open SwasthyaConnect AI Voice Assistant" onclick="SwasthyaVoiceAssistant.toggleAssistant()">
         <span class="va-pulse-ring"></span>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
         <span>Voice AI</span>
       </button>
 
+      <!-- Voice Assistant Window -->
       <div id="swasthya-va-window" class="swasthya-va-window">
         
+        <!-- Header -->
         <div class="va-header">
           <div class="va-header-title">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
             <span>Voice Assistant</span>
           </div>
 
           <div style="display:flex; align-items:center; gap:0.4rem;">
-            <!-- Language Dropdown (All Major Indian & Global Languages) -->
-            <select id="va-lang-select" onchange="SwasthyaVoiceAssistant.setLanguage(this.value)" style="background:rgba(255,255,255,0.2); color:#ffffff; border:1px solid rgba(255,255,255,0.4); border-radius:var(--radius-xs); padding:2px 6px; font-size:0.75rem; font-weight:600; outline:none; cursor:pointer;" title="Change Language / भाषा बदलें / భాషను మార్చండి">
-              ${langOptionsHtml}
+            <!-- Language Selector: English, Telugu, Hindi -->
+            <select id="va-lang-select" class="va-lang-picker" onchange="SwasthyaVoiceAssistant.setLanguage(this.value)" aria-label="Select Voice Language" title="🌐 Select Voice Language / భాష / भाषा">
+              <option value="en">🌐 English</option>
+              <option value="te">🌐 తెలుగు (Telugu)</option>
+              <option value="hi">🌐 हिन्दी (Hindi)</option>
             </select>
 
-            <button onclick="SwasthyaVoiceAssistant.toggleAssistant(false)" style="background:none; border:none; color:#ffffff; font-size:1.2rem; cursor:pointer; line-height:1; padding:0 4px;" title="Close Voice Assistant">
+            <button onclick="SwasthyaVoiceAssistant.toggleAssistant(false)" style="background:none; border:none; color:#ffffff; font-size:1.3rem; cursor:pointer; line-height:1; padding:0 4px;" title="Close Voice Assistant">
               &times;
             </button>
           </div>
         </div>
 
+        <!-- Status Bar -->
         <div class="va-status-bar">
-          <span id="va-status-text"><span class="pulse-dot" style="background:#64748b;"></span> Tap the microphone to speak</span>
-          <button class="btn btn-sm btn-outline" style="padding:1px 6px; font-size:0.7rem;" onclick="SwasthyaVoiceAssistant.stopSpeaking()" title="Stop Voice Speaking">
-            ⏹ Stop
-          </button>
+          <span id="va-status-text"><span class="pulse-dot" style="background:#64748b;"></span> Tap microphone to speak</span>
+          <div style="display:flex; gap:0.3rem;">
+            <button class="btn btn-sm btn-outline" style="padding:1px 6px; font-size:0.7rem;" onclick="SwasthyaVoiceAssistant.toggleDebugPanel()" title="Toggle Diagnostic Voice Panel">
+              🛠️ Debug
+            </button>
+            <button class="btn btn-sm btn-outline" style="padding:1px 6px; font-size:0.7rem;" onclick="SwasthyaVoiceAssistant.stopSpeaking()" title="Stop Speaking">
+              ⏹ Stop
+            </button>
+          </div>
         </div>
 
+        <!-- Central Microphone Visualizer -->
         <div class="va-mic-area">
           <button id="va-main-mic-btn" class="va-main-mic-btn state-idle" onclick="SwasthyaVoiceAssistant.toggleListening()" title="Click to Speak">
             <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
@@ -1553,16 +1309,25 @@
           </div>
         </div>
 
+        <!-- Chat Stream -->
         <div id="va-chat-stream" class="va-chat-stream">
           <!-- Populated dynamically -->
         </div>
 
+        <!-- Quick Prompts Chips -->
         <div id="va-quick-prompts" class="va-quick-prompts">
           <!-- Populated dynamically -->
         </div>
 
+        <!-- Diagnostic Debug Panel (Collapsible) -->
+        <div id="va-debug-panel" class="va-debug-panel" style="display:none;">
+          <div style="font-weight:700; margin-bottom:3px; color:var(--hospital-teal-700);">🛠️ Voice Engine Diagnostics:</div>
+          <div id="va-debug-content">Loading diagnostics...</div>
+        </div>
+
+        <!-- Text Input Fallback -->
         <form class="va-input-bar" onsubmit="event.preventDefault(); SwasthyaVoiceAssistant.handleTextInputSubmit();">
-          <input type="text" id="va-text-input" class="va-input-field" placeholder="Or type your healthcare question here...">
+          <input type="text" id="va-text-input" class="va-input-field" placeholder="Or type your question here...">
           <button type="submit" class="btn btn-sm btn-primary" style="padding:0.4rem 0.8rem;">
             Send
           </button>
@@ -1591,6 +1356,11 @@
     }
   }
 
+  function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   // Public API
   window.SwasthyaVoiceAssistant = {
     startListening,
@@ -1601,10 +1371,12 @@
     handleVoiceQuery,
     toggleAssistant,
     setLanguage,
+    getVoiceForLanguage,
+    loadAvailableVoices,
+    toggleDebugPanel,
     submitManualLocation,
     shareFacilityToWhatsApp: (id) => handleWhatsAppVoiceShare(id),
-    handleTextInputSubmit,
-    detectLanguageFromText
+    handleTextInputSubmit
   };
 
   // Auto-init on DOM ready
